@@ -1,0 +1,41 @@
+package org.morriswa.communityservice.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.GregorianCalendar;
+import java.util.UUID;
+
+@Entity @Table(name = "community")
+@NoArgsConstructor @Getter
+public class Community {
+    @Id
+    @Column(name = "community_id")
+    @SequenceGenerator(name="community_id_seq_gen",sequenceName = "community_id_seq")
+    @GeneratedValue(generator = "community_id_seq_gen",strategy = GenerationType.AUTO)
+    private Long communityId;
+
+    @NotBlank
+    @Pattern(regexp = "^[a-z0-9-]*$")
+    @Column(nullable = false, unique = true)
+    private String communityDisplayName;
+
+    @NotNull
+    @Column(nullable = false)
+    private UUID communityOwnerUserId;
+
+    @NotNull
+    @Column(nullable = false, updatable = false)
+    private GregorianCalendar dateCreated;
+
+
+    public Community(String communityDisplayName, UUID communityOwnerUserId) {
+        this.communityDisplayName = communityDisplayName;
+        this.communityOwnerUserId = communityOwnerUserId;
+        this.dateCreated = new GregorianCalendar();
+    }
+}
