@@ -2,7 +2,6 @@ package org.morriswa.messageboard.config;
 
 import org.morriswa.messageboard.service.util.AmazonSecretService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,14 +11,16 @@ import javax.sql.DataSource;
 
 @Configuration
 public class CustomDatasourceConfig {
-    @Autowired
-    private Environment e;
+    private final Environment e;
+    private final AmazonSecretService ss;
+    private final String SPRING_DATASOURCE_AUTH;
 
     @Autowired
-    private AmazonSecretService ss;
-
-    @Value("${spring.datasource.auth}")
-    private String SPRING_DATASOURCE_AUTH;
+    public CustomDatasourceConfig(Environment e, AmazonSecretService ss) {
+        this.e = e;
+        this.ss = ss;
+        this.SPRING_DATASOURCE_AUTH = e.getRequiredProperty("spring.datasource.auth");
+    }
 
     @Bean
     public DataSource getDataSource() {
@@ -39,7 +40,7 @@ public class CustomDatasourceConfig {
                             e.getRequiredProperty("spring.datasource.port"),
                             e.getRequiredProperty("spring.datasource.database.name"))
                     ).build();
-            default -> throw new RuntimeException("DATASOURCE COULD NOT BE CONFIGURED, PLEASE CHECK CONFIG <3");
+            default -> throw new RuntimeException(e.getRequiredProperty("common.service.errors.bad-datasource-config"));
         };
     }
 }

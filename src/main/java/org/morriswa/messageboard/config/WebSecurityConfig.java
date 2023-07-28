@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.GregorianCalendar;
 
@@ -34,6 +35,9 @@ public class WebSecurityConfig
     private String path;
     @Value("${auth0.scope.secureroutes}")
     private String securedRoutesScope;
+    @Value("${common.service.endpoints.health.path}")
+    private String healthPath;
+
 
     @Bean
     protected JwtDecoder jwtDecoder() {
@@ -63,7 +67,7 @@ public class WebSecurityConfig
 
                 .authorizeHttpRequests(authorize -> authorize
                         // Will allow any request on /health endpoint
-                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/"+healthPath).permitAll()
                         // Will require authentication for secured routes
                         .requestMatchers("/" + path + "**").hasAuthority("SCOPE_"+securedRoutesScope)
                         // Will deny all other unauthenticated requests

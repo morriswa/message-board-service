@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.model.DefaultResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,18 +13,21 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController @CrossOrigin
 public class HealthController {
-    @GetMapping(path = "health")
+    @Value("${common.service.endpoints.health.messages.get}")
+    private String successMessage;
+
+    @GetMapping(path = "${common.service.endpoints.health.path}")
     public ResponseEntity<?> healthCheckup()
     {
-        var response = new DefaultResponse<>("Hello! All is good on our side...");
+        var response = new DefaultResponse<>(successMessage);
 
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping(path = "v0/health")
+    @GetMapping(path = "${server.path}${common.service.endpoints.health.path}")
     public ResponseEntity<?> authHealthCheckup(JwtAuthenticationToken token)
     {
-        var response = new DefaultResponse<>("Hello! All is good on our side...",token);
+        var response = new DefaultResponse<>(successMessage,token);
 
         return ResponseEntity.ok().body(response);
     }
