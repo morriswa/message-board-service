@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.common.validation.BasicBeanValidator;
+import org.morriswa.messageboard.validation.BasicBeanValidator;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.control;
 
-import org.morriswa.common.model.DefaultResponse;
+import org.morriswa.messageboard.model.DefaultResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;

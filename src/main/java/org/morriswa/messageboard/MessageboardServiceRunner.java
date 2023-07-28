@@ -1,6 +1,6 @@
 package org.morriswa.messageboard;
 
-import org.morriswa.common.config.AppConfig;
+import org.morriswa.messageboard.config.AppConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
@@ -17,7 +17,7 @@ public class MessageboardServiceRunner {
                         applicationContext
                                 .getEnvironment()
                                 .getPropertySources()
-                                .addFirst(appConfig.retrieveApplicationPropertySource("community"));
+                                .addFirst(appConfig.retrieveApplicationPropertySource());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

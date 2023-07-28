@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.common.model.BadRequestException;
+import org.morriswa.messageboard.model.BadRequestException;
 import org.morriswa.messageboard.entity.User;
 import org.morriswa.messageboard.model.UpdateProfileImageRequest;
 import org.morriswa.messageboard.model.UserProfileResponse;

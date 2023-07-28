@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.common.model.BadRequestException;
-import org.morriswa.common.model.UploadImageRequest;
+import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
 

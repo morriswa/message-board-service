@@ -3,8 +3,8 @@ package org.morriswa.messageboard.control;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.morriswa.common.model.BadRequestException;
-import org.morriswa.common.model.DefaultResponse;
+import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.model.DefaultResponse;
 import org.morriswa.messageboard.model.NewPostRequest;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.service.UserProfileService;

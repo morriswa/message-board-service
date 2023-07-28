@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.morriswa.common.model.BadRequestException;
-import org.morriswa.common.model.UploadImageRequest;
+import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.entity.Comment;
 import org.morriswa.messageboard.entity.Post;
 import org.morriswa.messageboard.entity.Resource;

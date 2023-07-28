@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.common.model.UploadImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.AllCommunityResourceURLs;
 import org.morriswa.messageboard.service.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;

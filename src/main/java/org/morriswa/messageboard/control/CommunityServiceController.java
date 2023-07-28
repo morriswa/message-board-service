@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.control;
 
-import org.morriswa.common.model.BadRequestException;
-import org.morriswa.common.model.DefaultResponse;
-import org.morriswa.common.model.UploadImageRequest;
+import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.model.DefaultResponse;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
 import org.morriswa.messageboard.service.CommunityService;
 import org.springframework.beans.factory.annotation.Autowired;

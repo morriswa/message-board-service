@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.common.model.BadRequestException;
-import org.morriswa.common.validation.BasicBeanValidator;
+import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.validation.BasicBeanValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;

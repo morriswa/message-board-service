@@ -65,7 +65,7 @@ public class AppConfig {
      * @throws UnsupportedEncodingException when aws returns config in a format not expected
      * @throws JsonProcessingException if YAML file cannot be read
      */
-    public PropertiesPropertySource retrieveApplicationPropertySource(String application) throws UnsupportedEncodingException, JsonProcessingException {
+    public PropertiesPropertySource retrieveApplicationPropertySource() throws UnsupportedEncodingException, JsonProcessingException {
         // create new object mapper and type refrence
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         TypeReference<HashMap<String, Object>> typeRef = new TypeReference<>() {};
@@ -74,10 +74,6 @@ public class AppConfig {
         // flatten deep config and add to AWS_PROPS source
 
         var config = JsonMapFlattener.flatten(configMap);
-
-        config.put("server.port",config.get(String.format("%s.service.port",application)));
-
-        log.info("Got port {} from config", config.get("server.port"));
 
         return new PropertiesPropertySource("AWS_PROPS", new Properties() {{
             this.putAll(config);
