@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.service;
+package org.morriswa.messageboard.validation;
 
 import org.morriswa.messageboard.model.BadRequestException;
 import org.morriswa.messageboard.validation.BasicBeanValidator;
@@ -24,7 +24,7 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
     public void validateDisplayNameOrThrow(String displayName) throws BadRequestException {
         var matches = Pattern.matches(DISPLAY_NAME_REGEXP, displayName);
 
-        if (matches)
+        if (!matches)
             throw new BadRequestException(
                 e.getRequiredProperty("user-profile.service.errors.bad-display-name"));
     }

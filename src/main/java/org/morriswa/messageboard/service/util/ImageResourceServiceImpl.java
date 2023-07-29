@@ -14,7 +14,7 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 
 import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.service.CommunityServiceValidator;
+import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;

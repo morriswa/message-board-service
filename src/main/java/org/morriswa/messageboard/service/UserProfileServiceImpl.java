@@ -8,6 +8,7 @@ import org.morriswa.messageboard.model.UserProfileResponse;
 import org.morriswa.messageboard.model.UserRole;
 import org.morriswa.messageboard.repo.UserProfileRepo;
 import org.morriswa.messageboard.service.util.ProfileImageService;
+import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;

@@ -16,6 +16,7 @@ import org.morriswa.messageboard.repo.CommentRepo;
 import org.morriswa.messageboard.repo.PostRepo;
 import org.morriswa.messageboard.repo.ResourceRepo;
 import org.morriswa.messageboard.service.util.ImageResourceService;
+import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;

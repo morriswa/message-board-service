@@ -11,6 +11,7 @@ import org.morriswa.messageboard.repo.CommunityRepo;
 import org.morriswa.messageboard.service.util.ResourceService;
 import org.morriswa.messageboard.entity.Community;
 import org.morriswa.messageboard.entity.CommunityMember;
+import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityRepo communityRepo;
     private final CommunityMemberRepo communityMemberRepo;
     private final UserProfileService userProfileService;
-    private final org.morriswa.messageboard.service.CommunityServiceValidator validator;
+    private final CommunityServiceValidator validator;
     private final ResourceService resourceService;
 
     @Autowired

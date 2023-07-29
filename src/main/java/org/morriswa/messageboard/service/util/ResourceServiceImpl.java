@@ -10,7 +10,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.AllCommunityResourceURLs;
-import org.morriswa.messageboard.service.CommunityServiceValidator;
+import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ import java.util.Date;
 @Service @Slf4j
 public class ResourceServiceImpl implements ResourceService {
     private final Environment e;
-    private final org.morriswa.messageboard.service.CommunityServiceValidator validator;
+    private final CommunityServiceValidator validator;
     private final Base64.Decoder b64decoder;
     private final AmazonS3 s3;
     private final String ACTIVE_BUCKET;
