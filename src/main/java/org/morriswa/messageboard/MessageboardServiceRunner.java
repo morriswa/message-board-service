@@ -14,10 +14,11 @@ public class MessageboardServiceRunner {
                 .sources(MessageboardServiceRunner.class)
                 .initializers(applicationContext -> {
                     try {
-                        applicationContext
-                                .getEnvironment()
-                                .getPropertySources()
-                                .addLast(appConfig.retrieveApplicationPropertySource());
+                        if (!System.getenv("APPCONFIG_ENV_ID").equals("local"))
+                            applicationContext
+                                    .getEnvironment()
+                                    .getPropertySources()
+                                    .addFirst(appConfig.retrieveApplicationPropertySource());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
