@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 public interface CommunityService {
-    void createNewCommunity(CreateNewCommunityRequest request);
+    void createNewCommunity(CreateNewCommunityRequest request) throws BadRequestException;
 
     void updateCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId, String jwt) throws BadRequestException, IOException;
 

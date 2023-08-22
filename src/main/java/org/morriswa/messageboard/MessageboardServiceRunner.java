@@ -17,7 +17,7 @@ public class MessageboardServiceRunner {
                         applicationContext
                                 .getEnvironment()
                                 .getPropertySources()
-                                .addFirst(appConfig.retrieveApplicationPropertySource());
+                                .addLast(appConfig.retrieveApplicationPropertySource());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

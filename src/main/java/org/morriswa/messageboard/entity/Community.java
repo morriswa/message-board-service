@@ -21,7 +21,11 @@ public class Community {
 
     @NotBlank
     @Pattern(regexp = "^[a-z0-9-]*$")
-    @Column(nullable = false, unique = true)
+    @Column(name = "community_ref", nullable = false, unique = true)
+    private String communityLocator;
+
+    @NotBlank
+    @Column(name = "display_name", nullable = false)
     private String communityDisplayName;
 
     @NotNull
@@ -33,7 +37,8 @@ public class Community {
     private GregorianCalendar dateCreated;
 
 
-    public Community(String communityDisplayName, UUID communityOwnerUserId) {
+    public Community(String communityLocator, String communityDisplayName, UUID communityOwnerUserId) {
+        this.communityLocator = communityLocator;
         this.communityDisplayName = communityDisplayName;
         this.communityOwnerUserId = communityOwnerUserId;
         this.dateCreated = new GregorianCalendar();

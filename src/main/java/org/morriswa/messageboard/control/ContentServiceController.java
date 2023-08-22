@@ -48,10 +48,9 @@ public class ContentServiceController {
     }
 
     @GetMapping("${content.service.endpoints.community-feed.path}")
-    public ResponseEntity<?> createPost(JwtAuthenticationToken token,
+    public ResponseEntity<?> getCommunityFeed(JwtAuthenticationToken token,
                                         @PathVariable Long communityId) throws BadRequestException {
 
-//        contentService.createPost(request);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getProperty("content.service.endpoints.community-feed.messages.get")));
     }

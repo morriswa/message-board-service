@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Data @AllArgsConstructor @NoArgsConstructor
 public class CreateNewCommunityRequest {
+    private String communityRef;
     private String communityName;
-    private UUID userId;
+    private String authZeroId;
 }

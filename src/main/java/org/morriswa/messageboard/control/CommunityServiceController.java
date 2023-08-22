@@ -27,7 +27,8 @@ public class CommunityServiceController {
 
     @PostMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> createCommunity(JwtAuthenticationToken jwt,
-                                             @RequestBody CreateNewCommunityRequest request) {
+                                             @RequestBody CreateNewCommunityRequest request) throws BadRequestException {
+        request.setAuthZeroId(jwt.getName());
         this.community.createNewCommunity(request);
 
         return ResponseEntity.ok(new DefaultResponse<>(

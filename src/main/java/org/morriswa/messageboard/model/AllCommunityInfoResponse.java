@@ -10,6 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor @NoArgsConstructor @Data
 public class AllCommunityInfoResponse {
     private Long communityId;
+    private String communityLocator;
     private String displayName;
     private UUID ownerId;
     private GregorianCalendar dateCreated;

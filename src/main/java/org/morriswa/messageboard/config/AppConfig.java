@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.config;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.appconfigdata.AWSAppConfigDataClient;
 import com.amazonaws.services.appconfigdata.model.GetLatestConfigurationRequest;
 import com.amazonaws.services.appconfigdata.model.StartConfigurationSessionRequest;
@@ -39,7 +40,7 @@ public class AppConfig {
         sessionConfig.setConfigurationProfileIdentifier(System.getenv("APPCONFIG_PROFILE_ID"));
         sessionConfig.setEnvironmentIdentifier(System.getenv("APPCONFIG_ENV_ID"));
         // create a client and start a session to be used to retrieve config
-        client = (AWSAppConfigDataClient) AWSAppConfigDataClient.builder().withRegion("us-east-2").build();
+        client = (AWSAppConfigDataClient) AWSAppConfigDataClient.builder().withRegion(Regions.US_EAST_2).build();
         session = client.startConfigurationSession(sessionConfig);
     }
 
@@ -66,7 +67,7 @@ public class AppConfig {
      * @throws JsonProcessingException if YAML file cannot be read
      */
     public PropertiesPropertySource retrieveApplicationPropertySource() throws UnsupportedEncodingException, JsonProcessingException {
-        // create new object mapper and type refrence
+        // create new object mapper and type reference
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         TypeReference<HashMap<String, Object>> typeRef = new TypeReference<>() {};
         // create a deep config map from YAML file using mapper and type ref
@@ -77,6 +78,7 @@ public class AppConfig {
 
         return new PropertiesPropertySource("AWS_PROPS", new Properties() {{
             this.putAll(config);
+//            this.put("spring.jpa.hibernate.ddl-auto", "create");
         }});
     }
 }

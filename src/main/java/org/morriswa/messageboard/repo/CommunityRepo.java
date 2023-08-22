@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CommunityRepo extends JpaRepository<org.morriswa.messageboard.entity.Community, Long> {
-    Optional<org.morriswa.messageboard.entity.Community> findCommunityByCommunityDisplayName(String communityDisplayName);
+public interface CommunityRepo extends JpaRepository<Community, Long> {
+    Optional<Community> findCommunityByCommunityLocator(String communityLocator);
     Optional<Community> findCommunityByCommunityIdAndCommunityOwnerUserId(Long communityId, UUID communityOwnerUserId);
 }

@@ -45,8 +45,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 
     @Override
-    public void createNewCommunity(CreateNewCommunityRequest request) {
-        var newCommunity = new Community(request.getCommunityName(), request.getUserId());
+    public void createNewCommunity(CreateNewCommunityRequest request) throws BadRequestException {
+        var userId = userProfileService.getUserId(request.getAuthZeroId());
+
+        var newCommunity = new Community(request.getCommunityRef(), request.getCommunityName(), userId);
 
         this.validator.validateBeanOrThrow(newCommunity);
 
@@ -78,16 +80,17 @@ public class CommunityServiceImpl implements CommunityService {
         var response = new AllCommunityInfoResponse();
 
         var community = communityRepo
-                .findCommunityByCommunityDisplayName(communityDisplayName)
+                .findCommunityByCommunityLocator(communityDisplayName)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
-                                e.getProperty("community.service.errors.missing-community"),
+                                e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityDisplayName)));
 
         response.setCommunityId(community.getCommunityId());
         response.setDisplayName(community.getCommunityDisplayName());
         response.setOwnerId(community.getCommunityOwnerUserId());
         response.setDateCreated(community.getDateCreated());
+        response.setCommunityLocator(community.getCommunityLocator());
 
         var resources = resourceService.getAllCommunityResources(community.getCommunityId());
 

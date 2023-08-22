@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.GregorianCalendar;
 
@@ -27,17 +26,31 @@ import java.util.GregorianCalendar;
 public class WebSecurityConfig
 {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    @Value("${auth0.audience}")
-    private String audience;
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private String issuer;
+
     @Value("${server.path}")
     private String path;
-    @Value("${auth0.scope.secureroutes}")
-    private String securedRoutesScope;
     @Value("${common.service.endpoints.health.path}")
     private String healthPath;
 
+    @Value("${auth0.audience}")
+    private String audience;
+    @Value("${auth0.issuer-uri}")
+    private String issuer;
+    @Value("${auth0.scope.secureroutes}")
+    private String securedRoutesScope;
+
+    @Value("${common.service.errors.security.not-allowed}")
+    private String notAllowedError;
+    @Value("${common.service.errors.security.not-allowed-desc}")
+    private String notAllowedMessage;
+    @Value("${common.service.errors.security.invalid-jwt}")
+    private String invalidJwtError;
+    @Value("${common.service.errors.security.scope-error-message}")
+    private String badScopeMessage;
+    @Value("${common.service.errors.audience.code}")
+    private String audienceErrorCode;
+    @Value("${common.service.errors.audience.error}")
+    private String audienceErrorDesc;
 
     @Bean
     protected JwtDecoder jwtDecoder() {
@@ -46,7 +59,7 @@ public class WebSecurityConfig
                 JwtDecoders.fromOidcIssuerLocation(issuer); // from User-provided issuer
 
         // create a new Audience Validator with user-provided audience (should be protected uris)
-        OAuth2TokenValidator<Jwt> withAudience = new AudienceValidator(audience);
+        OAuth2TokenValidator<Jwt> withAudience = new AudienceValidator(audience, audienceErrorCode, audienceErrorDesc);
         // create a new Jwt Validator from User-provided issuer
         OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuer);
         // create a new Jwt Validator
@@ -75,12 +88,12 @@ public class WebSecurityConfig
                 // Will allow cors
                 .cors().and()
 
-                // Handle exceptions for Unauthorized requests
                 .exceptionHandling()
+                // UNAUTHENTICATED REQUEST ERROR HANDLING
                     .authenticationEntryPoint((request, response, authException) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error("YOU SHALL NOT PASS")
-                                .message("The requested service requires authorization, which you didn't bother to provide")
+                                .error(notAllowedError)
+                                .message(notAllowedMessage)
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
@@ -89,10 +102,11 @@ public class WebSecurityConfig
                         response.setContentType("application/json");
                         response.setStatus(401);
                     })
+                // INSUFFICIENT SCOPE ERROR HANDLING
                     .accessDeniedHandler((request, response, authException) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error("YOU SHALL NOT PASS")
-                                .message("The requested service requires a higher scope than you provided.")
+                                .error(notAllowedError)
+                                .message(badScopeMessage)
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
@@ -107,7 +121,7 @@ public class WebSecurityConfig
                 .oauth2ResourceServer()
                     .authenticationEntryPoint((request, response, exception) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error("invalid jwt")
+                                .error(invalidJwtError)
                                 .message(exception.getMessage())
                                 .timestamp(new GregorianCalendar())
                                 .build();
@@ -120,8 +134,8 @@ public class WebSecurityConfig
                     })
                     .accessDeniedHandler((request, response, authException) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error("YOU SHALL NOT PASS")
-                                .message("The requested service requires authorization, which you didn't bother to provide")
+                                .error(notAllowedError)
+                                .message(notAllowedMessage)
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
