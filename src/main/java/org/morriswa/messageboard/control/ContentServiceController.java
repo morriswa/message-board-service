@@ -29,7 +29,7 @@ public class ContentServiceController {
     }
 
     @GetMapping("${content.service.endpoints.user-id.path}")
-    public ResponseEntity<?> sayHiToUserProfile(JwtAuthenticationToken token) throws BadRequestException, UnsupportedEncodingException {
+    public ResponseEntity<?> sayHiToUserProfile(JwtAuthenticationToken token) throws BadRequestException {
         var userId = userProfileService.getUserId(token.getName());
         return ResponseEntity.ok(new DefaultResponse<>(
             e.getProperty("content.service.endpoints.user-id.messages.get"),
@@ -39,7 +39,7 @@ public class ContentServiceController {
     @PostMapping("${content.service.endpoints.create-post.path}")
     public ResponseEntity<?> createPost(JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
-                                        @RequestBody NewPostRequest request) throws BadRequestException, UnsupportedEncodingException, IOException {
+                                        @RequestBody NewPostRequest request) throws BadRequestException, IOException {
         request.setAuthZeroId(token.getName());
         request.setCommunityId(communityId);
         contentService.createPost(request);

@@ -27,7 +27,7 @@ public class UserProfileController {
     }
 
     @GetMapping("${user-profile.service.endpoints.user.path}")
-    public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws BadRequestException, UnsupportedEncodingException {
+    public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws BadRequestException {
         var user = userProfileService.getUserProfile(jwt.getName());
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("user-profile.service.endpoints.user.messages.get"),
