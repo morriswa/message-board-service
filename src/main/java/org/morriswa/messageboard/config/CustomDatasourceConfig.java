@@ -13,18 +13,16 @@ import javax.sql.DataSource;
 public class CustomDatasourceConfig {
     private final Environment e;
     private final AmazonSecretService ss;
-    private final String SPRING_DATASOURCE_AUTH;
 
     @Autowired
     public CustomDatasourceConfig(Environment e, AmazonSecretService ss) {
         this.e = e;
         this.ss = ss;
-        this.SPRING_DATASOURCE_AUTH = e.getRequiredProperty("spring.datasource.auth");
     }
 
     @Bean
     public DataSource getDataSource() {
-        return switch (SPRING_DATASOURCE_AUTH) {
+        return switch (e.getRequiredProperty("spring.datasource.auth")) {
             case "false" -> DataSourceBuilder.create()
                     .url(String.format("%s://%s:%s/%s",
                             e.getRequiredProperty("spring.datasource.scheme"),

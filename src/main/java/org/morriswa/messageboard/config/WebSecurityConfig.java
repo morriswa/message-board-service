@@ -26,13 +26,11 @@ import java.util.GregorianCalendar;
 @EnableWebSecurity // Enables Spring Security for Web Services importing this config
 public class WebSecurityConfig
 {
-    private final ObjectMapper objectMapper;
     private final Environment e;
     private final AudienceValidator audienceValidator;
 
     @Autowired
     public WebSecurityConfig(Environment e, AudienceValidator audienceValidator) {
-        this.objectMapper = new ObjectMapper();
         this.e = e;
         this.audienceValidator = audienceValidator;
     }
@@ -59,6 +57,8 @@ public class WebSecurityConfig
 
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
+
+        final ObjectMapper objectMapper = new ObjectMapper();
 
         final String path = e.getRequiredProperty("server.path");
         final String healthPath = e.getRequiredProperty("common.service.endpoints.health.path");

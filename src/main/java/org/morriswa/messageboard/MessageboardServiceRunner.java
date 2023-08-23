@@ -8,17 +8,20 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 public class MessageboardServiceRunner {
 
     public static void main(String[] args) {
-        var appConfig = new AppConfig();
 
         new SpringApplicationBuilder()
                 .sources(MessageboardServiceRunner.class)
                 .initializers(applicationContext -> {
                     try {
-                        if (!System.getenv("APPCONFIG_ENV_ID").equals("local"))
+                        if (!System.getenv("APPCONFIG_ENV_ID").equals("local")) {
+
+                            var appConfig = new AppConfig();
+
                             applicationContext
                                     .getEnvironment()
                                     .getPropertySources()
                                     .addFirst(appConfig.retrieveApplicationPropertySource());
+                        }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
