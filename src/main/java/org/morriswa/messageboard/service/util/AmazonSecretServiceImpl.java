@@ -16,7 +16,9 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("unchecked") @Service @Profile("!test")
+@SuppressWarnings("unchecked")
+@Service
+@Profile("!test")
 public class AmazonSecretServiceImpl implements AmazonSecretService {
     private final Map<String,Object> secrets;
 

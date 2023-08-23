@@ -10,7 +10,8 @@ import org.springframework.core.env.Environment;
 
 import javax.sql.DataSource;
 
-@Configuration @Profile("!test")
+@Configuration
+@Profile("!test")
 public class CustomDatasourceConfig {
     private final Environment e;
     private final AmazonSecretService ss;
@@ -21,7 +22,7 @@ public class CustomDatasourceConfig {
         this.ss = ss;
     }
 
-    @Bean @Profile("!test")
+    @Bean
     public DataSource getDataSource() {
         return switch (e.getRequiredProperty("spring.datasource.auth")) {
             case "false" -> DataSourceBuilder.create()
