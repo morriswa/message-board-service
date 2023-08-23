@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.morriswa.messageboard.service.util.AmazonSecretService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("unchecked") @Service
+@SuppressWarnings("unchecked") @Service @Profile("!test")
 public class AmazonSecretServiceImpl implements AmazonSecretService {
     private final Map<String,Object> secrets;
 
