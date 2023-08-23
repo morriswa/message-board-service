@@ -2,9 +2,10 @@ package org.morriswa.messageboard;
 
 import org.morriswa.messageboard.config.AppConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 public class MessageboardServiceRunner {
 
     public static void main(String[] args) {
