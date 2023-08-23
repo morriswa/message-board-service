@@ -2,9 +2,10 @@ package org.morriswa.messageboard.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.morriswa.messageboard.model.DefaultErrorResponse;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,45 +26,30 @@ import java.util.GregorianCalendar;
 @EnableWebSecurity // Enables Spring Security for Web Services importing this config
 public class WebSecurityConfig
 {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+    private final Environment e;
+    private final AudienceValidator audienceValidator;
 
-    @Value("${server.path}")
-    private String path;
-    @Value("${common.service.endpoints.health.path}")
-    private String healthPath;
-
-    @Value("${auth0.audience}")
-    private String audience;
-    @Value("${auth0.issuer-uri}")
-    private String issuer;
-    @Value("${auth0.scope.secureroutes}")
-    private String securedRoutesScope;
-
-    @Value("${common.service.errors.security.not-allowed}")
-    private String notAllowedError;
-    @Value("${common.service.errors.security.not-allowed-desc}")
-    private String notAllowedMessage;
-    @Value("${common.service.errors.security.invalid-jwt}")
-    private String invalidJwtError;
-    @Value("${common.service.errors.security.scope-error-message}")
-    private String badScopeMessage;
-    @Value("${common.service.errors.audience.code}")
-    private String audienceErrorCode;
-    @Value("${common.service.errors.audience.error}")
-    private String audienceErrorDesc;
+    @Autowired
+    public WebSecurityConfig(Environment e, AudienceValidator audienceValidator) {
+        this.objectMapper = new ObjectMapper();
+        this.e = e;
+        this.audienceValidator = audienceValidator;
+    }
 
     @Bean
     protected JwtDecoder jwtDecoder() {
-        // all jwts will be decoded with decoder...
-        NimbusJwtDecoder jwtDecoder = (NimbusJwtDecoder)
-                JwtDecoders.fromOidcIssuerLocation(issuer); // from User-provided issuer
+        final String issuer = e.getRequiredProperty("auth0.issuer-uri");
 
-        // create a new Audience Validator with user-provided audience (should be protected uris)
-        OAuth2TokenValidator<Jwt> withAudience = new AudienceValidator(audience, audienceErrorCode, audienceErrorDesc);
-        // create a new Jwt Validator from User-provided issuer
-        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuer);
+        // all jwts will be decoded with decoder from issuer...
+        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuer);
+
         // create a new Jwt Validator
-        OAuth2TokenValidator<Jwt> tokenValidator = new DelegatingOAuth2TokenValidator<>(withIssuer, withAudience);
+        OAuth2TokenValidator<Jwt> tokenValidator = new DelegatingOAuth2TokenValidator<>(
+                // from User-provided issuer
+                JwtValidators.createDefaultWithIssuer(issuer),
+                // and User-provided audience validator
+                audienceValidator);
 
         // save newly created Validator
         jwtDecoder.setJwtValidator(tokenValidator);
@@ -73,6 +59,11 @@ public class WebSecurityConfig
 
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
+
+        final String path = e.getRequiredProperty("server.path");
+        final String healthPath = e.getRequiredProperty("common.service.endpoints.health.path");
+        final String securedRoutesScope = e.getRequiredProperty("auth0.scope.secureroutes");
+
         http // All http requests will...
                 // Be stateless
                 .sessionManagement()
@@ -92,8 +83,8 @@ public class WebSecurityConfig
                 // UNAUTHENTICATED REQUEST ERROR HANDLING
                     .authenticationEntryPoint((request, response, authException) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(notAllowedError)
-                                .message(notAllowedMessage)
+                                .error(e.getRequiredProperty("common.service.errors.security.not-allowed"))
+                                .message(e.getRequiredProperty("common.service.errors.security.not-allowed-desc"))
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
@@ -105,8 +96,8 @@ public class WebSecurityConfig
                 // INSUFFICIENT SCOPE ERROR HANDLING
                     .accessDeniedHandler((request, response, authException) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(notAllowedError)
-                                .message(badScopeMessage)
+                                .error(e.getRequiredProperty("common.service.errors.security.not-allowed"))
+                                .message(e.getRequiredProperty("common.service.errors.security.scope-error-message"))
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
@@ -121,7 +112,7 @@ public class WebSecurityConfig
                 .oauth2ResourceServer()
                     .authenticationEntryPoint((request, response, exception) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(invalidJwtError)
+                                .error(e.getRequiredProperty("common.service.errors.security.invalid-jwt"))
                                 .message(exception.getMessage())
                                 .timestamp(new GregorianCalendar())
                                 .build();
@@ -134,8 +125,8 @@ public class WebSecurityConfig
                     })
                     .accessDeniedHandler((request, response, authException) -> {
                         var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(notAllowedError)
-                                .message(notAllowedMessage)
+                                .error(e.getRequiredProperty("common.service.errors.security.not-allowed"))
+                                .message(e.getRequiredProperty("common.service.errors.security.not-allowed-desc"))
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
