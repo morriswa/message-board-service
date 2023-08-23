@@ -3,8 +3,10 @@ package org.morriswa.messageboard.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.morriswa.messageboard.model.DefaultErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +37,7 @@ public class WebSecurityConfig
         this.audienceValidator = audienceValidator;
     }
 
-    @Bean
+    @Bean @Profile("!test")
     protected JwtDecoder jwtDecoder() {
         final String issuer = e.getRequiredProperty("auth0.issuer-uri");
 
