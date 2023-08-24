@@ -8,7 +8,7 @@ import org.morriswa.messageboard.model.CommunityStanding;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
 import org.morriswa.messageboard.repo.CommunityMemberRepo;
 import org.morriswa.messageboard.repo.CommunityRepo;
-import org.morriswa.messageboard.service.util.ResourceService;
+import org.morriswa.messageboard.service.util.CommunityResourceService;
 import org.morriswa.messageboard.entity.Community;
 import org.morriswa.messageboard.entity.CommunityMember;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
@@ -27,14 +27,14 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityMemberRepo communityMemberRepo;
     private final UserProfileService userProfileService;
     private final CommunityServiceValidator validator;
-    private final ResourceService resourceService;
+    private final CommunityResourceService resourceService;
 
     @Autowired
     public CommunityServiceImpl(Environment e,
                                 CommunityRepo communityRepo,
                                 CommunityMemberRepo communityMemberRepo, UserProfileService userProfileService,
                                 CommunityServiceValidator validator,
-                                ResourceService resourceService) {
+                                CommunityResourceService resourceService) {
         this.e = e;
         this.communityRepo = communityRepo;
         this.communityMemberRepo = communityMemberRepo;
@@ -127,8 +127,7 @@ public class CommunityServiceImpl implements CommunityService {
         communityMemberRepo.delete(result.get());
     }
 
-    @Override
-    public boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException {
+    private boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException {
         var communityMember = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId, communityId)
                 .orElseThrow(()->new BadRequestException(
                         e.getRequiredProperty("community.service.errors.no-relation-found")));
@@ -141,5 +140,13 @@ public class CommunityServiceImpl implements CommunityService {
             return true;
 
         return false;
+    }
+
+    @Override
+    public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
+        if (!this.canUserPostInCommunity(userId, communityId))
+            throw new BadRequestException(
+                    e.getRequiredProperty("community.service.errors.user-cannot-post")
+            );
     }
 }

@@ -106,6 +106,7 @@ community:
       missing-community: "We could not locate a community named %s :)"
       not-community-owner: You cannot perform this action because this community does not exist or because you are not the community owner.
       no-relation-found: You do not appear to be a part of this community!
+      user-cannot-post: You are not authorized to post to this community!
     stores:
       icons: "user-content/communities/icons/"
       banners: "user-content/communities/banners/"
@@ -126,7 +127,7 @@ content:
         messages:
           get: Good!
     errors:
-      user-cannot-post: You are not authorized to post to this community!
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
+      too-many-images: Please do not upload more than 10 images for a single post!
     stores:
       resources: "user-content/post/resources/"

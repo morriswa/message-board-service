@@ -18,22 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("${server.path}")
 public class ContentServiceController {
     private final Environment e;
-    private final UserProfileService userProfileService;
     private final ContentService contentService;
 
     @Autowired
-    public ContentServiceController(Environment e, UserProfileService userProfileService, ContentService contentService) {
+    public ContentServiceController(Environment e, ContentService contentService) {
         this.e = e;
-        this.userProfileService = userProfileService;
         this.contentService = contentService;
-    }
-
-    @GetMapping("${content.service.endpoints.user-id.path}")
-    public ResponseEntity<?> sayHiToUserProfile(JwtAuthenticationToken token) throws BadRequestException {
-        var userId = userProfileService.getUserId(token.getName());
-        return ResponseEntity.ok(new DefaultResponse<>(
-            e.getProperty("content.service.endpoints.user-id.messages.get"),
-            userId));
     }
 
     @PostMapping("${content.service.endpoints.create-post.path}")
@@ -51,8 +41,11 @@ public class ContentServiceController {
     public ResponseEntity<?> getCommunityFeed(JwtAuthenticationToken token,
                                         @PathVariable Long communityId) throws BadRequestException {
 
+        var feed = contentService.getFeedForCommunity(communityId);
+
         return ResponseEntity.ok(new DefaultResponse<>(
-                e.getProperty("content.service.endpoints.community-feed.messages.get")));
+                e.getProperty("content.service.endpoints.community-feed.messages.get"),
+                feed));
     }
 
 }

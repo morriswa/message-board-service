@@ -21,5 +21,5 @@ public interface CommunityService {
 
     void leaveCommunity(String authzeroid, Long communityId) throws BadRequestException;
 
-    boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException;
+    void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException;
 }

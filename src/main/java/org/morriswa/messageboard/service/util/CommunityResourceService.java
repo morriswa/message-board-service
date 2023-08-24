@@ -5,7 +5,7 @@ import org.morriswa.messageboard.model.AllCommunityResourceURLs;
 
 import java.io.IOException;
 
-public interface ResourceService {
+public interface CommunityResourceService {
     void setCommunityBanner(UploadImageRequest uploadImageRequest, Long communityId) throws IOException;
 
     void setCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId) throws IOException;

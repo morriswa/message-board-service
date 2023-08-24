@@ -119,4 +119,17 @@ public class UserProfileServiceImpl implements UserProfileService {
             throw new BadRequestException(e.getProperty("user-profile.service.errors.display-name-already-exists"));
         }
     }
+
+    @Override
+    public UserProfileResponse getUserProfileByUserId(UUID userId) throws BadRequestException {
+        var user = userProfileRepo.findUserByUserId(userId)
+            .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+
+
+        var userProfileImage = profileImageService.getSignedUserProfileImage(user.getUserId());
+
+        var userProfileResponse = new UserProfileResponse(user,userProfileImage);
+
+        return userProfileResponse;
+    }
 }

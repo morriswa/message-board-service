@@ -22,4 +22,5 @@ public interface UserProfileService {
 
     void updateUserProfileDisplayName(String authZeroId, String requestedDisplayName) throws BadRequestException;
 
+    UserProfileResponse getUserProfileByUserId(UUID userId) throws BadRequestException;
 }

@@ -1,17 +1,15 @@
 package org.morriswa.messageboard.service;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import org.morriswa.messageboard.model.BadRequestException;
-import org.morriswa.messageboard.model.UploadImageRequest;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.entity.Comment;
 import org.morriswa.messageboard.entity.Post;
 import org.morriswa.messageboard.entity.Resource;
-import org.morriswa.messageboard.model.CommentResponse;
-import org.morriswa.messageboard.model.NewCommentRequest;
-import org.morriswa.messageboard.model.NewPostRequest;
 import org.morriswa.messageboard.repo.CommentRepo;
 import org.morriswa.messageboard.repo.PostRepo;
 import org.morriswa.messageboard.repo.ResourceRepo;
@@ -56,22 +54,53 @@ public class ContentServiceImpl implements ContentService {
 
         var userId = userProfileService.getUserId(request.getAuthZeroId());
 
-        if (!communityService.canUserPostInCommunity(userId, request.getCommunityId())) {
-            throw new BadRequestException(
-                    e.getRequiredProperty("content.service.errors.user-cannot-post")
-            );
-        }
+        communityService.verifyUserCanPostInCommunityOrThrow(userId, request.getCommunityId());
 
         var newResource = new Resource();
 
         resourceRepo.save(newResource);
 
         switch (request.getContentType()) {
-            case PHOTO:
-                imageResourceService.uploadImage(newResource.getResourceId(), (UploadImageRequest) request.getContent());
-                break;
-        
-            default:
+            case PHOTO ->
+                imageResourceService.uploadImage(
+                        newResource.getResourceId(),
+                        new UploadImageRequest(
+                                (String) request.getContent().get("baseEncodedImage"),
+                                (String) request.getContent().get("imageFormat")
+                        ));
+
+            case PHOTO_GALLERY -> {
+                int imagesToUpload = (int) request.getContent().get("count");
+
+                if (imagesToUpload>10) throw new BadRequestException(
+                        e.getRequiredProperty("content.service.errors.too-many-images")
+                );
+
+                var generatedSource = new ArrayList<UUID>();
+
+                for (int i = 0; i < imagesToUpload; i++) {
+                    UUID newResourceUUID = i == 0 ? newResource.getResourceId() : UUID.randomUUID();
+
+                    generatedSource.add(newResourceUUID);
+
+                    imageResourceService.uploadImage(newResourceUUID,
+                            new UploadImageRequest(
+                                    (String) request.getContent().get("baseEncodedImage" + i),
+                                    (String) request.getContent().get("imageFormat" + i)
+                            ));
+                }
+
+                try {
+                    newResource.setList(generatedSource);
+                    resourceRepo.save(newResource);
+                } catch (Exception e) {
+                    throw new RuntimeException("naughty");
+                }
+
+
+            }
+
+            default ->
                 throw new BadRequestException(e.getRequiredProperty("content.service.errors.content-type-not-supported"));
         }
 
@@ -100,11 +129,7 @@ public class ContentServiceImpl implements ContentService {
                         e.getRequiredProperty("content.service.errors.cannot-locate-post")
                 ));
 
-        if (!communityService.canUserPostInCommunity(userId, post.getCommunityId())) {
-            throw new BadRequestException(
-                    e.getRequiredProperty("content.service.errors.user-cannot-post")
-            );
-        }
+        communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
         var newCommentBuilder = Comment.builder()
                 .userId(userId)
@@ -138,5 +163,29 @@ public class ContentServiceImpl implements ContentService {
         // TODO map all subComments to Comments
 
         return comments;
+    }
+
+    @Override
+    public List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException {
+
+        var response = new ArrayList<PostResponse>();
+
+        var allCommunityPosts = postRepo.findAllPostsByCommunityId(communityId);
+
+        for (Post post : allCommunityPosts) {
+            var user = userProfileService.getUserProfileByUserId(post.getUserId());
+            var resourceEntity = resourceRepo.findResourceByResourceId(post.getResourceId())
+                    .orElseThrow();
+
+            var resourceUrls = new ArrayList<URL>(){{
+                for (UUID resource : resourceEntity.getList())
+                    add(imageResourceService.retrievedImageResource(resource));
+            }};
+
+            response.add(new PostResponse(post, user, resourceUrls));
+
+        }
+
+        return response;
     }
 }

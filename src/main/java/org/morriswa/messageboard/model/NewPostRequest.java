@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data @AllArgsConstructor @NoArgsConstructor
 public class NewPostRequest {
     private String authZeroId;
@@ -11,5 +13,5 @@ public class NewPostRequest {
     private String caption;
     private String description;
     private PostContentType contentType;
-    private Object content;
+    private Map<String,Object> content;
 }

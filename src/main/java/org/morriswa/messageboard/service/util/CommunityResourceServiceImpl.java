@@ -26,7 +26,7 @@ import java.util.Base64;
 import java.util.Date;
 
 @Service @Slf4j
-public class ResourceServiceImpl implements ResourceService {
+public class CommunityResourceServiceImpl implements CommunityResourceService {
     private final Environment e;
     private final CommunityServiceValidator validator;
     private final Base64.Decoder b64decoder;
@@ -37,7 +37,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final CannedAccessControlList acl = CannedAccessControlList.AuthenticatedRead;
 
     @Autowired
-    ResourceServiceImpl(Environment e, CommunityServiceValidator validator) {
+    CommunityResourceServiceImpl(Environment e, CommunityServiceValidator validator) {
         this.e = e;
         this.validator = validator;
         this.s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
