@@ -1,4 +1,4 @@
-package org.morriswa.messageboard;
+package org.morriswa.messageboard.control;
 
 import org.apache.http.HttpHeaders;
 import org.hamcrest.Matchers;
@@ -22,21 +22,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class HealthEndpointsTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired protected MockMvc mockMvc;
 
-    @Autowired private Environment e;
+    @Autowired protected Environment e;
 
-    @MockBean private CommentRepo commentRepo;
+    @MockBean protected CommentRepo commentRepo;
 
-    @MockBean private CommunityMemberRepo communityMemberRepo;
+    @MockBean protected CommunityMemberRepo communityMemberRepo;
 
-    @MockBean private CommunityRepo communityRepo;
+    @MockBean protected CommunityRepo communityRepo;
 
-    @MockBean private PostRepo postRepo;
+    @MockBean protected PostRepo postRepo;
 
-    @MockBean private ResourceRepo resourceRepo;
+    @MockBean protected ResourceRepo resourceRepo;
 
-    @MockBean private UserProfileRepo userProfileRepo;
+    @MockBean protected UserProfileRepo userProfileRepo;
 
     @Test
     void testHealthEndpoint() throws Exception {

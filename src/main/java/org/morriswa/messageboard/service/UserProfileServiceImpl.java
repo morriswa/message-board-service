@@ -59,7 +59,13 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public User createNewUser(String authZeroId, String email, String displayName) {
+    public User createNewUser(String authZeroId, String email, String displayName) throws BadRequestException {
+
+        validator.validateDisplayNameOrThrow(displayName);
+
+        if (userProfileRepo.existsByDisplayName(displayName))
+            throw new BadRequestException(
+                e.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
 
         var newUser = User.builder();
         newUser.authZeroId(authZeroId);

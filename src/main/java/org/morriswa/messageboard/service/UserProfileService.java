@@ -14,7 +14,7 @@ public interface UserProfileService {
 
     UUID getUserId(String authZeroId) throws BadRequestException;
 
-    User createNewUser(String authZeroId, String email, String displayName);
+    User createNewUser(String authZeroId, String email, String displayName) throws BadRequestException;
 
     void updateUserProfileImage(String authZeroId, UpdateProfileImageRequest request) throws BadRequestException, IOException;
 

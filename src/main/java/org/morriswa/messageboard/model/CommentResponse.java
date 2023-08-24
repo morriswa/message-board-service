@@ -20,7 +20,7 @@ public class CommentResponse {
 
     private String commentBody;
 
-    private List<Object> subComments;
+    private List<CommentResponse> subComments;
 
     public CommentResponse(Comment commentFromDb) {
         this.commentId = commentFromDb.getCommentId();

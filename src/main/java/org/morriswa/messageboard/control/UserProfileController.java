@@ -37,7 +37,7 @@ public class UserProfileController {
     @PostMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
                                            @RequestParam String email,
-                                           @RequestParam String displayName) {
+                                           @RequestParam String displayName) throws BadRequestException {
         var newUser = userProfileService.createNewUser(jwt.getName(), email, displayName);
         return ResponseEntity.ok(new DefaultResponse<>(String.format(
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.post"),
