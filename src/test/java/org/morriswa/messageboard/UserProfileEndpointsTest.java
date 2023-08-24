@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.control;
+package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class UserProfileEndpointsTest extends HealthEndpointsTest {
+public class UserProfileEndpointsTest extends MessageboardTest {
 
     @Test
     void testGetUserProfileEndpoint() throws Exception {
