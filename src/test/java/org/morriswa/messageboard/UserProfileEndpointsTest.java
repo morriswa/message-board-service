@@ -142,4 +142,64 @@ public class UserProfileEndpointsTest extends MessageboardTest {
 
         ;
     }
+
+    @Test
+    void testUpdateUserDisplayNameEndpointWithInvalidDisplayName() throws Exception {
+
+        final String targetUrl = String.format("/%s%s",
+                e.getRequiredProperty("server.path"),
+                e.getRequiredProperty("user-profile.service.endpoints.user-profile-displayname.path"));
+
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch(targetUrl)
+                        .header("Authorization","Bearer token")
+                        .param("displayName","display$Name"))
+
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$.message", Matchers.is(
+                        e.getRequiredProperty("user-profile.service.errors.bad-display-name")
+                )))
+
+        ;
+    }
+
+    @Test
+    void testUpdateUserDisplayNameEndpointWithLongDisplayName() throws Exception {
+
+        final String targetUrl = String.format("/%s%s",
+                e.getRequiredProperty("server.path"),
+                e.getRequiredProperty("user-profile.service.endpoints.user-profile-displayname.path"));
+
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch(targetUrl)
+                        .header("Authorization","Bearer token")
+                        .param("displayName","012345678901234567890123456789012345"))
+
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$.message", Matchers.is(
+                        e.getRequiredProperty("user-profile.service.errors.bad-display-name-length")
+                )))
+
+        ;
+    }
+
+    @Test
+    void testUpdateUserDisplayNameEndpointWithShortDisplayName() throws Exception {
+
+        final String targetUrl = String.format("/%s%s",
+                e.getRequiredProperty("server.path"),
+                e.getRequiredProperty("user-profile.service.endpoints.user-profile-displayname.path"));
+
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch(targetUrl)
+                        .header("Authorization","Bearer token")
+                        .param("displayName","01"))
+
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$.message", Matchers.is(
+                        e.getRequiredProperty("user-profile.service.errors.bad-display-name-length")
+                )))
+
+        ;
+    }
 }

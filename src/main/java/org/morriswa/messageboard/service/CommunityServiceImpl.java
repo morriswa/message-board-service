@@ -77,7 +77,6 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public AllCommunityInfoResponse getAllCommunityInfo(String communityDisplayName) throws BadRequestException {
-        var response = new AllCommunityInfoResponse();
 
         var community = communityRepo
                 .findCommunityByCommunityLocator(communityDisplayName)
@@ -86,17 +85,11 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityDisplayName)));
 
-        response.setCommunityId(community.getCommunityId());
-        response.setDisplayName(community.getCommunityDisplayName());
-        response.setOwnerId(community.getCommunityOwnerUserId());
-        response.setDateCreated(community.getDateCreated());
-        response.setCommunityLocator(community.getCommunityLocator());
+        int communityMembers = communityMemberRepo.countCommunityMembersByCommunityId(community.getCommunityId());
 
         var resources = resourceService.getAllCommunityResources(community.getCommunityId());
 
-        response.setResourceUrls(resources);
-
-        return response;
+        return new AllCommunityInfoResponse(community, communityMembers, resources);
     }
 
     @Override

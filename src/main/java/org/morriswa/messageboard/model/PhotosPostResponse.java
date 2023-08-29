@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Data @AllArgsConstructor @NoArgsConstructor
-public class PostResponse {
+public class PhotosPostResponse {
 
     private UserInfo userInfo;
     private String caption;
     private String description;
     private List<URL> resources;
+    private PostContentType contentType;
 
     @Data @AllArgsConstructor @NoArgsConstructor
     public static class UserInfo {
@@ -25,10 +26,11 @@ public class PostResponse {
     }
 
 
-    public PostResponse(Post post, UserProfileResponse user, List<URL> resources) {
+    public PhotosPostResponse(Post post, UserProfileResponse user, List<URL> resources) {
         this.userInfo = new UserInfo(user.getUserId(), user.getDisplayName(), user.getUserProfileImage());
         this.caption = post.getCaption();
         this.description = post.getDescription();
         this.resources = resources;
+        this.contentType = post.getPostContentType();
     }
 }

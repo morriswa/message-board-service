@@ -10,5 +10,5 @@ public interface ContentService {
     void addCommentToPost(NewCommentRequest request) throws BadRequestException;
     List<CommentResponse> getFullCommentMapForPost(Long postId);
 
-    List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException;
+    List<PhotosPostResponse> getFeedForCommunity(Long communityId) throws BadRequestException;
 }

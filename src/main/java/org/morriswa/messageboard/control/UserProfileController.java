@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 @RestController @CrossOrigin
 @RequestMapping("${server.path}")
@@ -62,8 +61,8 @@ public class UserProfileController {
 
     @PatchMapping("${user-profile.service.endpoints.user-profile-displayname.path}")
     public ResponseEntity<?> updateUserDisplayName(JwtAuthenticationToken jwt,
-                                                    @RequestParam String requestedDisplayName) throws BadRequestException {
-        userProfileService.updateUserProfileDisplayName(jwt.getName(), requestedDisplayName);
+                                                    @RequestParam String displayName) throws BadRequestException {
+        userProfileService.updateUserProfileDisplayName(jwt.getName(), displayName);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getProperty("user-profile.service.endpoints.user-profile-displayname.messages.patch")));
     }

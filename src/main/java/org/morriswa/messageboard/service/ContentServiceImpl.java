@@ -166,9 +166,9 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException {
+    public List<PhotosPostResponse> getFeedForCommunity(Long communityId) throws BadRequestException {
 
-        var response = new ArrayList<PostResponse>();
+        var response = new ArrayList<PhotosPostResponse>();
 
         var allCommunityPosts = postRepo.findAllPostsByCommunityId(communityId);
 
@@ -182,7 +182,7 @@ public class ContentServiceImpl implements ContentService {
                     add(imageResourceService.retrievedImageResource(resource));
             }};
 
-            response.add(new PostResponse(post, user, resourceUrls));
+            response.add(new PhotosPostResponse(post, user, resourceUrls));
 
         }
 
