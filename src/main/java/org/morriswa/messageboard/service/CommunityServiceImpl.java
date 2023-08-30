@@ -17,6 +17,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service @Slf4j
@@ -46,7 +48,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void createNewCommunity(CreateNewCommunityRequest request) throws BadRequestException {
-        var userId = userProfileService.getUserId(request.getAuthZeroId());
+        var userId = userProfileService.getUserOrThrow(request.getAuthZeroId()).getUserId();
 
         var newCommunity = new Community(request.getCommunityRef(), request.getCommunityName(), userId);
 
@@ -57,7 +59,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void updateCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId, String jwt) throws BadRequestException, IOException {
-        var userId = userProfileService.getUserId(jwt);
+        var userId = userProfileService.getUserOrThrow(jwt).getUserId();
 
         communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId)
                 .orElseThrow(()->new BadRequestException(e.getRequiredProperty("community.service.errors.not-community-owner")));
@@ -67,12 +69,20 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void updateCommunityBanner(UploadImageRequest uploadImageRequest, Long communityId, String jwt) throws BadRequestException, IOException {
-        var userId = userProfileService.getUserId(jwt);
+        var userId = userProfileService.getUserOrThrow(jwt).getUserId();
 
         communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId)
                 .orElseThrow(()->new BadRequestException(e.getRequiredProperty("community.service.errors.not-community-owner")));
 
         resourceService.setCommunityBanner(uploadImageRequest, communityId);
+    }
+
+    private AllCommunityInfoResponse buildAllCommunityInfoResponse(Community community) {
+        int communityMembers = communityMemberRepo.countCommunityMembersByCommunityId(community.getCommunityId());
+
+        var resources = resourceService.getAllCommunityResources(community.getCommunityId());
+
+        return new AllCommunityInfoResponse(community, communityMembers, resources);
     }
 
     @Override
@@ -85,16 +95,25 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityDisplayName)));
 
-        int communityMembers = communityMemberRepo.countCommunityMembersByCommunityId(community.getCommunityId());
+        return buildAllCommunityInfoResponse(community);
+    }
 
-        var resources = resourceService.getAllCommunityResources(community.getCommunityId());
+    @Override
+    public AllCommunityInfoResponse getAllCommunityInfo(Long communityId) throws BadRequestException {
 
-        return new AllCommunityInfoResponse(community, communityMembers, resources);
+        var community = communityRepo
+                .findCommunityByCommunityId(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community-by-id"),
+                                communityId.toString())));
+
+        return buildAllCommunityInfoResponse(community);
     }
 
     @Override
     public void joinCommunity(String authzeroid, Long communityId) throws BadRequestException {
-        var userId = userProfileService.getUserId(authzeroid);
+        var userId = userProfileService.getUserOrThrow(authzeroid).getUserId();
 
         var result = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId,communityId);
 
@@ -110,7 +129,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void leaveCommunity(String authzeroid, Long communityId) throws BadRequestException {
-        var userId = userProfileService.getUserId(authzeroid);
+        var userId = userProfileService.getUserOrThrow(authzeroid).getUserId();
 
         var result = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId,communityId);
 
@@ -121,13 +140,15 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     private boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException {
-        var communityMember = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId, communityId)
-                .orElseThrow(()->new BadRequestException(
-                        e.getRequiredProperty("community.service.errors.no-relation-found")));
+
 
         var checkCommunityOwner = communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId);
 
         if (checkCommunityOwner.isPresent()) return true;
+
+        var communityMember = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId, communityId)
+                .orElseThrow(()->new BadRequestException(
+                        e.getRequiredProperty("community.service.errors.no-relation-found")));
 
         if (communityMember.getCommunityStanding().equals(CommunityStanding.HEALTHY))
             return true;
@@ -141,5 +162,21 @@ public class CommunityServiceImpl implements CommunityService {
             throw new BadRequestException(
                     e.getRequiredProperty("community.service.errors.user-cannot-post")
             );
+    }
+
+    @Override
+    public List<AllCommunityInfoResponse> getAllUsersCommunities(String authZeroId) throws BadRequestException {
+
+        var user = userProfileService.getUserOrThrow(authZeroId);
+
+        var communities = communityMemberRepo.findAllByUserId(user.getUserId());
+
+        var response = new ArrayList<AllCommunityInfoResponse>();
+
+        for (CommunityMember community : communities) {
+            response.add(getAllCommunityInfo(community.getCommunityId()));
+        }
+
+        return response;
     }
 }

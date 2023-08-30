@@ -52,7 +52,7 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public void createPost(NewPostRequest request) throws BadRequestException, IOException {
 
-        var userId = userProfileService.getUserId(request.getAuthZeroId());
+        var userId = userProfileService.getUserOrThrow(request.getAuthZeroId()).getUserId();
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, request.getCommunityId());
 
@@ -122,7 +122,7 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public void addCommentToPost(NewCommentRequest request) throws BadRequestException {
-        var userId = userProfileService.getUserId(request.getAuthZeroId());
+        var userId = userProfileService.getUserOrThrow(request.getAuthZeroId()).getUserId();
 
         var post = postRepo.findPostByPostId(request.getPostId())
                 .orElseThrow(()->new BadRequestException(
@@ -173,7 +173,7 @@ public class ContentServiceImpl implements ContentService {
         var allCommunityPosts = postRepo.findAllPostsByCommunityId(communityId);
 
         for (Post post : allCommunityPosts) {
-            var user = userProfileService.getUserProfileByUserId(post.getUserId());
+            var user = userProfileService.getUserProfileInternal(post.getUserId());
             var resourceEntity = resourceRepo.findResourceByResourceId(post.getResourceId())
                     .orElseThrow();
 

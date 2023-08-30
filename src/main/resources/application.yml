@@ -13,7 +13,7 @@ spring:
     database:
       name: messageboard
   jpa:
-    hibernate.ddl-auto: update
+    hibernate.ddl-auto: create-drop
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   banner.location: classpath:banner.txt
 
@@ -105,8 +105,13 @@ community:
         path: community/{communityId}/icon
         messages:
           post: "Your community icon was changed successfully!"
+      get-users-communities:
+        path: communities
+        messages:
+          get: "Successfully retrieved all of users' communities"
     errors:
-      missing-community: "We could not locate a community named %s :)"
+      missing-community: "We could not locate a community named %s :("
+      missing-community-by-id: "We could not locate a community #%s :("
       not-community-owner: You cannot perform this action because this community does not exist or because you are not the community owner.
       no-relation-found: You do not appear to be a part of this community!
       user-cannot-post: You are not authorized to post to this community!

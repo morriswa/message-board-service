@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface CommunityRepo extends JpaRepository<Community, Long> {
     Optional<Community> findCommunityByCommunityLocator(String communityLocator);
     Optional<Community> findCommunityByCommunityIdAndCommunityOwnerUserId(Long communityId, UUID communityOwnerUserId);
+
+    Optional<Community> findCommunityByCommunityId(Long communityId);
 }

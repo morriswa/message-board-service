@@ -36,26 +36,31 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.profileImageService = profileImageService;
     }
 
-    private User getUserEntityByAuthZeroIdOrThrow(String authZeroId) throws BadRequestException {
-        return userProfileRepo.findUserByAuthZeroId(authZeroId)
-                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+    private UserProfileResponse buildUserProfileResponse(User user) {
+        var userProfileImage = profileImageService.getSignedUserProfileImage(user.getUserId());
+
+        return new UserProfileResponse(user,userProfileImage);
     }
 
     @Override
     public UserProfileResponse getUserProfile(String authZeroId) throws BadRequestException {
-        var user = getUserEntityByAuthZeroIdOrThrow(authZeroId);
+        var user = getUserOrThrow(authZeroId);
 
-        var userProfileImage = profileImageService.getSignedUserProfileImage(user.getUserId());
-
-        var userProfileResponse = new UserProfileResponse(user,userProfileImage);
-
-        return userProfileResponse;
+        return buildUserProfileResponse(user);
     }
 
     @Override
-    public UUID getUserId(String authZeroId) throws BadRequestException {
-        var user = getUserEntityByAuthZeroIdOrThrow(authZeroId);
-        return user.getUserId();
+    public UserProfileResponse getUserProfileInternal(UUID userId) throws BadRequestException {
+        var user = userProfileRepo.findUserByUserId(userId)
+                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+
+        return buildUserProfileResponse(user);
+    }
+
+    @Override
+    public User getUserOrThrow(String authZeroId) throws BadRequestException {
+        return userProfileRepo.findUserByAuthZeroId(authZeroId)
+                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
     }
 
     @Override
@@ -120,16 +125,5 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
     }
 
-    @Override
-    public UserProfileResponse getUserProfileByUserId(UUID userId) throws BadRequestException {
-        var user = userProfileRepo.findUserByUserId(userId)
-            .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
 
-
-        var userProfileImage = profileImageService.getSignedUserProfileImage(user.getUserId());
-
-        var userProfileResponse = new UserProfileResponse(user,userProfileImage);
-
-        return userProfileResponse;
-    }
 }

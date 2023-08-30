@@ -32,7 +32,7 @@ public class CommunityServiceController {
         this.community.createNewCommunity(request);
 
         return ResponseEntity.ok(new DefaultResponse<>(
-                e.getProperty("community.service.endpoints.community.messages.post")
+                e.getRequiredProperty("community.service.endpoints.community.messages.post")
         ));
     }
 
@@ -41,7 +41,7 @@ public class CommunityServiceController {
         var response = this.community.getAllCommunityInfo(displayName);
 
         return ResponseEntity.ok(new DefaultResponse<>(
-                e.getProperty("community.service.endpoints.community.messages.get"),
+                e.getRequiredProperty("community.service.endpoints.community.messages.get"),
                 response));
     }
 
@@ -52,7 +52,7 @@ public class CommunityServiceController {
         this.community.updateCommunityBanner(request,communityId,jwt.getName());
 
         return ResponseEntity.ok(new DefaultResponse<>(
-                e.getProperty("community.service.endpoints.update-community-banner.messages.post")
+                e.getRequiredProperty("community.service.endpoints.update-community-banner.messages.post")
         ));
     }
 
@@ -63,7 +63,7 @@ public class CommunityServiceController {
         this.community.updateCommunityIcon(request,communityId, jwt.getName());
 
         return ResponseEntity.ok(new DefaultResponse<>(
-                e.getProperty("community.service.endpoints.update-community-icon.messages.post")
+                e.getRequiredProperty("community.service.endpoints.update-community-icon.messages.post")
         ));
     }
 
@@ -73,7 +73,7 @@ public class CommunityServiceController {
         this.community.joinCommunity(jwt.getName(),communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(
-                e.getProperty("community.service.endpoints.community-membership.messages.post")
+                e.getRequiredProperty("community.service.endpoints.community-membership.messages.post")
         ));
     }
 
@@ -83,11 +83,19 @@ public class CommunityServiceController {
         this.community.leaveCommunity(jwt.getName(),communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(
-                e.getProperty("community.service.endpoints.community-membership.messages.delete")
+                e.getRequiredProperty("community.service.endpoints.community-membership.messages.delete")
         ));
     }
 
+    @GetMapping("${community.service.endpoints.get-users-communities.path}")
+    public ResponseEntity<?> getUsersCommunities(JwtAuthenticationToken jwtAuthenticationToken) throws BadRequestException {
+        var communities = this.community.getAllUsersCommunities(jwtAuthenticationToken.getName());
 
+        return ResponseEntity.ok(new DefaultResponse<>(
+                e.getRequiredProperty("community.service.endpoints.get-users-communities.messages.get"),
+                communities
+        ));
+    }
 
 
 

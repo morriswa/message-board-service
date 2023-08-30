@@ -10,9 +10,12 @@ import java.net.URL;
 import java.util.UUID;
 
 public interface UserProfileService {
+
     UserProfileResponse getUserProfile(String authZeroId) throws BadRequestException;
 
-    UUID getUserId(String authZeroId) throws BadRequestException;
+    UserProfileResponse getUserProfileInternal(UUID userId) throws BadRequestException;
+
+    User getUserOrThrow(String authZeroId) throws BadRequestException;
 
     User createNewUser(String authZeroId, String email, String displayName) throws BadRequestException;
 
@@ -21,6 +24,4 @@ public interface UserProfileService {
     URL getUserProfileImage(String authZeroId) throws BadRequestException;
 
     void updateUserProfileDisplayName(String authZeroId, String requestedDisplayName) throws BadRequestException;
-
-    UserProfileResponse getUserProfileByUserId(UUID userId) throws BadRequestException;
 }
