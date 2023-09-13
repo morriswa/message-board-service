@@ -27,7 +27,7 @@ public class UserProfileController {
 
     @GetMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws BadRequestException {
-        var user = userProfileService.getUserProfile(jwt.getName());
+        var user = userProfileService.authenticateAndGetUserProfile(jwt);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("user-profile.service.endpoints.user.messages.get"),
                 user));
@@ -37,7 +37,7 @@ public class UserProfileController {
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
                                            @RequestParam String email,
                                            @RequestParam String displayName) throws BadRequestException {
-        var newUser = userProfileService.createNewUser(jwt.getName(), email, displayName);
+        var newUser = userProfileService.createNewUser(jwt, email, displayName);
         return ResponseEntity.ok(new DefaultResponse<>(String.format(
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.post"),
             newUser.getDisplayName())));
@@ -45,7 +45,7 @@ public class UserProfileController {
 
     @GetMapping("${user-profile.service.endpoints.user-profile-image.path}")
     public ResponseEntity<?> getProfileImage(JwtAuthenticationToken jwt) throws BadRequestException {
-        var profileImageUrl = userProfileService.getUserProfileImage(jwt.getName());
+        var profileImageUrl = userProfileService.getUserProfileImage(jwt);
         return ResponseEntity.ok(new DefaultResponse<>(
             e.getProperty("user-profile.service.endpoints.user-profile-image.messages.get"),
             profileImageUrl));
@@ -54,7 +54,7 @@ public class UserProfileController {
     @PostMapping("${user-profile.service.endpoints.user-profile-image.path}")
     public ResponseEntity<?> updateUserProfileImage(JwtAuthenticationToken jwt,
                                                     @RequestBody UpdateProfileImageRequest request) throws BadRequestException, IOException {
-        userProfileService.updateUserProfileImage(jwt.getName(), request);
+        userProfileService.updateUserProfileImage(jwt, request);
         return ResponseEntity.ok(new DefaultResponse<>(
             e.getProperty("user-profile.service.endpoints.user-profile-image.messages.post")));
     }
@@ -62,7 +62,7 @@ public class UserProfileController {
     @PatchMapping("${user-profile.service.endpoints.user-profile-displayname.path}")
     public ResponseEntity<?> updateUserDisplayName(JwtAuthenticationToken jwt,
                                                     @RequestParam String displayName) throws BadRequestException {
-        userProfileService.updateUserProfileDisplayName(jwt.getName(), displayName);
+        userProfileService.updateUserProfileDisplayName(jwt, displayName);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getProperty("user-profile.service.endpoints.user-profile-displayname.messages.patch")));
     }

@@ -30,16 +30,13 @@ public class ContentServiceController {
     public ResponseEntity<?> createPost(JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
                                         @RequestBody NewPostRequest request) throws BadRequestException, IOException {
-        request.setAuthZeroId(token.getName());
-        request.setCommunityId(communityId);
-        contentService.createPost(request);
+        contentService.createPost(token, communityId, request);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getProperty("content.service.endpoints.create-post.messages.post")));
     }
 
     @GetMapping("${content.service.endpoints.community-feed.path}")
-    public ResponseEntity<?> getCommunityFeed(JwtAuthenticationToken token,
-                                        @PathVariable Long communityId) throws BadRequestException {
+    public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws BadRequestException {
 
         var feed = contentService.getFeedForCommunity(communityId);
 

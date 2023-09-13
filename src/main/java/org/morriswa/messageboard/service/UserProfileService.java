@@ -4,6 +4,7 @@ import org.morriswa.messageboard.model.BadRequestException;
 import org.morriswa.messageboard.entity.User;
 import org.morriswa.messageboard.model.UpdateProfileImageRequest;
 import org.morriswa.messageboard.model.UserProfileResponse;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.io.IOException;
 import java.net.URL;
@@ -11,17 +12,17 @@ import java.util.UUID;
 
 public interface UserProfileService {
 
-    UserProfileResponse getUserProfile(String authZeroId) throws BadRequestException;
+    UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException;
 
-    UserProfileResponse getUserProfileInternal(UUID userId) throws BadRequestException;
+    UserProfileResponse getUserProfile(UUID userId) throws BadRequestException;
 
-    User getUserOrThrow(String authZeroId) throws BadRequestException;
+    User authenticateAndGetUserEntity(JwtAuthenticationToken token) throws BadRequestException;
 
-    User createNewUser(String authZeroId, String email, String displayName) throws BadRequestException;
+    User createNewUser(JwtAuthenticationToken token, String email, String displayName) throws BadRequestException;
 
-    void updateUserProfileImage(String authZeroId, UpdateProfileImageRequest request) throws BadRequestException, IOException;
+    void updateUserProfileImage(JwtAuthenticationToken token, UpdateProfileImageRequest request) throws BadRequestException, IOException;
 
-    URL getUserProfileImage(String authZeroId) throws BadRequestException;
+    URL getUserProfileImage(JwtAuthenticationToken token) throws BadRequestException;
 
-    void updateUserProfileDisplayName(String authZeroId, String requestedDisplayName) throws BadRequestException;
+    void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws BadRequestException;
 }

@@ -14,6 +14,7 @@ import org.morriswa.messageboard.entity.CommunityMember;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -47,8 +48,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 
     @Override
-    public void createNewCommunity(CreateNewCommunityRequest request) throws BadRequestException {
-        var userId = userProfileService.getUserOrThrow(request.getAuthZeroId()).getUserId();
+    public void createNewCommunity(JwtAuthenticationToken token, CreateNewCommunityRequest request) throws BadRequestException {
+        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
         var newCommunity = new Community(request.getCommunityRef(), request.getCommunityName(), userId);
 
@@ -58,8 +59,8 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId, String jwt) throws BadRequestException, IOException {
-        var userId = userProfileService.getUserOrThrow(jwt).getUserId();
+    public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
+        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
         communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId)
                 .orElseThrow(()->new BadRequestException(e.getRequiredProperty("community.service.errors.not-community-owner")));
@@ -68,8 +69,8 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityBanner(UploadImageRequest uploadImageRequest, Long communityId, String jwt) throws BadRequestException, IOException {
-        var userId = userProfileService.getUserOrThrow(jwt).getUserId();
+    public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
+        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
         communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId)
                 .orElseThrow(()->new BadRequestException(e.getRequiredProperty("community.service.errors.not-community-owner")));
@@ -112,8 +113,8 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void joinCommunity(String authzeroid, Long communityId) throws BadRequestException {
-        var userId = userProfileService.getUserOrThrow(authzeroid).getUserId();
+    public void joinCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
+        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
         var result = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId,communityId);
 
@@ -128,8 +129,8 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void leaveCommunity(String authzeroid, Long communityId) throws BadRequestException {
-        var userId = userProfileService.getUserOrThrow(authzeroid).getUserId();
+    public void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
+        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
         var result = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId,communityId);
 
@@ -165,9 +166,9 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<AllCommunityInfoResponse> getAllUsersCommunities(String authZeroId) throws BadRequestException {
+    public List<AllCommunityInfoResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException {
 
-        var user = userProfileService.getUserOrThrow(authZeroId);
+        var user = userProfileService.authenticateAndGetUserEntity(token);
 
         var communities = communityMemberRepo.findAllByUserId(user.getUserId());
 

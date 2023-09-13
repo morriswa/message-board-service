@@ -11,6 +11,7 @@ import org.morriswa.messageboard.service.util.ProfileImageService;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -43,14 +44,14 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public UserProfileResponse getUserProfile(String authZeroId) throws BadRequestException {
-        var user = getUserOrThrow(authZeroId);
+    public UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException {
+        var user = authenticateAndGetUserEntity(token);
 
         return buildUserProfileResponse(user);
     }
 
     @Override
-    public UserProfileResponse getUserProfileInternal(UUID userId) throws BadRequestException {
+    public UserProfileResponse getUserProfile(UUID userId) throws BadRequestException {
         var user = userProfileRepo.findUserByUserId(userId)
                 .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
 
@@ -58,13 +59,13 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public User getUserOrThrow(String authZeroId) throws BadRequestException {
-        return userProfileRepo.findUserByAuthZeroId(authZeroId)
+    public User authenticateAndGetUserEntity(JwtAuthenticationToken token) throws BadRequestException {
+        return userProfileRepo.findUserByAuthZeroId(token.getName())
                 .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
     }
 
     @Override
-    public User createNewUser(String authZeroId, String email, String displayName) throws BadRequestException {
+    public User createNewUser(JwtAuthenticationToken token, String email, String displayName) throws BadRequestException {
 
         validator.validateDisplayNameOrThrow(displayName);
 
@@ -73,7 +74,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
 
         var newUser = User.builder();
-        newUser.authZeroId(authZeroId);
+        newUser.authZeroId(token.getName());
         newUser.email(email);
         newUser.displayName(displayName);
         newUser.role(UserRole.DEFAULT);
@@ -87,31 +88,26 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void updateUserProfileImage(String name, UpdateProfileImageRequest request) throws BadRequestException, IOException {
+    public void updateUserProfileImage(JwtAuthenticationToken token, UpdateProfileImageRequest request) throws BadRequestException, IOException {
 
-        var user = userProfileRepo.findUserByAuthZeroId(name)
-                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
-
-
+        var user = authenticateAndGetUserEntity(token);
 
         profileImageService.uploadImageToS3(user.getUserId(),request);
     }
 
     @Override
-    public URL getUserProfileImage(String name) throws BadRequestException {
-        var user = userProfileRepo.findUserByAuthZeroId(name)
-                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+    public URL getUserProfileImage(JwtAuthenticationToken token) throws BadRequestException {
+        var user = authenticateAndGetUserEntity(token);
 
         return profileImageService.getSignedUserProfileImage(user.getUserId());
     }
 
     @Override
-    public void updateUserProfileDisplayName(String authZeroId, String requestedDisplayName) throws BadRequestException {
+    public void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws BadRequestException {
         // ensure display name follows basic rules
         this.validator.validateDisplayNameOrThrow(requestedDisplayName);
 
-        var user = userProfileRepo.findUserByAuthZeroId(authZeroId)
-            .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+        var user = authenticateAndGetUserEntity(token);
 
         // update display name
         user.setDisplayName(requestedDisplayName);

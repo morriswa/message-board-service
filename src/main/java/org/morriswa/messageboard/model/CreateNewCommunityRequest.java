@@ -10,5 +10,4 @@ import java.util.UUID;
 public class CreateNewCommunityRequest {
     private String communityRef;
     private String communityName;
-    private String authZeroId;
 }

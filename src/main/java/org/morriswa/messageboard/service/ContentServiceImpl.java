@@ -17,6 +17,7 @@ import org.morriswa.messageboard.service.util.ImageResourceService;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,11 +51,11 @@ public class ContentServiceImpl implements ContentService {
 
 
     @Override
-    public void createPost(NewPostRequest request) throws BadRequestException, IOException {
+    public void createPost(JwtAuthenticationToken token, Long communityId, NewPostRequest request) throws BadRequestException, IOException {
 
-        var userId = userProfileService.getUserOrThrow(request.getAuthZeroId()).getUserId();
+        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
-        communityService.verifyUserCanPostInCommunityOrThrow(userId, request.getCommunityId());
+        communityService.verifyUserCanPostInCommunityOrThrow(userId, communityId);
 
         var newResource = new Resource();
 
@@ -106,7 +107,7 @@ public class ContentServiceImpl implements ContentService {
 
 
         var newPost = new Post(userId,
-                request.getCommunityId(),
+                communityId,
                 request.getCaption(),
                 request.getDescription(),
                 request.getContentType(),
@@ -121,8 +122,8 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void addCommentToPost(NewCommentRequest request) throws BadRequestException {
-        var userId = userProfileService.getUserOrThrow(request.getAuthZeroId()).getUserId();
+    public void addCommentToPost(JwtAuthenticationToken token, NewCommentRequest request) throws BadRequestException {
+        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
         var post = postRepo.findPostByPostId(request.getPostId())
                 .orElseThrow(()->new BadRequestException(
@@ -173,7 +174,7 @@ public class ContentServiceImpl implements ContentService {
         var allCommunityPosts = postRepo.findAllPostsByCommunityId(communityId);
 
         for (Post post : allCommunityPosts) {
-            var user = userProfileService.getUserProfileInternal(post.getUserId());
+            var user = userProfileService.getUserProfile(post.getUserId());
             var resourceEntity = resourceRepo.findResourceByResourceId(post.getResourceId())
                     .orElseThrow();
 

@@ -3,13 +3,15 @@ package org.morriswa.messageboard.service;
 import java.io.IOException;
 import java.util.List;
 
+import org.morriswa.messageboard.entity.Community;
 import org.morriswa.messageboard.model.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 public interface ContentService {
 
-    void createPost(NewPostRequest request) throws BadRequestException, IOException;
+    void createPost(JwtAuthenticationToken token, Long communityId, NewPostRequest request) throws BadRequestException, IOException;
 
-    void addCommentToPost(NewCommentRequest request) throws BadRequestException;
+    void addCommentToPost(JwtAuthenticationToken token, NewCommentRequest request) throws BadRequestException;
 
     List<CommentResponse> getFullCommentMapForPost(Long postId);
 

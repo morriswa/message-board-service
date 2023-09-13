@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authorization.AuthorityAuthorizationManager;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationManagers;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,7 +17,9 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 /**
@@ -56,6 +61,17 @@ public class WebSecurityConfig
         return jwtDecoder;
     }
 
+    private AuthorizationManager<RequestAuthorizationContext> getScopeAuthManagers() {
+        ArrayList<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
+        final String[] securedRoutesScope =
+                e.getRequiredProperty("auth0.scope.secureroutes", String[].class);
+
+        for (String scope : securedRoutesScope)
+            list.add(AuthorityAuthorizationManager.hasAuthority("SCOPE_"+scope));
+
+        return AuthorizationManagers.allOf(list.toArray(new AuthorityAuthorizationManager[0]));
+    }
+
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
@@ -63,7 +79,6 @@ public class WebSecurityConfig
 
         final String path = e.getRequiredProperty("server.path");
         final String healthPath = e.getRequiredProperty("common.service.endpoints.health.path");
-        final String securedRoutesScope = e.getRequiredProperty("auth0.scope.secureroutes");
 
         http // All http requests will...
                 // Be stateless
@@ -74,7 +89,9 @@ public class WebSecurityConfig
                         // Will allow any request on /health endpoint
                         .requestMatchers("/"+healthPath).permitAll()
                         // Will require authentication for secured routes
-                        .requestMatchers("/" + path + "**").hasAuthority("SCOPE_"+securedRoutesScope)
+                        .requestMatchers("/" + path + "**")
+//                        .hasAuthority("SCOPE_"+securedRoutesScope)
+                        .access(getScopeAuthManagers())
                         // Will deny all other unauthenticated requests
                         .anyRequest().denyAll())
                 // Will allow cors

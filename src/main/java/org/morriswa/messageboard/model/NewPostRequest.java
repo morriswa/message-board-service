@@ -8,8 +8,6 @@ import java.util.Map;
 
 @Data @AllArgsConstructor @NoArgsConstructor
 public class NewPostRequest {
-    private String authZeroId;
-    private Long communityId;
     private String caption;
     private String description;
     private PostContentType contentType;

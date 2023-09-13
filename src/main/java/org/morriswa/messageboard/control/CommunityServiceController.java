@@ -28,8 +28,7 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> createCommunity(JwtAuthenticationToken jwt,
                                              @RequestBody CreateNewCommunityRequest request) throws BadRequestException {
-        request.setAuthZeroId(jwt.getName());
-        this.community.createNewCommunity(request);
+        this.community.createNewCommunity(jwt, request);
 
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.community.messages.post")
@@ -49,7 +48,7 @@ public class CommunityServiceController {
     public ResponseEntity<?> updateCommunityBanner(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId,
                                              @RequestBody UploadImageRequest request) throws BadRequestException, IOException {
-        this.community.updateCommunityBanner(request,communityId,jwt.getName());
+        this.community.updateCommunityBanner(jwt, request, communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.update-community-banner.messages.post")
@@ -60,7 +59,7 @@ public class CommunityServiceController {
     public ResponseEntity<?> updateCommunityIcon(JwtAuthenticationToken jwt,
                                                  @PathVariable Long communityId,
                                                  @RequestBody UploadImageRequest request) throws BadRequestException, IOException {
-        this.community.updateCommunityIcon(request,communityId, jwt.getName());
+        this.community.updateCommunityIcon(jwt, request, communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.update-community-icon.messages.post")
@@ -70,7 +69,7 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.community-membership.path}")
     public ResponseEntity<?> joinCommunity(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId) throws BadRequestException {
-        this.community.joinCommunity(jwt.getName(),communityId);
+        this.community.joinCommunity(jwt, communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.community-membership.messages.post")
@@ -80,7 +79,7 @@ public class CommunityServiceController {
     @DeleteMapping("${community.service.endpoints.community-membership.path}")
     public ResponseEntity<?> leaveCommunity(JwtAuthenticationToken jwt,
                                                  @PathVariable Long communityId) throws BadRequestException {
-        this.community.leaveCommunity(jwt.getName(),communityId);
+        this.community.leaveCommunity(jwt, communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.community-membership.messages.delete")
@@ -89,7 +88,7 @@ public class CommunityServiceController {
 
     @GetMapping("${community.service.endpoints.get-users-communities.path}")
     public ResponseEntity<?> getUsersCommunities(JwtAuthenticationToken jwtAuthenticationToken) throws BadRequestException {
-        var communities = this.community.getAllUsersCommunities(jwtAuthenticationToken.getName());
+        var communities = this.community.getAllUsersCommunities(jwtAuthenticationToken);
 
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.get-users-communities.messages.get"),
