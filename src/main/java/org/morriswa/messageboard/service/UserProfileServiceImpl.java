@@ -1,11 +1,8 @@
 package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.entity.User;
-import org.morriswa.messageboard.model.UpdateProfileImageRequest;
-import org.morriswa.messageboard.model.UserProfileResponse;
-import org.morriswa.messageboard.model.UserRole;
 import org.morriswa.messageboard.repo.UserProfileRepo;
 import org.morriswa.messageboard.service.util.ProfileImageService;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
@@ -65,7 +62,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public User createNewUser(JwtAuthenticationToken token, String email, String displayName) throws BadRequestException {
+    public User createNewUser(JwtAuthenticationToken token, String email, String displayName) throws BadRequestException, ValidationException {
 
         validator.validateDisplayNameOrThrow(displayName);
 
@@ -103,7 +100,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws BadRequestException {
+    public void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws BadRequestException, ValidationException {
         // ensure display name follows basic rules
         this.validator.validateDisplayNameOrThrow(requestedDisplayName);
 

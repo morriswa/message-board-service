@@ -41,6 +41,7 @@ common:
           get: "Oh no! That page was not found :("
     errors:
       bad-datasource-config: "DATASOURCE COULD NOT BE CONFIGURED, PLEASE CHECK CONFIG <3"
+      validation-exception-thrown: A validation exception has occurred!
       security:
         not-allowed: YOU SHALL NOT PASS!
         not-allowed-desc: The requested service requires authorization, which you didn't bother to provide

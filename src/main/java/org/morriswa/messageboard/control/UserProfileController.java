@@ -3,6 +3,7 @@ package org.morriswa.messageboard.control;
 import org.morriswa.messageboard.model.BadRequestException;
 import org.morriswa.messageboard.model.DefaultResponse;
 import org.morriswa.messageboard.model.UpdateProfileImageRequest;
+import org.morriswa.messageboard.model.ValidationException;
 import org.morriswa.messageboard.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -36,7 +37,7 @@ public class UserProfileController {
     @PostMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
                                            @RequestParam String email,
-                                           @RequestParam String displayName) throws BadRequestException {
+                                           @RequestParam String displayName) throws BadRequestException, ValidationException {
         var newUser = userProfileService.createNewUser(jwt, email, displayName);
         return ResponseEntity.ok(new DefaultResponse<>(String.format(
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.post"),
@@ -61,7 +62,7 @@ public class UserProfileController {
 
     @PatchMapping("${user-profile.service.endpoints.user-profile-displayname.path}")
     public ResponseEntity<?> updateUserDisplayName(JwtAuthenticationToken jwt,
-                                                    @RequestParam String displayName) throws BadRequestException {
+                                                    @RequestParam String displayName) throws BadRequestException, ValidationException {
         userProfileService.updateUserProfileDisplayName(jwt, displayName);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getProperty("user-profile.service.endpoints.user-profile-displayname.messages.patch")));

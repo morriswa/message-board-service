@@ -3,6 +3,7 @@ package org.morriswa.messageboard.control.advice;
 import jakarta.validation.ConstraintViolationException;
 import org.morriswa.messageboard.model.BadRequestException;
 import org.morriswa.messageboard.model.DefaultErrorResponse;
+import org.morriswa.messageboard.model.ValidationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +31,23 @@ public class CustomControllerAdvice {
     public ResponseEntity<?> badRequest(Exception e, WebRequest r) {
         var response = DefaultErrorResponse.builder()
                 .error(e.getClass().getName())
+                .message(e.getMessage())
+                .timestamp(new GregorianCalendar())
+                .build();
+        // and assume user fault [400]
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler({ // catch...
+            ValidationException.class // Custom Validator exceptions
+    }) // in this controller...
+    public ResponseEntity<?> handleValidationExceptions(Exception e, WebRequest r) {
+
+        ValidationException v = (ValidationException) e;
+
+        var response = DefaultErrorResponse.builder()
+                .error(e.getClass().getName())
+                .stack(v.getValidationErrors())
                 .message(e.getMessage())
                 .timestamp(new GregorianCalendar())
                 .build();
