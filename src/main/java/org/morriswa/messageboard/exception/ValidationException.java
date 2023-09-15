@@ -17,13 +17,12 @@ public class ValidationException extends Exception {
     /**
      * Creates a Validation Exception when only one error needs to be returned
      *
-     * @param validationExceptionMessage to be returned
      * @param problemField name of the request field that failed validation
      * @param problemValue value passed in request
      * @param errorMessage error message to be provided
      */
-    public ValidationException(String validationExceptionMessage, String problemField, String problemValue, String errorMessage) {
-        super(validationExceptionMessage);
+    public ValidationException(String problemField, String problemValue, String errorMessage) {
+        super();
         this.validationErrors = Collections.singletonList(new ValidationError(
                 problemField, problemValue, errorMessage
         ));
@@ -32,11 +31,10 @@ public class ValidationException extends Exception {
     /**
      * Creates a Validation Exception when multiple errors need to be returned
      *
-     * @param validationExceptionMessage to be returned
      * @param validationErrors to be included in response
      */
-    public ValidationException(String validationExceptionMessage, List<ValidationError> validationErrors) {
-        super(validationExceptionMessage);
+    public ValidationException(List<ValidationError> validationErrors) {
+        super();
         this.validationErrors = validationErrors;
     }
 

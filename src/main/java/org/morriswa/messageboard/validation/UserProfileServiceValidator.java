@@ -15,7 +15,6 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
     private final String DISPLAY_NAME_REGEXP;
     private final int MIN_LENGTH;
     private final int MAX_LENGTH;
-    private final String VALIDATION_ERROR_MESSAGE;
 
     @Autowired
     public UserProfileServiceValidator(Environment e) {
@@ -26,12 +25,9 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
                 "user-profile.service.rules.display-name.min-length"));
         MAX_LENGTH = Integer.parseInt(e.getRequiredProperty(
                 "user-profile.service.rules.display-name.max-length"));
-        VALIDATION_ERROR_MESSAGE = e.getRequiredProperty("common.service.errors.validation-exception-thrown");
     }
 
-    public String getVALIDATION_ERROR_MESSAGE() {
-        return VALIDATION_ERROR_MESSAGE;
-    }
+
 
     public void validateDisplayNameOrThrow(String displayName) throws ValidationException {
 
@@ -49,7 +45,7 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
                     displayName,
                     e.getRequiredProperty("user-profile.service.errors.bad-display-name")));
 
-        if (!errors.isEmpty()) throw new ValidationException(VALIDATION_ERROR_MESSAGE, errors);
+        if (!errors.isEmpty()) throw new ValidationException(errors);
     }
 
 }

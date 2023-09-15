@@ -46,7 +46,6 @@ public class UserProfileServiceImpl implements UserProfileService {
     private void displayNameIsAvailableOrThrow(String displayName) throws ValidationException {
         if (userProfileRepo.existsByDisplayName(displayName))
             throw new ValidationException(
-                validator.getVALIDATION_ERROR_MESSAGE(),
                 "displayName",
                 displayName,
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));

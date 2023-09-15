@@ -4,6 +4,9 @@ import jakarta.validation.ConstraintViolationException;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.DefaultErrorResponse;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +16,13 @@ import java.util.GregorianCalendar;
 
 @ControllerAdvice
 public class CustomControllerAdvice {
+    private final Environment env;
+
+    @Autowired
+    public CustomControllerAdvice(final Environment env) {
+        this.env = env;
+    }
+
     @ExceptionHandler(Exception.class) // Catch any and all unhandled exceptions thrown in this controller
     public ResponseEntity<?> internalServerError(Exception e, WebRequest r) {
         var response = DefaultErrorResponse.builder()
@@ -48,7 +58,7 @@ public class CustomControllerAdvice {
         var response = DefaultErrorResponse.builder()
                 .error(e.getClass().getName())
                 .stack(v.getValidationErrors())
-                .message(e.getMessage())
+                .message(env.getRequiredProperty("common.service.errors.validation-exception-thrown"))
                 .timestamp(new GregorianCalendar())
                 .build();
         // and assume user fault [400]
