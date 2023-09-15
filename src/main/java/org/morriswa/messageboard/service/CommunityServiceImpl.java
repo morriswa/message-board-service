@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 import org.morriswa.messageboard.model.CommunityStanding;

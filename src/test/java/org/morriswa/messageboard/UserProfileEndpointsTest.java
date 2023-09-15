@@ -120,7 +120,7 @@ public class UserProfileEndpointsTest extends MessageboardTest {
                         .param("displayName","displayName"))
 
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.is(
+                .andExpect(jsonPath("$.stack[0].message", Matchers.is(
                         e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")
                 )))
 

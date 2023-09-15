@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.entity.Comment;
 import org.morriswa.messageboard.entity.Post;

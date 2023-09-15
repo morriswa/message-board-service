@@ -1,13 +1,11 @@
 package org.morriswa.messageboard.control;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
-import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.DefaultResponse;
 import org.morriswa.messageboard.model.NewPostRequest;
 import org.morriswa.messageboard.service.ContentService;
-import org.morriswa.messageboard.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;

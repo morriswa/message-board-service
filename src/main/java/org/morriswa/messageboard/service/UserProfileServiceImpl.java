@@ -1,6 +1,8 @@
 package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.entity.User;
 import org.morriswa.messageboard.repo.UserProfileRepo;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.UUID;
 
 @Service @Slf4j
@@ -40,6 +43,15 @@ public class UserProfileServiceImpl implements UserProfileService {
         return new UserProfileResponse(user,userProfileImage);
     }
 
+    private void displayNameIsAvailableOrThrow(String displayName) throws ValidationException {
+        if (userProfileRepo.existsByDisplayName(displayName))
+            throw new ValidationException(
+                validator.getVALIDATION_ERROR_MESSAGE(),
+                "displayName",
+                displayName,
+                e.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
+    }
+
     @Override
     public UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException {
         var user = authenticateAndGetUserEntity(token);
@@ -62,13 +74,11 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public User createNewUser(JwtAuthenticationToken token, String email, String displayName) throws BadRequestException, ValidationException {
+    public String createNewUser(JwtAuthenticationToken token, String email, String displayName) throws ValidationException {
 
         validator.validateDisplayNameOrThrow(displayName);
 
-        if (userProfileRepo.existsByDisplayName(displayName))
-            throw new BadRequestException(
-                e.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
+        displayNameIsAvailableOrThrow(displayName);
 
         var newUser = User.builder();
         newUser.authZeroId(token.getName());
@@ -81,15 +91,15 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         userProfileRepo.save(user);
 
-        return user;
+        return user.getDisplayName();
     }
 
     @Override
-    public void updateUserProfileImage(JwtAuthenticationToken token, UpdateProfileImageRequest request) throws BadRequestException, IOException {
+    public void updateUserProfileImage(JwtAuthenticationToken token, UploadImageRequest request) throws BadRequestException, IOException {
 
         var user = authenticateAndGetUserEntity(token);
 
-        profileImageService.uploadImageToS3(user.getUserId(),request);
+        profileImageService.uploadImageToS3(user.getUserId(), request);
     }
 
     @Override
@@ -106,17 +116,16 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         var user = authenticateAndGetUserEntity(token);
 
+        displayNameIsAvailableOrThrow(requestedDisplayName);
+
         // update display name
         user.setDisplayName(requestedDisplayName);
+
         // and validate the user is valid
         this.validator.validateBeanOrThrow(user);
 
-        try { // attempt to save changes
-            this.userProfileRepo.save(user);
-        } catch (Exception ex) { // assume any error was caused by data integrity violation and stop request
-            throw new BadRequestException(e.getProperty("user-profile.service.errors.display-name-already-exists"));
-        }
+        // save changes
+        this.userProfileRepo.save(user);
     }
-
 
 }

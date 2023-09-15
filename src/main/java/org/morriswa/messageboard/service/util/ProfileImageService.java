@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.service.util;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.model.UpdateProfileImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 
 import java.io.IOException;
 import java.net.URL;
@@ -14,7 +14,7 @@ public interface ProfileImageService {
      * @param request a valid ImageServiceRequest
      * @return the created resource
      */
-    void uploadImageToS3(UUID userId, @Valid UpdateProfileImageRequest request) throws IOException;
+    void uploadImageToS3(UUID userId, @Valid UploadImageRequest request) throws IOException;
 
     /**
      * Generates a URL of the Image signed for 30 minutes

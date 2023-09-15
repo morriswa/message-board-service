@@ -1,9 +1,9 @@
 package org.morriswa.messageboard.control;
 
-import org.morriswa.messageboard.model.BadRequestException;
+import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.DefaultResponse;
-import org.morriswa.messageboard.model.UpdateProfileImageRequest;
-import org.morriswa.messageboard.model.ValidationException;
+import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -38,10 +38,10 @@ public class UserProfileController {
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
                                            @RequestParam String email,
                                            @RequestParam String displayName) throws BadRequestException, ValidationException {
-        var newUser = userProfileService.createNewUser(jwt, email, displayName);
+        var newUserDisplayName = userProfileService.createNewUser(jwt, email, displayName);
         return ResponseEntity.ok(new DefaultResponse<>(String.format(
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.post"),
-            newUser.getDisplayName())));
+            newUserDisplayName)));
     }
 
     @GetMapping("${user-profile.service.endpoints.user-profile-image.path}")
@@ -54,7 +54,7 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user-profile-image.path}")
     public ResponseEntity<?> updateUserProfileImage(JwtAuthenticationToken jwt,
-                                                    @RequestBody UpdateProfileImageRequest request) throws BadRequestException, IOException {
+                                                    @RequestBody UploadImageRequest request) throws BadRequestException, IOException {
         userProfileService.updateUserProfileImage(jwt, request);
         return ResponseEntity.ok(new DefaultResponse<>(
             e.getProperty("user-profile.service.endpoints.user-profile-image.messages.post")));

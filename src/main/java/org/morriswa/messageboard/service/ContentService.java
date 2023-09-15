@@ -3,7 +3,7 @@ package org.morriswa.messageboard.service;
 import java.io.IOException;
 import java.util.List;
 
-import org.morriswa.messageboard.entity.Community;
+import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 

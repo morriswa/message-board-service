@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.UpdateProfileImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -49,7 +49,7 @@ public class ProfileImageServiceImpl implements ProfileImageService {
     }
 
     @Override
-    public void uploadImageToS3(UUID userId, UpdateProfileImageRequest request) throws IOException {
+    public void uploadImageToS3(UUID userId, UploadImageRequest request) throws IOException {
         validator.validateBeanOrThrow(request);
 
         final String FILESTORE_PATH = e.getRequiredProperty("server.filecache");
