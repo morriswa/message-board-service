@@ -50,12 +50,11 @@ public interface UserProfileService {
      * Creates a new Messageboard User
      *
      * @param token to authenticate and register with
-     * @param email to register with
      * @param displayName user's requested display name
      * @return the display name that the user was registered with
      * @throws ValidationException if the displayName is poorly formatted or already taken
      */
-    String createNewUser(JwtAuthenticationToken token, String email, String displayName) throws BadRequestException, ValidationException;
+    String createNewUser(JwtAuthenticationToken token, String displayName) throws BadRequestException, ValidationException;
 
     /**
      * Updates a User's profile image

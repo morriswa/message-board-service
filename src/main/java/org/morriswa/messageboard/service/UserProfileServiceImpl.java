@@ -73,7 +73,17 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public String createNewUser(JwtAuthenticationToken token, String email, String displayName) throws ValidationException {
+    public String createNewUser(JwtAuthenticationToken token, String displayName) throws ValidationException {
+
+
+        String email; // get email logic for new user
+        if (System.getenv("APPCONFIG_ENV_ID").equals("local")
+            && // in local environment, this value may be filled by local property
+            !token.getTokenAttributes().containsKey("email")) {
+            email = e.getProperty("testemail");
+        } else
+            // in most cases this value should come from users token
+            email = String.valueOf(token.getTokenAttributes().get("email"));
 
         validator.validateDisplayNameOrThrow(displayName);
 

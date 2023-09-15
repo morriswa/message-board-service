@@ -28,6 +28,8 @@ aws:
   s3:
     bucket: circlesdevocean
 
+testemail: test@email.com
+
 common:
   service:
     endpoints:
