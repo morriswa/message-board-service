@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.UUID;
 
 @Service @Slf4j
@@ -75,7 +74,6 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public String createNewUser(JwtAuthenticationToken token, String displayName) throws ValidationException {
 
-
         String email; // get email logic for new user
         if (System.getenv("APPCONFIG_ENV_ID").equals("local")
             && // in local environment, this value may be filled by local property
@@ -108,11 +106,12 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         var user = authenticateAndGetUserEntity(token);
 
-        profileImageService.uploadImageToS3(user.getUserId(), request);
+        profileImageService.updateUserProfileImage(user.getUserId(), request);
     }
 
     @Override
     public URL getUserProfileImage(JwtAuthenticationToken token) throws BadRequestException {
+
         var user = authenticateAndGetUserEntity(token);
 
         return profileImageService.getSignedUserProfileImage(user.getUserId());

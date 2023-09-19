@@ -9,12 +9,11 @@ import java.util.UUID;
 
 public interface ProfileImageService {
     /**
-     * Uploads an Image to S3 and returns saved data
+     * Uploads an Image
      *
      * @param request a valid ImageServiceRequest
-     * @return the created resource
      */
-    void uploadImageToS3(UUID userId, @Valid UploadImageRequest request) throws IOException;
+    void updateUserProfileImage(UUID userId, @Valid UploadImageRequest request) throws IOException;
 
     /**
      * Generates a URL of the Image signed for 30 minutes
