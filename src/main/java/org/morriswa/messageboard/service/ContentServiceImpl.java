@@ -14,7 +14,7 @@ import org.morriswa.messageboard.entity.Resource;
 import org.morriswa.messageboard.repo.CommentRepo;
 import org.morriswa.messageboard.repo.PostRepo;
 import org.morriswa.messageboard.repo.ResourceRepo;
-import org.morriswa.messageboard.service.util.ImageResourceService;
+import org.morriswa.messageboard.stores.ImageStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -27,7 +27,7 @@ public class ContentServiceImpl implements ContentService {
     private final ContentServiceValidator validator;
     private final CommunityService communityService;
     private final UserProfileService userProfileService;
-    private final ImageResourceService imageResourceService;
+    private final ImageStore imageStore;
     private final PostRepo postRepo;
     private final ResourceRepo resourceRepo;
     private final CommentRepo commentRepo;
@@ -37,14 +37,14 @@ public class ContentServiceImpl implements ContentService {
                               ContentServiceValidator validator,
                               CommunityService communityService,
                               UserProfileService userProfileService,
-                              ImageResourceService imageResourceService,
+                              ImageStore imageStore,
                               PostRepo postRepo,
                               ResourceRepo resourceRepo, CommentRepo commentRepo) {
         this.e = e;
         this.validator = validator;
         this.communityService = communityService;
         this.userProfileService = userProfileService;
-        this.imageResourceService = imageResourceService;
+        this.imageStore = imageStore;
         this.postRepo = postRepo;
         this.resourceRepo = resourceRepo;
         this.commentRepo = commentRepo;
@@ -64,7 +64,7 @@ public class ContentServiceImpl implements ContentService {
 
         switch (request.getContentType()) {
             case PHOTO ->
-                imageResourceService.uploadImage(
+                imageStore.uploadIndividualImage(
                         newResource.getResourceId(),
                         new UploadImageRequest(
                                 (String) request.getContent().get("baseEncodedImage"),
@@ -85,7 +85,7 @@ public class ContentServiceImpl implements ContentService {
 
                     generatedSource.add(newResourceUUID);
 
-                    imageResourceService.uploadImage(newResourceUUID,
+                    imageStore.uploadIndividualImage(newResourceUUID,
                             new UploadImageRequest(
                                     (String) request.getContent().get("baseEncodedImage" + i),
                                     (String) request.getContent().get("imageFormat" + i)
@@ -181,7 +181,7 @@ public class ContentServiceImpl implements ContentService {
 
             var resourceUrls = new ArrayList<URL>(){{
                 for (UUID resource : resourceEntity.getList())
-                    add(imageResourceService.retrievedImageResource(resource));
+                    add(imageStore.retrieveImageResource(resource));
             }};
 
             response.add(new PhotosPostResponse(post, user, resourceUrls));

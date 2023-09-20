@@ -31,6 +31,13 @@ aws:
 testemail: test@email.com
 
 common:
+  stores:
+    profile-images: "user-content/profiles/"
+    community-icons: "user-content/communities/icons/"
+    community-banners: "user-content/communities/banners/"
+    post-resources: "user-content/post/resources/"
+  static-content:
+    default-profile-image: "static-content/DEFAULT_USER_PROFILE_0"
   service:
     endpoints:
       health:
@@ -77,9 +84,6 @@ user-profile:
       display-name-already-exists: Could not update your display name because another user is already registered with that display name!
       bad-display-name: "Alphanumeric chars, underscores, hyphens and periods only please."
       bad-display-name-length: "Display Name should be at least 3 and not more than 30 chars."
-    stores:
-      profile-images: "user-content/profiles/"
-      default-profile-image: "static-content/DEFAULT_USER_PROFILE_0"
     rules:
       display-name:
         regexp: "^[A-Za-z0-9._-]*$"
@@ -118,9 +122,6 @@ community:
       not-community-owner: You cannot perform this action because this community does not exist or because you are not the community owner.
       no-relation-found: You do not appear to be a part of this community!
       user-cannot-post: You are not authorized to post to this community!
-    stores:
-      icons: "user-content/communities/icons/"
-      banners: "user-content/communities/banners/"
 
 content:
   service:
@@ -136,5 +137,3 @@ content:
     errors:
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
       too-many-images: Please do not upload more than 10 images for a single post!
-    stores:
-      resources: "user-content/post/resources/"

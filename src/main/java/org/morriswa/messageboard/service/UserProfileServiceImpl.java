@@ -6,7 +6,7 @@ import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.entity.User;
 import org.morriswa.messageboard.repo.UserProfileRepo;
-import org.morriswa.messageboard.service.util.ProfileImageService;
+import org.morriswa.messageboard.stores.ProfileImageStoreImpl;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Service @Slf4j
@@ -23,21 +24,21 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final Environment e;
     private final UserProfileRepo userProfileRepo;
     private final UserProfileServiceValidator validator;
-    private final ProfileImageService profileImageService;
+    private final ProfileImageStoreImpl profileImageStoreImpl;
 
     @Autowired
     public UserProfileServiceImpl(
             Environment e, UserProfileRepo userProfileRepo,
             UserProfileServiceValidator validator,
-            ProfileImageService profileImageService) {
+            ProfileImageStoreImpl profileImageStoreImpl) {
         this.e = e;
         this.userProfileRepo = userProfileRepo;
         this.validator = validator;
-        this.profileImageService = profileImageService;
+        this.profileImageStoreImpl = profileImageStoreImpl;
     }
 
     private UserProfileResponse buildUserProfileResponse(User user) {
-        var userProfileImage = profileImageService.getSignedUserProfileImage(user.getUserId());
+        var userProfileImage = profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
 
         return new UserProfileResponse(user,userProfileImage);
     }
@@ -53,7 +54,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private String extractEmailFromJwt(JwtAuthenticationToken token) {
         String email; // get email logic for new user
         if (    // if the application is running a test
-                e.getActiveProfiles()[0].equals("test")
+                Arrays.asList(e.getActiveProfiles()).contains("test")
                 ||      // or the application is running in a local development environment
                 (       System.getenv("APPCONFIG_ENV_ID").equals("local")
                         && // and the user has not included an email in their JWT
@@ -113,7 +114,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         var user = authenticateAndGetUserEntity(token);
 
-        profileImageService.updateUserProfileImage(user.getUserId(), request);
+        profileImageStoreImpl.updateUserProfileImage(user.getUserId(), request);
     }
 
     @Override
@@ -121,7 +122,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         var user = authenticateAndGetUserEntity(token);
 
-        return profileImageService.getSignedUserProfileImage(user.getUserId());
+        return profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
     }
 
     @Override

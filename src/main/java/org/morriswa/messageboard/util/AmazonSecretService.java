@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.service.util;
+package org.morriswa.messageboard.util;
 
 public interface AmazonSecretService {
     /**

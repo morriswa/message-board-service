@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.service.util;
+package org.morriswa.messageboard.stores;
 
 import jakarta.validation.Valid;
 import org.morriswa.messageboard.model.UploadImageRequest;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 
-public interface ProfileImageService {
+public interface ProfileImageStore {
     /**
      * Uploads an Image
      *

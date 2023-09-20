@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.service.util;
+package org.morriswa.messageboard.stores.util;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.regions.Regions;
@@ -8,28 +8,26 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileSystemException;
+import java.time.Instant;
 import java.util.Date;
 
-@Slf4j
-public class GenericS3Store {
+@Service @Slf4j
+public class CustomS3ServiceImpl implements CustomS3Service {
+    private final Environment e;
     private final AmazonS3 s3;
     private final String ACTIVE_BUCKET;
 
-
-    protected final Environment e;
-    protected final String INTERNAL_FILE_CACHE_PATH;
-    protected final ImageScaleService imageScaleService;
-
-    GenericS3Store(Environment e, ImageScaleService imageScaleService) {
+    @Autowired
+    CustomS3ServiceImpl(Environment e) {
         this.e = e;
-        this.INTERNAL_FILE_CACHE_PATH = e.getRequiredProperty("server.filecache");
-        this.imageScaleService = imageScaleService;
         this.s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
         this.ACTIVE_BUCKET = e.getRequiredProperty("aws.s3.bucket");
     }
@@ -57,12 +55,18 @@ public class GenericS3Store {
         return objectExists;
     }
 
-    public URL getSignedObjectUrl(String pathToObject, Date expirationTime) {
+    public URL getSignedObjectUrl(String pathToObject, int expirationMinutes) {
+
+        Date expiration = new Date();
+        long expTimeMillis = Instant.now().toEpochMilli();
+        expTimeMillis += 1000 * 60 * expirationMinutes;
+        expiration.setTime(expTimeMillis);
+
         return s3.generatePresignedUrl(
                 new GeneratePresignedUrlRequest(
                         ACTIVE_BUCKET,
                         pathToObject)
                         .withMethod(HttpMethod.GET)
-                        .withExpiration(expirationTime));
+                        .withExpiration(expiration));
     }
 }

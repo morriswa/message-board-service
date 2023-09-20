@@ -8,7 +8,7 @@ import org.morriswa.messageboard.model.CommunityStanding;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
 import org.morriswa.messageboard.repo.CommunityMemberRepo;
 import org.morriswa.messageboard.repo.CommunityRepo;
-import org.morriswa.messageboard.service.util.CommunityResourceService;
+import org.morriswa.messageboard.stores.CommunityResourceStore;
 import org.morriswa.messageboard.entity.Community;
 import org.morriswa.messageboard.entity.CommunityMember;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
@@ -30,14 +30,14 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityMemberRepo communityMemberRepo;
     private final UserProfileService userProfileService;
     private final CommunityServiceValidator validator;
-    private final CommunityResourceService resourceService;
+    private final CommunityResourceStore resourceService;
 
     @Autowired
     public CommunityServiceImpl(Environment e,
                                 CommunityRepo communityRepo,
                                 CommunityMemberRepo communityMemberRepo, UserProfileService userProfileService,
                                 CommunityServiceValidator validator,
-                                CommunityResourceService resourceService) {
+                                CommunityResourceStore resourceService) {
         this.e = e;
         this.communityRepo = communityRepo;
         this.communityMemberRepo = communityMemberRepo;

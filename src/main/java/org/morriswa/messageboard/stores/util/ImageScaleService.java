@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.service.util;
+package org.morriswa.messageboard.stores.util;
 
 import org.morriswa.messageboard.model.UploadImageRequest;
 

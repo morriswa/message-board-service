@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.config;
 
-import org.morriswa.messageboard.service.util.AmazonSecretService;
+import org.morriswa.messageboard.util.AmazonSecretService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
