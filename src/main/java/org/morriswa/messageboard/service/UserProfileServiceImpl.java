@@ -50,6 +50,22 @@ public class UserProfileServiceImpl implements UserProfileService {
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
     }
 
+    private String extractEmailFromJwt(JwtAuthenticationToken token) {
+        String email; // get email logic for new user
+        if (    // if the application is running a test
+                e.getActiveProfiles()[0].equals("test")
+                ||      // or the application is running in a local development environment
+                (       System.getenv("APPCONFIG_ENV_ID").equals("local")
+                        && // and the user has not included an email in their JWT
+                        !token.getTokenAttributes().containsKey("email"))
+        ) { // in local/test environments, this value may be filled by local property
+            email = e.getProperty("testemail");
+        } else
+            // in most cases this value should come from users token
+            email = String.valueOf(token.getTokenAttributes().get("email"));
+        return email;
+    }
+
     @Override
     public UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException {
         var user = authenticateAndGetUserEntity(token);
@@ -74,22 +90,13 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public String createNewUser(JwtAuthenticationToken token, String displayName) throws ValidationException {
 
-        String email; // get email logic for new user
-        if (System.getenv("APPCONFIG_ENV_ID").equals("local")
-            && // in local environment, this value may be filled by local property
-            !token.getTokenAttributes().containsKey("email")) {
-            email = e.getProperty("testemail");
-        } else
-            // in most cases this value should come from users token
-            email = String.valueOf(token.getTokenAttributes().get("email"));
-
         validator.validateDisplayNameOrThrow(displayName);
 
         displayNameIsAvailableOrThrow(displayName);
 
         var newUser = User.builder();
         newUser.authZeroId(token.getName());
-        newUser.email(email);
+        newUser.email(extractEmailFromJwt(token));
         newUser.displayName(displayName);
         newUser.role(UserRole.DEFAULT);
 

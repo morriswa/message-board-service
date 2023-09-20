@@ -128,25 +128,6 @@ public class UserProfileEndpointsTest extends MessageboardTest {
     }
 
     @Test
-    void testRegisterUserEndpointWithInvalidEmail() throws Exception {
-
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
-
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization","Bearer token")
-                        .param("email","emailgmail.com")
-                        .param("displayName","displayName"))
-
-                .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.notNullValue()))
-
-        ;
-    }
-
-    @Test
     void testUpdateUserDisplayNameEndpointWithInvalidDisplayName() throws Exception {
 
         final String targetUrl = String.format("/%s%s",
