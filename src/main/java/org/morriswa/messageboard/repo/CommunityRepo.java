@@ -15,4 +15,6 @@ public interface CommunityRepo extends JpaRepository<Community, Long> {
     Optional<Community> findCommunityByCommunityIdAndCommunityOwnerUserId(Long communityId, UUID communityOwnerUserId);
 
     Optional<Community> findCommunityByCommunityId(Long communityId);
+
+    boolean existsByCommunityLocator(String communityLocator);
 }

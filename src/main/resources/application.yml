@@ -99,6 +99,7 @@ community:
         messages:
           post: "Your community has successfully been registered!"
           get: "Successfully retrieved requested information!"
+          patch: "Successfully updated requested information!"
       community-membership:
         path: community/{communityId}/membership
         messages:
@@ -116,12 +117,25 @@ community:
         path: communities
         messages:
           get: "Successfully retrieved all of users' communities"
+    rules:
+      display-name:
+        min-length: 0
+        max-length: 100
+      community-ref:
+        regexp: "^[a-z][a-z0-9-]*[a-z0-9]$"
+        min-length: 4
+        max-length: 30
     errors:
       missing-community: "We could not locate a community named %s :("
       missing-community-by-id: "We could not locate a community #%s :("
-      not-community-owner: You cannot perform this action because this community does not exist or because you are not the community owner.
       no-relation-found: You do not appear to be a part of this community!
       user-cannot-post: You are not authorized to post to this community!
+      user-cannot-edit: "User %s was denied edit access to community #%s"
+      bad-community-ref-length: "Bad L"
+      bad-community-ref: Please only include lowercase letters, numbers, and hyphens! 
+        Additionally, your ref should not start or end with a hyphen, or start with a number. Thanks!
+      bad-community-display-name-length: "Bad Display  Name L"
+      ref-already-taken: "bad kitty that name is already taken"
 
 content:
   service:

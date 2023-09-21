@@ -2,6 +2,7 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 import org.morriswa.messageboard.model.CommunityStanding;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service @Slf4j
@@ -62,8 +64,7 @@ public class CommunityServiceImpl implements CommunityService {
     public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
         var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
-        communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId)
-                .orElseThrow(()->new BadRequestException(e.getRequiredProperty("community.service.errors.not-community-owner")));
+        verifyUserCanEditCommunityOrThrow(userId, communityId);
 
         resourceService.setCommunityIcon(uploadImageRequest, communityId);
     }
@@ -72,8 +73,7 @@ public class CommunityServiceImpl implements CommunityService {
     public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
         var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
-        communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId)
-                .orElseThrow(()->new BadRequestException(e.getRequiredProperty("community.service.errors.not-community-owner")));
+        verifyUserCanEditCommunityOrThrow(userId, communityId);
 
         resourceService.setCommunityBanner(uploadImageRequest, communityId);
     }
@@ -142,7 +142,6 @@ public class CommunityServiceImpl implements CommunityService {
 
     private boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException {
 
-
         var checkCommunityOwner = communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId);
 
         if (checkCommunityOwner.isPresent()) return true;
@@ -180,4 +179,56 @@ public class CommunityServiceImpl implements CommunityService {
 
         return response;
     }
+
+    @Override
+    public Community verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
+        var community = communityRepo.findCommunityByCommunityId(communityId)
+                .orElseThrow(()->new BadRequestException(String.format(
+                        e.getRequiredProperty("community.service.errors.missing-community-by-id"),
+                        communityId
+                )));
+
+        if (!userId.equals(community.getCommunityOwnerUserId()))
+            throw new BadRequestException(String.format(
+                    e.getRequiredProperty("community.service.errors.user-cannot-edit"),
+                    userId,
+                    communityId
+            ));
+
+        return community;
+    }
+
+    @Override
+    public void updateCommunityAttributes(JwtAuthenticationToken token,
+                                          Long communityId,
+                                          Optional<String> communityRef,
+                                          Optional<String> communityDisplayName) throws BadRequestException, ValidationException {
+
+        var user = userProfileService.authenticateAndGetUserEntity(token);
+
+        var community = verifyUserCanEditCommunityOrThrow(user.getUserId(), communityId);
+
+        if (communityRef.isPresent()) {
+            var ref = communityRef.get();
+            communityRefIsAvailableOrThrow(ref);
+            validator.validateCommunityRefOrThrow(ref);
+            community.setCommunityLocator(ref);
+        }
+
+        if (communityDisplayName.isPresent()) {
+            var ref = communityDisplayName.get();
+            validator.validateCommunityDisplayNameOrThrow(ref);
+            community.setCommunityDisplayName(ref);
+        }
+
+        communityRepo.save(community);
+    }
+
+    private void communityRefIsAvailableOrThrow(String communityRef) throws BadRequestException {
+        if (communityRepo.existsByCommunityLocator(communityRef))
+            throw new BadRequestException(
+                    e.getRequiredProperty("community.service.errors.ref-already-taken")
+            );
+    }
+
 }

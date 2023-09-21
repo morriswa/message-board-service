@@ -1,6 +1,8 @@
 package org.morriswa.messageboard.service;
 
+import org.morriswa.messageboard.entity.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
@@ -8,6 +10,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CommunityService {
@@ -26,7 +29,11 @@ public interface CommunityService {
 
     void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException;
 
+    Community verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException;
+
     void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException;
 
     List<AllCommunityInfoResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException;
+
+    void updateCommunityAttributes(JwtAuthenticationToken token, Long communityId, Optional<String> communityRef, Optional<String> communityDisplayName) throws BadRequestException, ValidationException;
 }

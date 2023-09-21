@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.DefaultResponse;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
@@ -12,6 +13,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController @CrossOrigin
 @RequestMapping("${server.path}")
@@ -42,6 +44,18 @@ public class CommunityServiceController {
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.community.messages.get"),
                 response));
+    }
+
+    @PatchMapping("${community.service.endpoints.community.path}")
+    public ResponseEntity<?> updateCommunityInformation(JwtAuthenticationToken token,
+                                                        @RequestParam Long communityId,
+                                                        @RequestParam Optional<String> communityRef,
+                                                        @RequestParam Optional<String> communityDisplayName) throws BadRequestException, ValidationException {
+        community.updateCommunityAttributes(token, communityId, communityRef, communityDisplayName);
+
+        return ResponseEntity.ok(new DefaultResponse<>(
+                e.getRequiredProperty("community.service.endpoints.community.messages.patch")
+                ));
     }
 
     @PostMapping("${community.service.endpoints.update-community-banner.path}")

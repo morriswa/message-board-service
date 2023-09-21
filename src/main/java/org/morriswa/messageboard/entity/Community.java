@@ -6,12 +6,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.stereotype.Service;
 
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
 @Entity @Table(name = "community")
-@NoArgsConstructor @Getter
+@NoArgsConstructor @Getter @Setter
 public class Community {
     @Id
     @Column(name = "community_id")
