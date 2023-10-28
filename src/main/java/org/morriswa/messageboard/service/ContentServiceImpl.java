@@ -21,7 +21,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-@Service
+import lombok.extern.slf4j.Slf4j;
+
+@Service @Slf4j
 public class ContentServiceImpl implements ContentService {
     private final Environment e;
     private final ContentServiceValidator validator;

@@ -1,8 +1,6 @@
 package org.morriswa.messageboard.exception;
 
 import lombok.Getter;
-import org.springframework.core.env.Environment;
-
 import java.util.Collections;
 import java.util.List;
 
