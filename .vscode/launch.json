@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [ 
+        {
+            "type": "java",
+            "name": "MessageboardServiceRunner",
+            "request": "launch",
+            "mainClass": "org.morriswa.messageboard.MessageboardServiceRunner",
+            "projectName": "message-board-service",
+            "env": {
+                "APPCONFIG_APPLICATION_ID":"messageboard",
+                "APPCONFIG_PROFILE_ID":"config",
+                "APPCONFIG_ENV_ID":"local"
+            }
+        }
+    ]
+}
