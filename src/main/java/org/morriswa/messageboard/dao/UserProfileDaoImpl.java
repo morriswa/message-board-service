@@ -121,12 +121,12 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     public boolean existsByDisplayName(String displayName) {
-        final String query = "select exists(select 1 from user_profile where display_name=:displayName)";
+        final String query = "select 1 from user_profile where display_name=:displayName";
 
         Map<String, Object> params = new HashMap<>(){{
             put("displayName", displayName);
         }};
 
-        return !jdbc.query(query, params, ResultSet::next);
+        return jdbc.query(query, params, ResultSet::next);
     }
 }
