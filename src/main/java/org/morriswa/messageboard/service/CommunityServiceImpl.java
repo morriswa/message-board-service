@@ -209,19 +209,21 @@ public class CommunityServiceImpl implements CommunityService {
         var community = verifyUserCanEditCommunityOrThrow(user.getUserId(), communityId);
 
         if (communityRef.isPresent()) {
-            var ref = communityRef.get();
-            communityRefIsAvailableOrThrow(ref);
-            validator.validateCommunityRefOrThrow(ref);
-            community.setCommunityLocator(ref);
+            var requestedRef = communityRef.get();
+            // if the user requested the same name they already had, ignore
+            if (!requestedRef.equals(community.getCommunityLocator())) {
+                communityRefIsAvailableOrThrow(requestedRef);
+                validator.validateCommunityRefOrThrow(requestedRef);
+                communityDao.setCommunityLocator(communityId, requestedRef);
+            }
         }
 
         if (communityDisplayName.isPresent()) {
-            var ref = communityDisplayName.get();
-            validator.validateCommunityDisplayNameOrThrow(ref);
-            community.setCommunityDisplayName(ref);
+            var displayName = communityDisplayName.get();
+            validator.validateCommunityDisplayNameOrThrow(displayName);
+            communityDao.setCommunityDisplayName(communityId, displayName);
         }
 
-        communityDao.updateCommunityAttributes(community);
     }
 
     private void communityRefIsAvailableOrThrow(String communityRef) throws BadRequestException {

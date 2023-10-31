@@ -17,5 +17,7 @@ public interface CommunityDao {
 
     void createNewCommunity(Community newCommunity);
 
-    void updateCommunityAttributes(Community community);
+    void setCommunityLocator(Long communityId, String ref);
+
+    void setCommunityDisplayName(Long communityId, String displayName);
 }

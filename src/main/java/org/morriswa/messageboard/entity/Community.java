@@ -3,14 +3,15 @@ package org.morriswa.messageboard.entity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
 //@Entity @Table(name = "community")
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor @Data @AllArgsConstructor
+@Builder
+
 public class Community {
 //    @Id
 //    @Column(name = "community_id")
