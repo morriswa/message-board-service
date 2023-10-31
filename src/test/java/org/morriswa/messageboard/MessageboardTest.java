@@ -1,10 +1,7 @@
 package org.morriswa.messageboard;
 
-import org.apache.http.HttpHeaders;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 import org.morriswa.messageboard.config.TestSecurityConfig;
-import org.morriswa.messageboard.repo.*;
+import org.morriswa.messageboard.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,10 +9,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = {TestSecurityConfig.class})
 @ActiveProfiles("test")
@@ -26,16 +21,16 @@ public class MessageboardTest {
 
     @Autowired protected Environment e;
 
-    @MockBean protected CommentRepo commentRepo;
+    @MockBean protected CommentDao commentDao;
 
-    @MockBean protected CommunityMemberRepo communityMemberRepo;
+    @MockBean protected CommunityMemberDao communityMemberDao;
 
-    @MockBean protected CommunityRepo communityRepo;
+    @MockBean protected CommunityDao communityRepo;
 
-    @MockBean protected PostRepo postRepo;
+    @MockBean protected PostDao postDao;
 
-    @MockBean protected ResourceRepo resourceRepo;
+    @MockBean protected ResourceDao resourceDao;
 
-    @MockBean protected UserProfileRepo userProfileRepo;
+    @MockBean protected UserProfileDao userProfileDao;
 
 }

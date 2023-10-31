@@ -1,19 +1,20 @@
-package org.morriswa.messageboard.repo;
+package org.morriswa.messageboard.dao;
 
 import org.morriswa.messageboard.entity.CommunityMember;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
-public interface CommunityMemberRepo extends JpaRepository<CommunityMember, Long> {
+public interface CommunityMemberDao {
 
     Optional<CommunityMember> findCommunityMemberByUserIdAndCommunityId(UUID userId, Long communityId);
 
     int countCommunityMembersByCommunityId(Long communityId);
 
     List<CommunityMember> findAllByUserId(UUID userId);
+
+    void createNewRelationship(CommunityMember newRelationship);
+
+    void deleteRelationship(Long communityId);
 }

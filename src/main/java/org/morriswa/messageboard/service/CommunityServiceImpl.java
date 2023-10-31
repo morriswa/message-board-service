@@ -1,14 +1,14 @@
 package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.dao.CommunityDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 import org.morriswa.messageboard.model.CommunityStanding;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
-import org.morriswa.messageboard.repo.CommunityMemberRepo;
-import org.morriswa.messageboard.repo.CommunityRepo;
+import org.morriswa.messageboard.dao.CommunityMemberDao;
 import org.morriswa.messageboard.stores.CommunityResourceStore;
 import org.morriswa.messageboard.entity.Community;
 import org.morriswa.messageboard.entity.CommunityMember;
@@ -28,21 +28,21 @@ import java.util.UUID;
 public class CommunityServiceImpl implements CommunityService {
 
     private final Environment e;
-    private final CommunityRepo communityRepo;
-    private final CommunityMemberRepo communityMemberRepo;
+    private final CommunityDao communityDao;
+    private final CommunityMemberDao communityMemberRepo;
     private final UserProfileService userProfileService;
     private final CommunityServiceValidator validator;
     private final CommunityResourceStore resourceService;
 
     @Autowired
     public CommunityServiceImpl(Environment e,
-                                CommunityRepo communityRepo,
-                                CommunityMemberRepo communityMemberRepo, UserProfileService userProfileService,
+                                CommunityDao communityDao,
+                                CommunityMemberDao communityMemberDao, UserProfileService userProfileService,
                                 CommunityServiceValidator validator,
                                 CommunityResourceStore resourceService) {
         this.e = e;
-        this.communityRepo = communityRepo;
-        this.communityMemberRepo = communityMemberRepo;
+        this.communityDao = communityDao;
+        this.communityMemberRepo = communityMemberDao;
         this.userProfileService = userProfileService;
         this.validator = validator;
         this.resourceService = resourceService;
@@ -57,7 +57,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         this.validator.validateBeanOrThrow(newCommunity);
 
-        communityRepo.save(newCommunity);
+        communityDao.createNewCommunity(newCommunity);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public AllCommunityInfoResponse getAllCommunityInfo(String communityDisplayName) throws BadRequestException {
 
-        var community = communityRepo
+        var community = communityDao
                 .findCommunityByCommunityLocator(communityDisplayName)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
@@ -102,7 +102,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public AllCommunityInfoResponse getAllCommunityInfo(Long communityId) throws BadRequestException {
 
-        var community = communityRepo
+        var community = communityDao
                 .findCommunityByCommunityId(communityId)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
@@ -125,7 +125,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         validator.validateBeanOrThrow(newRelationship);
 
-        communityMemberRepo.save(newRelationship);
+        communityMemberRepo.createNewRelationship(newRelationship);
     }
 
     @Override
@@ -137,12 +137,12 @@ public class CommunityServiceImpl implements CommunityService {
         if (result.isEmpty())
             return;
 
-        communityMemberRepo.delete(result.get());
+        communityMemberRepo.deleteRelationship(result.get().getCommunityId());
     }
 
     private boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException {
 
-        var checkCommunityOwner = communityRepo.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId);
+        var checkCommunityOwner = communityDao.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId);
 
         if (checkCommunityOwner.isPresent()) return true;
 
@@ -182,7 +182,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public Community verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
-        var community = communityRepo.findCommunityByCommunityId(communityId)
+        var community = communityDao.findCommunityByCommunityId(communityId)
                 .orElseThrow(()->new BadRequestException(String.format(
                         e.getRequiredProperty("community.service.errors.missing-community-by-id"),
                         communityId
@@ -221,11 +221,11 @@ public class CommunityServiceImpl implements CommunityService {
             community.setCommunityDisplayName(ref);
         }
 
-        communityRepo.save(community);
+        communityDao.updateCommunityAttributes(community);
     }
 
     private void communityRefIsAvailableOrThrow(String communityRef) throws BadRequestException {
-        if (communityRepo.existsByCommunityLocator(communityRef))
+        if (communityDao.existsByCommunityLocator(communityRef))
             throw new BadRequestException(
                     e.getRequiredProperty("community.service.errors.ref-already-taken")
             );

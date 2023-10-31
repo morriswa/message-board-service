@@ -30,7 +30,7 @@ public class UserProfileEndpointsTest extends MessageboardTest {
                 "displayName",
                 "email@gmail.com");
 
-        when(userProfileRepo.findUserByAuthZeroId(any())).thenReturn(Optional.of(exampleUser));
+        when(userProfileDao.findUserByAuthZeroId(any())).thenReturn(Optional.of(exampleUser));
 
         this.mockMvc.perform(MockMvcRequestBuilders
                 .get(targetUrl)
@@ -49,7 +49,7 @@ public class UserProfileEndpointsTest extends MessageboardTest {
                 e.getRequiredProperty("server.path"),
                 e.getRequiredProperty("user-profile.service.endpoints.user.path"));
 
-        when(userProfileRepo.findUserByAuthZeroId(any())).thenReturn(Optional.empty());
+        when(userProfileDao.findUserByAuthZeroId(any())).thenReturn(Optional.empty());
 
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get(targetUrl)
@@ -111,7 +111,7 @@ public class UserProfileEndpointsTest extends MessageboardTest {
                 e.getRequiredProperty("server.path"),
                 e.getRequiredProperty("user-profile.service.endpoints.user.path"));
 
-        when(userProfileRepo.existsByDisplayName(any())).thenReturn(true);
+        when(userProfileDao.existsByDisplayName(any())).thenReturn(true);
 
         this.mockMvc.perform(MockMvcRequestBuilders
                         .post(targetUrl)

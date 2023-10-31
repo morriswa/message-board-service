@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.morriswa.messageboard.dao.CommentDao;
+import org.morriswa.messageboard.dao.PostDao;
+import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.entity.Comment;
 import org.morriswa.messageboard.entity.Post;
 import org.morriswa.messageboard.entity.Resource;
-import org.morriswa.messageboard.repo.CommentRepo;
-import org.morriswa.messageboard.repo.PostRepo;
-import org.morriswa.messageboard.repo.ResourceRepo;
 import org.morriswa.messageboard.stores.ImageStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +30,9 @@ public class ContentServiceImpl implements ContentService {
     private final CommunityService communityService;
     private final UserProfileService userProfileService;
     private final ImageStore imageStore;
-    private final PostRepo postRepo;
-    private final ResourceRepo resourceRepo;
-    private final CommentRepo commentRepo;
+    private final PostDao postRepo;
+    private final ResourceDao resourceRepo;
+    private final CommentDao commentRepo;
 
     @Autowired
     public ContentServiceImpl(Environment e,
@@ -40,8 +40,8 @@ public class ContentServiceImpl implements ContentService {
                               CommunityService communityService,
                               UserProfileService userProfileService,
                               ImageStore imageStore,
-                              PostRepo postRepo,
-                              ResourceRepo resourceRepo, CommentRepo commentRepo) {
+                              PostDao postRepo,
+                              ResourceDao resourceRepo, CommentDao commentRepo) {
         this.e = e;
         this.validator = validator;
         this.communityService = communityService;
@@ -62,7 +62,7 @@ public class ContentServiceImpl implements ContentService {
 
         var newResource = new Resource();
 
-        resourceRepo.save(newResource);
+//        resourceRepo.createNewPostResource(newResource);
 
         switch (request.getContentType()) {
             case PHOTO ->
@@ -96,7 +96,7 @@ public class ContentServiceImpl implements ContentService {
 
                 try {
                     newResource.setList(generatedSource);
-                    resourceRepo.save(newResource);
+                    resourceRepo.createNewPostResource(newResource);
                 } catch (Exception e) {
                     throw new RuntimeException("naughty");
                 }
@@ -119,7 +119,7 @@ public class ContentServiceImpl implements ContentService {
 
         validator.validateBeanOrThrow(newPost);
 
-        postRepo.save(newPost);
+        postRepo.createNewPost(newPost);
 
 
     }
@@ -147,7 +147,7 @@ public class ContentServiceImpl implements ContentService {
 
         validator.validateBeanOrThrow(newComment);
 
-        commentRepo.save(newComment);
+        commentRepo.createNewComment(newComment);
     }
 
     @Override

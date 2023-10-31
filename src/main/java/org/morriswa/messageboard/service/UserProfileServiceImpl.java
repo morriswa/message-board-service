@@ -5,7 +5,7 @@ import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.entity.User;
-import org.morriswa.messageboard.repo.UserProfileRepo;
+import org.morriswa.messageboard.dao.UserProfileDao;
 import org.morriswa.messageboard.stores.ProfileImageStoreImpl;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +22,17 @@ import java.util.UUID;
 public class UserProfileServiceImpl implements UserProfileService {
 
     private final Environment e;
-    private final UserProfileRepo userProfileRepo;
+    private final UserProfileDao userProfileDao;
     private final UserProfileServiceValidator validator;
     private final ProfileImageStoreImpl profileImageStoreImpl;
 
     @Autowired
     public UserProfileServiceImpl(
-            Environment e, UserProfileRepo userProfileRepo,
+            Environment e, UserProfileDao userProfileDao,
             UserProfileServiceValidator validator,
             ProfileImageStoreImpl profileImageStoreImpl) {
         this.e = e;
-        this.userProfileRepo = userProfileRepo;
+        this.userProfileDao = userProfileDao;
         this.validator = validator;
         this.profileImageStoreImpl = profileImageStoreImpl;
     }
@@ -44,7 +44,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     private void displayNameIsAvailableOrThrow(String displayName) throws ValidationException {
-        if (userProfileRepo.existsByDisplayName(displayName))
+        if (userProfileDao.existsByDisplayName(displayName))
             throw new ValidationException(
                 "displayName",
                 displayName,
@@ -76,7 +76,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfileResponse getUserProfile(UUID userId) throws BadRequestException {
-        var user = userProfileRepo.findUserByUserId(userId)
+        var user = userProfileDao.findUserByUserId(userId)
                 .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
 
         return buildUserProfileResponse(user);
@@ -84,7 +84,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public User authenticateAndGetUserEntity(JwtAuthenticationToken token) throws BadRequestException {
-        return userProfileRepo.findUserByAuthZeroId(token.getName())
+        return userProfileDao.findUserByAuthZeroId(token.getName())
                 .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
     }
 
@@ -104,7 +104,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         var user = newUser.build();
         validator.validateBeanOrThrow(user);
 
-        userProfileRepo.save(user);
+        userProfileDao.createNewUser(user);
 
         return user.getDisplayName();
     }
@@ -141,7 +141,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.validator.validateBeanOrThrow(user);
 
         // save changes
-        this.userProfileRepo.save(user);
+        this.userProfileDao.updateUserDisplayName(user.getUserId(), user.getDisplayName());
     }
 
 }
