@@ -63,7 +63,28 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
 
     @Override
     public List<CommunityMember> findAllByUserId(UUID userId) {
-        return null;
+        final String query = "select * from community_member where user_id=:userId";
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+        }};
+
+        List<CommunityMember> response = new ArrayList<>();
+
+        jdbc.query(query, params, rs -> {
+            while (rs.next())
+                response.add(
+                        new CommunityMember(
+                                rs.getLong("id"),
+                                rs.getLong("community_id"),
+                                rs.getObject("user_id", UUID.class),
+                                rs.getInt("moderation_level"),
+                                CommunityStanding.valueOf(rs.getString("standing")),
+                                timestampToGregorian(rs.getTimestamp("date_updated")),
+                                timestampToGregorian(rs.getTimestamp("date_created"))));
+        });
+
+        return response;
     }
 
     @Override

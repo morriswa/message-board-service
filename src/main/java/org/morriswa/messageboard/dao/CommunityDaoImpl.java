@@ -23,7 +23,6 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
 
-
     private Optional<Community> unwrapCommunityResultSet(ResultSet rs) throws SQLException {
         if (rs.next())
             return Optional.of(Community.builder()
