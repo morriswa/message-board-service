@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,22 @@ public class UserProfileDaoImpl implements UserProfileDao {
         this.jdbc = jdbc;
     }
 
+    private Optional<User> unwrapUserResultSet(ResultSet rs) throws SQLException {
+        if (rs.next()) {
+            User user = new User(
+                    rs.getObject("id", UUID.class),
+                    rs.getString("auth_zero_id"),
+                    UserRole.valueOf(rs.getString("role")),
+                    rs.getString("display_name"),
+                    rs.getString("email")
+            );
+
+            return Optional.of(user);
+        }
+
+        return Optional.empty();
+    }
+    @Override
     public Optional<User> findUserByUserId(UUID userId) {
 
         final String query = "select id, auth_zero_id, display_name, email, role from user_profile where id=:userId";
@@ -31,25 +48,10 @@ public class UserProfileDaoImpl implements UserProfileDao {
            put("userId", userId);
         }};
 
-        return jdbc.query(query, params, rs -> {
-            Optional<User> response = Optional.empty();
-
-            if (rs.next()) {
-                User user = new User(
-                        rs.getObject("id", UUID.class),
-                        rs.getString("auth_zero_id"),
-                        UserRole.valueOf(rs.getString("role")),
-                        rs.getString("display_name"),
-                        rs.getString("email")
-                );
-
-                response = Optional.of(user);
-            }
-
-            return response;
-        });
+        return jdbc.query(query, params, this::unwrapUserResultSet);
     }
 
+    @Override
     public Optional<User> findUserByAuthZeroId(String authZeroId) {
 
         final String query = "select id, auth_zero_id, display_name, email, role from user_profile where auth_zero_id=:authZeroId";
@@ -58,25 +60,10 @@ public class UserProfileDaoImpl implements UserProfileDao {
             put("authZeroId", authZeroId);
         }};
 
-        return jdbc.query(query, params, rs -> {
-            Optional<User> response = Optional.empty();
-
-            if (rs.next()) {
-                User user = new User(
-                        rs.getObject("id", UUID.class),
-                        rs.getString("auth_zero_id"),
-                        UserRole.valueOf(rs.getString("role")),
-                        rs.getString("display_name"),
-                        rs.getString("email")
-                );
-
-                response = Optional.of(user);
-            }
-
-            return response;
-        });
+        return jdbc.query(query, params, this::unwrapUserResultSet);
     }
 
+    @Override
     public void createNewUser(User user) {
         final String query =
         """
@@ -100,6 +87,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
 
     }
 
+    @Override
     public void updateUserDisplayName(UUID userId, String requestedDisplayName) {
         final String query =
                 """
@@ -120,6 +108,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
         }
     }
 
+    @Override
     public boolean existsByDisplayName(String displayName) {
         final String query = "select 1 from user_profile where display_name=:displayName";
 

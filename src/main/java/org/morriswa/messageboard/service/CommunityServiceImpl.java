@@ -132,12 +132,7 @@ public class CommunityServiceImpl implements CommunityService {
     public void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
         var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
-        var result = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId,communityId);
-
-        if (result.isEmpty())
-            return;
-
-        communityMemberRepo.deleteRelationship(result.get().getCommunityId());
+        communityMemberRepo.deleteRelationship(userId, communityId);
     }
 
     private boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException {

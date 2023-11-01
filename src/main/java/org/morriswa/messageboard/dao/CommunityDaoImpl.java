@@ -7,7 +7,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
+
+import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
 
 @Component @Slf4j
 public class CommunityDaoImpl implements CommunityDao {
@@ -19,12 +22,20 @@ public class CommunityDaoImpl implements CommunityDao {
         this.jdbc = jdbc;
     }
 
-    private GregorianCalendar timestampToGregorian(long timestamp) {
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTimeInMillis(timestamp);
-        return cal;
-    }
 
+
+    private Optional<Community> unwrapCommunityResultSet(ResultSet rs) throws SQLException {
+        if (rs.next())
+            return Optional.of(Community.builder()
+                    .communityId(rs.getLong("id"))
+                    .communityLocator(rs.getString("community_ref"))
+                    .communityDisplayName(rs.getString("display_name"))
+                    .communityOwnerUserId(rs.getObject("owner", UUID.class))
+                    .dateCreated(timestampToGregorian(rs.getTimestamp("date_created")))
+                    .build());
+
+        return Optional.empty();
+    }
     @Override
     public Optional<Community> findCommunityByCommunityLocator(String communityLocator) {
         final String query = "select id, community_ref, display_name, owner, date_created from community where community_ref=:communityLocator";
@@ -33,18 +44,7 @@ public class CommunityDaoImpl implements CommunityDao {
             put("communityLocator", communityLocator);
         }};
 
-        return jdbc.query(query, params, rs -> {
-            if (rs.next())
-                return Optional.of(Community.builder()
-                    .communityId(rs.getLong("id"))
-                    .communityLocator(rs.getString("community_ref"))
-                    .communityDisplayName(rs.getString("display_name"))
-                    .communityOwnerUserId(rs.getObject("owner", UUID.class))
-                    .dateCreated(timestampToGregorian(rs.getTimestamp("date_created").getTime()))
-                        .build());
-
-            return Optional.empty();
-        });
+        return jdbc.query(query, params, this::unwrapCommunityResultSet);
     }
 
     @Override
@@ -61,18 +61,7 @@ public class CommunityDaoImpl implements CommunityDao {
             put("owner", communityOwnerUserId);
         }};
 
-        return jdbc.query(query, params, rs -> {
-            if (rs.next())
-                return Optional.of(Community.builder()
-                        .communityId(rs.getLong("id"))
-                        .communityLocator(rs.getString("community_ref"))
-                        .communityDisplayName(rs.getString("display_name"))
-                        .communityOwnerUserId(rs.getObject("owner", UUID.class))
-                        .dateCreated(timestampToGregorian(rs.getTimestamp("date_created").getTime()))
-                        .build());
-
-            return Optional.empty();
-        });
+        return jdbc.query(query, params, this::unwrapCommunityResultSet);
     }
 
     @Override
@@ -83,18 +72,7 @@ public class CommunityDaoImpl implements CommunityDao {
             put("id", communityId);
         }};
 
-        return jdbc.query(query, params, rs -> {
-            if (rs.next())
-                return Optional.of(Community.builder()
-                        .communityId(rs.getLong("id"))
-                        .communityLocator(rs.getString("community_ref"))
-                        .communityDisplayName(rs.getString("display_name"))
-                        .communityOwnerUserId(rs.getObject("owner", UUID.class))
-                        .dateCreated(timestampToGregorian(rs.getTimestamp("date_created").getTime()))
-                        .build());
-
-            return Optional.empty();
-        });
+        return jdbc.query(query, params, this::unwrapCommunityResultSet);
     }
 
     @Override

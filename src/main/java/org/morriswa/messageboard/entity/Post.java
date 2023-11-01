@@ -2,6 +2,7 @@ package org.morriswa.messageboard.entity;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
@@ -11,6 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.UUID;
 
 //@Entity @Table(name = "user_post")
+@AllArgsConstructor
 @NoArgsConstructor @Getter
 public class Post {
 //    @Id

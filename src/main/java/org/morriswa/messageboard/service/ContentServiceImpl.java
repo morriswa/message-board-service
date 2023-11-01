@@ -30,8 +30,8 @@ public class ContentServiceImpl implements ContentService {
     private final CommunityService communityService;
     private final UserProfileService userProfileService;
     private final ImageStore imageStore;
-    private final PostDao postRepo;
-    private final ResourceDao resourceRepo;
+    private final PostDao posts;
+    private final ResourceDao resources;
     private final CommentDao commentRepo;
 
     @Autowired
@@ -40,15 +40,15 @@ public class ContentServiceImpl implements ContentService {
                               CommunityService communityService,
                               UserProfileService userProfileService,
                               ImageStore imageStore,
-                              PostDao postRepo,
-                              ResourceDao resourceRepo, CommentDao commentRepo) {
+                              PostDao posts,
+                              ResourceDao resources, CommentDao commentRepo) {
         this.e = e;
         this.validator = validator;
         this.communityService = communityService;
         this.userProfileService = userProfileService;
         this.imageStore = imageStore;
-        this.postRepo = postRepo;
-        this.resourceRepo = resourceRepo;
+        this.posts = posts;
+        this.resources = resources;
         this.commentRepo = commentRepo;
     }
 
@@ -65,13 +65,16 @@ public class ContentServiceImpl implements ContentService {
 //        resourceRepo.createNewPostResource(newResource);
 
         switch (request.getContentType()) {
-            case PHOTO ->
+            case PHOTO -> {
                 imageStore.uploadIndividualImage(
                         newResource.getResourceId(),
                         new UploadImageRequest(
                                 (String) request.getContent().get("baseEncodedImage"),
                                 (String) request.getContent().get("imageFormat")
                         ));
+
+                resources.createNewPostResource(newResource);
+            }
 
             case PHOTO_GALLERY -> {
                 int imagesToUpload = (int) request.getContent().get("count");
@@ -96,18 +99,15 @@ public class ContentServiceImpl implements ContentService {
 
                 try {
                     newResource.setList(generatedSource);
-                    resourceRepo.createNewPostResource(newResource);
+                    resources.createNewPostResource(newResource);
                 } catch (Exception e) {
                     throw new RuntimeException("naughty");
                 }
-
-
             }
 
             default ->
                 throw new BadRequestException(e.getRequiredProperty("content.service.errors.content-type-not-supported"));
         }
-
 
         var newPost = new Post(userId,
                 communityId,
@@ -116,19 +116,16 @@ public class ContentServiceImpl implements ContentService {
                 request.getContentType(),
                 newResource.getResourceId());
 
-
         validator.validateBeanOrThrow(newPost);
 
-        postRepo.createNewPost(newPost);
-
-
+        posts.createNewPost(newPost);
     }
 
     @Override
     public void addCommentToPost(JwtAuthenticationToken token, NewCommentRequest request) throws BadRequestException {
         var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
-        var post = postRepo.findPostByPostId(request.getPostId())
+        var post = posts.findPostByPostId(request.getPostId())
                 .orElseThrow(()->new BadRequestException(
                         e.getRequiredProperty("content.service.errors.cannot-locate-post")
                 ));
@@ -174,11 +171,11 @@ public class ContentServiceImpl implements ContentService {
 
         var response = new ArrayList<PhotosPostResponse>();
 
-        var allCommunityPosts = postRepo.findAllPostsByCommunityId(communityId);
+        var allCommunityPosts = posts.findAllPostsByCommunityId(communityId);
 
         for (Post post : allCommunityPosts) {
             var user = userProfileService.getUserProfile(post.getUserId());
-            var resourceEntity = resourceRepo.findResourceByResourceId(post.getResourceId())
+            var resourceEntity = resources.findResourceByResourceId(post.getResourceId())
                     .orElseThrow();
 
             var resourceUrls = new ArrayList<URL>(){{

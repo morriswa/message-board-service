@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 //@Entity @Table(name = "post_resource")
-@NoArgsConstructor @Builder @Getter
+@Builder @Getter
 @AllArgsConstructor
 public class Resource {
 //    @Id
@@ -64,5 +64,9 @@ public class Resource {
             field.setAccessible(true);
             field.set(this, resources.get(i));
         }
+    }
+
+    public Resource() {
+        this.resourceId = UUID.randomUUID();
     }
 }

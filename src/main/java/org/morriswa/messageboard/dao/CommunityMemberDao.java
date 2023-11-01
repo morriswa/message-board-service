@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.dao;
 
+import jakarta.validation.Valid;
 import org.morriswa.messageboard.entity.CommunityMember;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface CommunityMemberDao {
 
     List<CommunityMember> findAllByUserId(UUID userId);
 
-    void createNewRelationship(CommunityMember newRelationship);
+    void createNewRelationship(@Valid CommunityMember newRelationship);
 
-    void deleteRelationship(Long communityId);
+    void deleteRelationship(UUID userId, Long communityId);
 }
