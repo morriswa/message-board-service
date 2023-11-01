@@ -12,9 +12,6 @@ spring:
     port: 5432
     database:
       name: messageboard
-  jpa:
-    hibernate.ddl-auto: create-drop
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
   banner.location: classpath:banner.txt
 
 auth0:

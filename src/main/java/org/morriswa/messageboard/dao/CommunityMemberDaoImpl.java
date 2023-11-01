@@ -69,9 +69,10 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
             put("userId", userId);
         }};
 
-        List<CommunityMember> response = new ArrayList<>();
 
-        jdbc.query(query, params, rs -> {
+        return jdbc.query(query, params, rs -> {
+            List<CommunityMember> response = new ArrayList<>();
+
             while (rs.next())
                 response.add(
                         new CommunityMember(
@@ -82,9 +83,10 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
                                 CommunityStanding.valueOf(rs.getString("standing")),
                                 timestampToGregorian(rs.getTimestamp("date_updated")),
                                 timestampToGregorian(rs.getTimestamp("date_created"))));
+
+            return response;
         });
 
-        return response;
     }
 
     @Override

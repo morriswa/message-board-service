@@ -28,15 +28,15 @@ public class PostDaoImpl implements PostDao{
 
     @Override
     public List<Post> findAllPostsByCommunityId(Long communityId) {
-        List<Post> posts = new ArrayList<>();
-
         final String query = "select * from user_post where community_id=:communityId";
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityId", communityId);
         }};
 
-        jdbcTemplate.query(query, params, rs -> {
+        return jdbcTemplate.query(query, params, rs -> {
+            List<Post> posts = new ArrayList<>();
+
             while (rs.next()) {
                 posts.add(new Post(
                         rs.getLong("id"),
@@ -49,11 +49,10 @@ public class PostDaoImpl implements PostDao{
                         rs.getObject("resource_id", UUID.class)
                 ));
             }
+//            log.info("located {} posts in community {}", posts.size(), communityId);
+
+            return posts;
         });
-
-//        log.info("located {} posts in community {}", posts.size(), communityId);
-
-        return posts;
     }
 
     @Override

@@ -1,19 +1,18 @@
 package org.morriswa.messageboard.entity;
 
-//import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.morriswa.messageboard.model.UserRole;
+import org.springframework.data.annotation.Id;
 
 import java.util.UUID;
 
-//@Entity @Table(name = "user_profile")
 @Getter @Setter @Builder
 @AllArgsConstructor @NoArgsConstructor
 public class User {
-//    @Id
+    @Id
 //    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
 

@@ -45,24 +45,28 @@ public class Resource {
         return response;
     }
 
-    public void setList(List<UUID> resources) throws NoSuchFieldException, IllegalAccessException {
+    public void setList(List<UUID> resources) {
         if (resources.size()>10) throw new RuntimeException("should never have > 10 vals");
 
         Class<Resource> resourceClass = Resource.class;
 
-        for (int i = 0;i < 10; i++) {
-            var field = i==0?resourceClass.getDeclaredField("resourceId")
-                    :resourceClass.getDeclaredField("resourceId"+i);
-            field.setAccessible(true);
-            field.set(this, null);
-        }
+        try {
+            for (int i = 0;i < 10; i++) {
+                var field = i==0?resourceClass.getDeclaredField("resourceId")
+                        :resourceClass.getDeclaredField("resourceId"+i);
+                field.setAccessible(true);
+                field.set(this, null);
+            }
 
-        for (int i = 0;i < resources.size(); i++) {
+            for (int i = 0;i < resources.size(); i++) {
 
-            var field = i==0?resourceClass.getDeclaredField("resourceId")
-                    :resourceClass.getDeclaredField("resourceId"+i);
-            field.setAccessible(true);
-            field.set(this, resources.get(i));
+                var field = i==0?resourceClass.getDeclaredField("resourceId")
+                        :resourceClass.getDeclaredField("resourceId"+i);
+                field.setAccessible(true);
+                field.set(this, resources.get(i));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
