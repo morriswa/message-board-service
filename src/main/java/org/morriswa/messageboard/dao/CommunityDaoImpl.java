@@ -36,9 +36,28 @@ public class CommunityDaoImpl implements CommunityDao {
 
         return Optional.empty();
     }
+
+    private Optional<AllCommunityInfoResponse> unwrapAllCommunityInfoResultSet(ResultSet rs) throws SQLException {
+        if (rs.next())
+            return Optional.of(new AllCommunityInfoResponse(
+                    rs.getLong("communityId"),
+                    rs.getString("communityLocator"),
+                    rs.getString("displayName"),
+                    rs.getObject("owner", UUID.class),
+                    timestampToGregorian(rs.getTimestamp("dateCreated")),
+                    null,
+                    rs.getInt("count")));
+
+        return Optional.empty();
+    }
+
     @Override
     public Optional<Community> findCommunityByCommunityLocator(String communityLocator) {
-        final String query = "select id, community_ref, display_name, owner, date_created from community where community_ref=:communityLocator";
+        final String query = """
+            select id, community_ref, display_name, owner, date_created
+            from community
+            where community_ref=:communityLocator
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityLocator", communityLocator);
@@ -49,12 +68,11 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public Optional<Community> findCommunityByCommunityIdAndCommunityOwnerUserId(Long communityId, UUID communityOwnerUserId) {
-        final String query =
-            """
-                select id, community_ref, display_name, owner, date_created from community
-                where id=:id
-                and owner=:owner
-            """;
+        final String query = """
+            select id, community_ref, display_name, owner, date_created
+            from community
+            where id=:id and owner=:owner
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("id", communityId);
@@ -77,20 +95,19 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public List<AllCommunityInfoResponse> findAllCommunitiesByUserId(UUID userId) {
-        final String query =
-            """            
-                select
+        final String query = """            
+            select DISTINCT
                     co.id communityId,
                     co.community_ref communityLocator,
                     co.display_name displayName,
                     co.owner owner,
                     co.date_created dateCreated,
                     (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count
-                from community co
-                left join community_member cm
-                on (co.id=cm.community_id and co.owner != cm.user_id)
-                where co.owner=:userId or cm.user_id=:userId
-            """;
+                from community_member cm
+                full join community co
+                    on co.id=cm.community_id
+                where cm.user_id=:userId or co.owner=:userId
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("userId", userId);
@@ -131,11 +148,10 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public void createNewCommunity(Community newCommunity) {
-        final String query =
-                """
-                    insert into community(id, community_ref, display_name, owner, date_created)
-                    values (DEFAULT, :communityRef, :displayName, :owner, :dateCreated)
-                """;
+        final String query = """
+            insert into community(id, community_ref, display_name, owner, date_created)
+            values (DEFAULT, :communityRef, :displayName, :owner, :dateCreated)
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityRef", newCommunity.getCommunityLocator());
@@ -154,12 +170,11 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public void setCommunityLocator(Long communityId, String communityLocator) {
-        final String query =
-                """
-                    update community
-                        set community_ref = :communityLocator
-                    where id = :id
-                """;
+        final String query = """
+            update community
+                set community_ref = :communityLocator
+            where id = :id
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("id", communityId);
@@ -175,12 +190,11 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public void setCommunityDisplayName(Long communityId, String displayName) {
-        final String query =
-                """
-                    update community
-                        set display_name = :displayName
-                    where id = :id
-                """;
+        final String query = """
+            update community
+                set display_name = :displayName
+            where id = :id
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("id", communityId);
@@ -196,37 +210,24 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityLocator(String communityLocator) {
-        final String query =
-                """            
-                    select
-                        co.id communityId,
-                        co.community_ref communityLocator,
-                        co.display_name displayName,
-                        co.owner owner,
-                        co.date_created dateCreated,
-                        (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count         
-                    from community co
-                    where co.community_ref=:communityLocator;
-                """;
+        final String query = """            
+            select
+                co.id communityId,
+                co.community_ref communityLocator,
+                co.display_name displayName,
+                co.owner owner,
+                co.date_created dateCreated,
+                (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count
+            from community co
+            where co.community_ref=:communityLocator;
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityLocator", communityLocator);
         }};
 
         try {
-            return jdbc.query(query, params, rs -> {
-                if (rs.next())
-                    return Optional.of(new AllCommunityInfoResponse(
-                            rs.getLong("communityId"),
-                            rs.getString("communityLocator"),
-                            rs.getString("displayName"),
-                            rs.getObject("owner", UUID.class),
-                            timestampToGregorian(rs.getTimestamp("dateCreated")),
-                            null,
-                            rs.getInt("count")));
-
-                return Optional.empty();
-            });
+            return jdbc.query(query, params, this::unwrapAllCommunityInfoResultSet);
         } catch (Exception e) {
             log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityLocator", e);
             throw new RuntimeException(e);
@@ -235,39 +236,26 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityId(Long communityId) {
-        final String query =
-                """            
-                    select
-                        co.id communityId,
-                        co.community_ref communityLocator,
-                        co.display_name displayName,
-                        co.owner owner,
-                        co.date_created dateCreated,
-                        (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count
-                    from community co
-                    where co.id=:communityId
-                """;
+        final String query = """            
+            select
+                co.id communityId,
+                co.community_ref communityLocator,
+                co.display_name displayName,
+                co.owner owner,
+                co.date_created dateCreated,
+                (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count
+            from community co
+            where co.id=:communityId
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityId", communityId);
         }};
 
         try {
-            return jdbc.query(query, params, rs -> {
-                if (rs.next())
-                    return Optional.of(new AllCommunityInfoResponse(
-                            rs.getLong("communityId"),
-                            rs.getString("communityLocator"),
-                            rs.getString("displayName"),
-                            rs.getObject("owner", UUID.class),
-                            timestampToGregorian(rs.getTimestamp("dateCreated")),
-                            null,
-                            rs.getInt("count")));
-
-                return Optional.empty();
-            });
+            return jdbc.query(query, params, this::unwrapAllCommunityInfoResultSet);
         } catch (Exception e) {
-            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityLocator", e);
+            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityId", e);
             throw new RuntimeException(e);
         }
     }
