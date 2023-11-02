@@ -166,13 +166,10 @@ public class CommunityServiceImpl implements CommunityService {
 
         var communities = communityMemberRepo.findAllByUserId(user.getUserId());
 
-        var response = new ArrayList<AllCommunityInfoResponse>();
+        for (var community : communities)
+            community.setResourceUrls(resourceService.getAllCommunityResources(community.getCommunityId()));
 
-        for (CommunityMember community : communities) {
-            response.add(getAllCommunityInfo(community.getCommunityId()));
-        }
-
-        return response;
+        return communities;
     }
 
     @Override

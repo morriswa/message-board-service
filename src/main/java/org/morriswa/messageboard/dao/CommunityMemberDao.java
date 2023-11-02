@@ -2,6 +2,7 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import org.morriswa.messageboard.entity.CommunityMember;
+import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ public interface CommunityMemberDao {
 
     int countCommunityMembersByCommunityId(Long communityId);
 
-    List<CommunityMember> findAllByUserId(UUID userId);
+    List<AllCommunityInfoResponse> findAllByUserId(UUID userId);
 
     void createNewRelationship(@Valid CommunityMember newRelationship);
 

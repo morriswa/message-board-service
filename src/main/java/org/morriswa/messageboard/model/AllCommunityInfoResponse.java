@@ -1,12 +1,13 @@
 package org.morriswa.messageboard.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.morriswa.messageboard.entity.Community;
 
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-@Data
+@Data @AllArgsConstructor
 public class AllCommunityInfoResponse {
     private Long communityId;
     private String communityLocator;

@@ -1,7 +1,9 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.entity.CommunityMember;
+import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 import org.morriswa.messageboard.model.CommunityStanding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,7 +13,7 @@ import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
 
-@Component
+@Component @Slf4j
 public class CommunityMemberDaoImpl implements CommunityMemberDao{
 
     private final NamedParameterJdbcTemplate jdbc;
@@ -62,31 +64,54 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
     }
 
     @Override
-    public List<CommunityMember> findAllByUserId(UUID userId) {
-        final String query = "select * from community_member where user_id=:userId";
+    public List<AllCommunityInfoResponse> findAllByUserId(UUID userId) {
+        final String query =
+        """
+            select
+                cm.id relationshipId,
+                cm.community_id communityId,
+                cm.user_id userId,
+                co.community_ref communityLocator,
+                co.display_name displayName,
+                co.owner owner,
+                co.date_created dateCreated
+            from community_member cm
+            full outer join community co
+              on co.id=cm.community_id
+            where (co.owner=:userId or cm.user_id=:userId)
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("userId", userId);
         }};
 
+        try {
+            return jdbc.query(query, params, rs -> {
+                List<AllCommunityInfoResponse> response = new ArrayList<>();
 
-        return jdbc.query(query, params, rs -> {
-            List<CommunityMember> response = new ArrayList<>();
+                while (rs.next()) {
+                    var communityId = rs.getLong("communityId");
 
-            while (rs.next())
-                response.add(
-                        new CommunityMember(
-                                rs.getLong("id"),
-                                rs.getLong("community_id"),
-                                rs.getObject("user_id", UUID.class),
-                                rs.getInt("moderation_level"),
-                                CommunityStanding.valueOf(rs.getString("standing")),
-                                timestampToGregorian(rs.getTimestamp("date_updated")),
-                                timestampToGregorian(rs.getTimestamp("date_created"))));
+                    int communityMembers = countCommunityMembersByCommunityId(communityId);
 
-            return response;
-        });
+                    var buildingCommunityResponse = new AllCommunityInfoResponse(
+                            communityId,
+                            rs.getString("communityLocator"),
+                            rs.getString("displayName"),
+                            rs.getObject("owner", UUID.class),
+                            timestampToGregorian(rs.getTimestamp("dateCreated")),
+                            null,
+                            communityMembers);
 
+                    response.add(buildingCommunityResponse);
+                }
+
+                return response;
+            });
+        } catch (Exception e) {
+            log.error("Exception occurred CommunityMemberDao.findAllByUserId", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
