@@ -56,7 +56,7 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public void createPost(JwtAuthenticationToken token, Long communityId, NewPostRequest request) throws BadRequestException, IOException {
 
-        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
+        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, communityId);
 
@@ -123,7 +123,7 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public void addCommentToPost(JwtAuthenticationToken token, NewCommentRequest request) throws BadRequestException {
-        var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
+        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
 
         var post = posts.findPostByPostId(request.getPostId())
                 .orElseThrow(()->new BadRequestException(

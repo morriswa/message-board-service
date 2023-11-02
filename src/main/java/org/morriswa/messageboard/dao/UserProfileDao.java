@@ -1,19 +1,20 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.model.User;
+import org.morriswa.messageboard.model.CreateUserRequest;
+import org.morriswa.messageboard.model.UserProfile;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public interface UserProfileDao {
 
-    Optional<User> findUserByAuthZeroId(String authZeroId);
+    Optional<UserProfile> getUserProfile(String authZeroId);
 
     boolean existsByDisplayName(String displayName);
 
-    Optional<User> findUserByUserId(UUID userId);
+    Optional<UserProfile> getUserProfile(UUID userId);
 
-    void createNewUser(User user);
+    void createNewUser(CreateUserRequest user);
 
     void updateUserDisplayName(UUID userId, String displayName);
 }

@@ -25,7 +25,7 @@ public class PhotosPostResponse {
     }
 
 
-    public PhotosPostResponse(Post post, UserProfileResponse user, List<URL> resources) {
+    public PhotosPostResponse(Post post, UserProfile user, List<URL> resources) {
         this.userInfo = new UserInfo(user.getUserId(), user.getDisplayName(), user.getUserProfileImage());
         this.caption = post.getCaption();
         this.description = post.getDescription();

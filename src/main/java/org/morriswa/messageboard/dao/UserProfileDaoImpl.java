@@ -1,7 +1,8 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.User;
+import org.morriswa.messageboard.model.CreateUserRequest;
+import org.morriswa.messageboard.model.UserProfile;
 import org.morriswa.messageboard.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -24,14 +25,14 @@ public class UserProfileDaoImpl implements UserProfileDao {
         this.jdbc = jdbc;
     }
 
-    private Optional<User> unwrapUserResultSet(ResultSet rs) throws SQLException {
+    private Optional<UserProfile> unwrapUserResultSet(ResultSet rs) throws SQLException {
         if (rs.next()) {
-            User user = new User(
+            UserProfile user = new UserProfile(
                     rs.getObject("id", UUID.class),
                     rs.getString("auth_zero_id"),
-                    UserRole.valueOf(rs.getString("role")),
+                    rs.getString("email"),
                     rs.getString("display_name"),
-                    rs.getString("email")
+                    UserRole.valueOf(rs.getString("role"))
             );
 
             return Optional.of(user);
@@ -40,7 +41,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
         return Optional.empty();
     }
     @Override
-    public Optional<User> findUserByUserId(UUID userId) {
+    public Optional<UserProfile> getUserProfile(UUID userId) {
 
         final String query = "select id, auth_zero_id, display_name, email, role from user_profile where id=:userId";
 
@@ -52,7 +53,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public Optional<User> findUserByAuthZeroId(String authZeroId) {
+    public Optional<UserProfile> getUserProfile(String authZeroId) {
 
         final String query = "select id, auth_zero_id, display_name, email, role from user_profile where auth_zero_id=:authZeroId";
 
@@ -64,7 +65,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public void createNewUser(User user) {
+    public void createNewUser(CreateUserRequest user) {
         final String query =
         """
             insert into user_profile(id, auth_zero_id, display_name, email, role)

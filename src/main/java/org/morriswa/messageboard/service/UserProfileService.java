@@ -1,9 +1,8 @@
 package org.morriswa.messageboard.service;
 
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.model.UserProfileResponse;
+import org.morriswa.messageboard.model.UserProfile;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
@@ -24,16 +23,16 @@ public interface UserProfileService {
      * @return a full User Profile Response
      * @throws BadRequestException if the user cannot be found or authenticated
      */
-    UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException;
+    UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException;
 
-    /**
-     * Authenticates an Oauth2 user with provided token
-     *
-     * @param token to authenticate with
-     * @return a User Entity from the DB
-     * @throws BadRequestException if the User cannot be authenticated or located in the DB
-     */
-    User authenticateAndGetUserEntity(JwtAuthenticationToken token) throws BadRequestException;
+//    /**
+//     * Authenticates an Oauth2 user with provided token
+//     *
+//     * @param token to authenticate with
+//     * @return a User Entity from the DB
+//     * @throws BadRequestException if the User cannot be authenticated or located in the DB
+//     */
+//    @Deprecated User authenticateAndGetUserEntity(JwtAuthenticationToken token) throws BadRequestException;
 
 
     /**
@@ -44,7 +43,7 @@ public interface UserProfileService {
      * @return a full User Profile Response
      * @throws BadRequestException if the user cannot be found
      */
-    UserProfileResponse getUserProfile(UUID userId) throws BadRequestException;
+    UserProfile getUserProfile(UUID userId) throws BadRequestException;
 
     /**
      * Creates a new Messageboard User

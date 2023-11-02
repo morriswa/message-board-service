@@ -2,7 +2,7 @@ package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.morriswa.messageboard.model.User;
+import org.morriswa.messageboard.model.UserProfile;
 import org.morriswa.messageboard.model.UserRole;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -24,13 +24,13 @@ public class UserProfileEndpointsTest extends MessageboardTest {
                 e.getRequiredProperty("user-profile.service.endpoints.user.path"));
 
 
-        final User exampleUser = new User(UUID.randomUUID(),
+        final UserProfile exampleUser = new UserProfile(UUID.randomUUID(),
                 "abc",
-                UserRole.DEFAULT,
+                "email@gmail.com",
                 "displayName",
-                "email@gmail.com");
+                UserRole.DEFAULT);
 
-        when(userProfileDao.findUserByAuthZeroId(any())).thenReturn(Optional.of(exampleUser));
+        when(userProfileDao.getUserProfile(any(String.class))).thenReturn(Optional.of(exampleUser));
 
         this.mockMvc.perform(MockMvcRequestBuilders
                 .get(targetUrl)
@@ -49,7 +49,7 @@ public class UserProfileEndpointsTest extends MessageboardTest {
                 e.getRequiredProperty("server.path"),
                 e.getRequiredProperty("user-profile.service.endpoints.user.path"));
 
-        when(userProfileDao.findUserByAuthZeroId(any())).thenReturn(Optional.empty());
+        when(userProfileDao.getUserProfile(any(String.class))).thenReturn(Optional.empty());
 
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get(targetUrl)
