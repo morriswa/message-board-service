@@ -21,7 +21,7 @@ public interface CommunityService {
 
     void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException;
 
-    AllCommunityInfoResponse getAllCommunityInfo(String communityDisplayName) throws BadRequestException;
+    AllCommunityInfoResponse getAllCommunityInfo(String communityLocator) throws BadRequestException;
 
     AllCommunityInfoResponse getAllCommunityInfo(Long communityId) throws BadRequestException;
 

@@ -14,8 +14,6 @@ public interface CommunityMemberDao {
 
     int countCommunityMembersByCommunityId(Long communityId);
 
-    List<AllCommunityInfoResponse> findAllByUserId(UUID userId);
-
     void createNewRelationship(@Valid CommunityMember newRelationship);
 
     void deleteRelationship(UUID userId, Long communityId);

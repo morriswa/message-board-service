@@ -38,8 +38,8 @@ public class CommunityServiceController {
     }
 
     @GetMapping("${community.service.endpoints.community.path}")
-    public ResponseEntity<?> getAllCommunityInformation(@RequestParam String displayName) throws BadRequestException {
-        var response = this.community.getAllCommunityInfo(displayName);
+    public ResponseEntity<?> getAllCommunityInformation(@RequestParam String communityLocator) throws BadRequestException {
+        var response = this.community.getAllCommunityInfo(communityLocator);
 
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("community.service.endpoints.community.messages.get"),

@@ -64,57 +64,6 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
     }
 
     @Override
-    public List<AllCommunityInfoResponse> findAllByUserId(UUID userId) {
-        final String query =
-        """
-            select
-                cm.id relationshipId,
-                cm.community_id communityId,
-                cm.user_id userId,
-                co.community_ref communityLocator,
-                co.display_name displayName,
-                co.owner owner,
-                co.date_created dateCreated
-            from community_member cm
-            full outer join community co
-              on co.id=cm.community_id
-            where (co.owner=:userId or cm.user_id=:userId)
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("userId", userId);
-        }};
-
-        try {
-            return jdbc.query(query, params, rs -> {
-                List<AllCommunityInfoResponse> response = new ArrayList<>();
-
-                while (rs.next()) {
-                    var communityId = rs.getLong("communityId");
-
-                    int communityMembers = countCommunityMembersByCommunityId(communityId);
-
-                    var buildingCommunityResponse = new AllCommunityInfoResponse(
-                            communityId,
-                            rs.getString("communityLocator"),
-                            rs.getString("displayName"),
-                            rs.getObject("owner", UUID.class),
-                            timestampToGregorian(rs.getTimestamp("dateCreated")),
-                            null,
-                            communityMembers);
-
-                    response.add(buildingCommunityResponse);
-                }
-
-                return response;
-            });
-        } catch (Exception e) {
-            log.error("Exception occurred CommunityMemberDao.findAllByUserId", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public void createNewRelationship(@Valid CommunityMember newRelationship) {
         final String query =
             """

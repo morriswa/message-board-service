@@ -2,6 +2,7 @@ package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.entity.Community;
+import org.morriswa.messageboard.model.AllCommunityInfoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -72,6 +73,49 @@ public class CommunityDaoImpl implements CommunityDao {
         }};
 
         return jdbc.query(query, params, this::unwrapCommunityResultSet);
+    }
+
+    @Override
+    public List<AllCommunityInfoResponse> findAllCommunitiesByUserId(UUID userId) {
+        final String query =
+            """            
+                select
+                    co.id communityId,
+                    co.community_ref communityLocator,
+                    co.display_name displayName,
+                    co.owner owner,
+                    co.date_created dateCreated,
+                    (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count
+                from community co
+                left join community_member cm
+                on (co.id=cm.community_id and co.owner != cm.user_id)
+                where co.owner=:userId or cm.user_id=:userId
+            """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+        }};
+
+        try {
+            return jdbc.query(query, params, rs -> {
+                List<AllCommunityInfoResponse> response = new ArrayList<>();
+
+                while (rs.next())
+                    response.add(new AllCommunityInfoResponse(
+                            rs.getLong("communityId"),
+                            rs.getString("communityLocator"),
+                            rs.getString("displayName"),
+                            rs.getObject("owner", UUID.class),
+                            timestampToGregorian(rs.getTimestamp("dateCreated")),
+                            null,
+                            rs.getInt("count")));
+
+                return response;
+            });
+        } catch (Exception e) {
+            log.error("Exception occurred CommunityMemberDao.findAllByUserId", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -147,6 +191,84 @@ public class CommunityDaoImpl implements CommunityDao {
             jdbc.update(query, params);
         } catch (Exception e) {
             log.error("encountered error ", e);
+        }
+    }
+
+    @Override
+    public Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityLocator(String communityLocator) {
+        final String query =
+                """            
+                    select
+                        co.id communityId,
+                        co.community_ref communityLocator,
+                        co.display_name displayName,
+                        co.owner owner,
+                        co.date_created dateCreated,
+                        (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count         
+                    from community co
+                    where co.community_ref=:communityLocator;
+                """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("communityLocator", communityLocator);
+        }};
+
+        try {
+            return jdbc.query(query, params, rs -> {
+                if (rs.next())
+                    return Optional.of(new AllCommunityInfoResponse(
+                            rs.getLong("communityId"),
+                            rs.getString("communityLocator"),
+                            rs.getString("displayName"),
+                            rs.getObject("owner", UUID.class),
+                            timestampToGregorian(rs.getTimestamp("dateCreated")),
+                            null,
+                            rs.getInt("count")));
+
+                return Optional.empty();
+            });
+        } catch (Exception e) {
+            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityLocator", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityId(Long communityId) {
+        final String query =
+                """            
+                    select
+                        co.id communityId,
+                        co.community_ref communityLocator,
+                        co.display_name displayName,
+                        co.owner owner,
+                        co.date_created dateCreated,
+                        (select count(cme.id) from community_member cme where co.id=cme.community_id) AS count
+                    from community co
+                    where co.id=:communityId
+                """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("communityId", communityId);
+        }};
+
+        try {
+            return jdbc.query(query, params, rs -> {
+                if (rs.next())
+                    return Optional.of(new AllCommunityInfoResponse(
+                            rs.getLong("communityId"),
+                            rs.getString("communityLocator"),
+                            rs.getString("displayName"),
+                            rs.getObject("owner", UUID.class),
+                            timestampToGregorian(rs.getTimestamp("dateCreated")),
+                            null,
+                            rs.getInt("count")));
+
+                return Optional.empty();
+            });
+        } catch (Exception e) {
+            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityLocator", e);
+            throw new RuntimeException(e);
         }
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,38 +77,38 @@ public class CommunityServiceImpl implements CommunityService {
         resourceService.setCommunityBanner(uploadImageRequest, communityId);
     }
 
-    private AllCommunityInfoResponse buildAllCommunityInfoResponse(Community community) {
-        int communityMembers = communityMemberRepo.countCommunityMembersByCommunityId(community.getCommunityId());
-
-        var resources = resourceService.getAllCommunityResources(community.getCommunityId());
-
-        return new AllCommunityInfoResponse(community, communityMembers, resources);
-    }
-
     @Override
-    public AllCommunityInfoResponse getAllCommunityInfo(String communityDisplayName) throws BadRequestException {
+    public AllCommunityInfoResponse getAllCommunityInfo(String communityLocator) throws BadRequestException {
 
-        var community = communityDao
-                .findCommunityByCommunityLocator(communityDisplayName)
+        AllCommunityInfoResponse community = communityDao
+                .getAllCommunityInfoByCommunityLocator(communityLocator)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
                                 e.getRequiredProperty("community.service.errors.missing-community"),
-                                communityDisplayName)));
+                                communityLocator)));
 
-        return buildAllCommunityInfoResponse(community);
+        community.setResourceUrls(
+                resourceService.getAllCommunityResources(community.getCommunityId())
+        );
+
+        return community;
     }
 
     @Override
     public AllCommunityInfoResponse getAllCommunityInfo(Long communityId) throws BadRequestException {
 
         var community = communityDao
-                .findCommunityByCommunityId(communityId)
+                .getAllCommunityInfoByCommunityId(communityId)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
                                 e.getRequiredProperty("community.service.errors.missing-community-by-id"),
                                 communityId.toString())));
 
-        return buildAllCommunityInfoResponse(community);
+        community.setResourceUrls(
+                resourceService.getAllCommunityResources(community.getCommunityId())
+        );
+
+        return community;
     }
 
     @Override
@@ -153,7 +152,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
-        if (!this.canUserPostInCommunity(userId, communityId))
+        if (!canUserPostInCommunity(userId, communityId))
             throw new BadRequestException(
                     e.getRequiredProperty("community.service.errors.user-cannot-post")
             );
@@ -164,7 +163,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         var user = userProfileService.authenticateAndGetUserEntity(token);
 
-        var communities = communityMemberRepo.findAllByUserId(user.getUserId());
+        var communities = communityDao.findAllCommunitiesByUserId(user.getUserId());
 
         for (var community : communities)
             community.setResourceUrls(resourceService.getAllCommunityResources(community.getCommunityId()));
