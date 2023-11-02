@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.model;
 
 import lombok.Getter;
-import org.morriswa.messageboard.entity.User;
 
 import java.net.URL;
 import java.util.UUID;

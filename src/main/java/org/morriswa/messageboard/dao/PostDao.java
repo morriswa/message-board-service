@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.entity.Post;
+import org.morriswa.messageboard.model.Post;
 
 import java.util.List;
 import java.util.Optional;

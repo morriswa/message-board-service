@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.model;
 
 import lombok.Data;
-import org.morriswa.messageboard.entity.Comment;
 
 import java.util.ArrayList;
 import java.util.List;

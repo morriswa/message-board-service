@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.entity;
+package org.morriswa.messageboard.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

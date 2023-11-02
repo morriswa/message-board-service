@@ -1,10 +1,9 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.messageboard.entity.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.model.AllCommunityInfoResponse;
+import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
@@ -21,19 +20,19 @@ public interface CommunityService {
 
     void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException;
 
-    AllCommunityInfoResponse getAllCommunityInfo(String communityLocator) throws BadRequestException;
+    Community getAllCommunityInfo(String communityLocator) throws BadRequestException;
 
-    AllCommunityInfoResponse getAllCommunityInfo(Long communityId) throws BadRequestException;
+    Community getAllCommunityInfo(Long communityId) throws BadRequestException;
 
     void joinCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException;
 
     void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException;
 
-    Community verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException;
+    void verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException;
 
     void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException;
 
-    List<AllCommunityInfoResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException;
+    List<Community> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException;
 
     void updateCommunityAttributes(JwtAuthenticationToken token, Long communityId, Optional<String> communityRef, Optional<String> communityDisplayName) throws BadRequestException, ValidationException;
 }

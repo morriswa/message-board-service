@@ -2,7 +2,7 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.entity.Post;
+import org.morriswa.messageboard.model.Post;
 import org.morriswa.messageboard.model.PostContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

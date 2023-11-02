@@ -1,9 +1,8 @@
-package org.morriswa.messageboard.entity;
+package org.morriswa.messageboard.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Arrays;

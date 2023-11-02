@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.entity.User;
+import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

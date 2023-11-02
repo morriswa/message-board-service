@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.entity.Community;
-import org.morriswa.messageboard.model.AllCommunityInfoResponse;
+import org.morriswa.messageboard.model.Community;
+import org.morriswa.messageboard.model.NewCommunityRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,23 +9,21 @@ import java.util.UUID;
 
 public interface CommunityDao {
 
-    Optional<Community> findCommunityByCommunityLocator(String communityLocator);
+    Optional<Community> getAllCommunityInfo(String communityDisplayName);
 
-    Optional<Community> findCommunityByCommunityIdAndCommunityOwnerUserId(Long communityId, UUID communityOwnerUserId);
+    Optional<Community> getAllCommunityInfo(Long communityId);
 
-    Optional<Community> findCommunityByCommunityId(Long communityId);
+    List<Community> findAllCommunitiesByUserId(UUID userId);
 
-    List<AllCommunityInfoResponse> findAllCommunitiesByUserId(UUID userId);
-
-    boolean existsByCommunityLocator(String communityLocator);
-
-    void createNewCommunity(Community newCommunity);
+    void createNewCommunity(NewCommunityRequest newCommunity);
 
     void setCommunityLocator(Long communityId, String ref);
 
     void setCommunityDisplayName(Long communityId, String displayName);
 
-    Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityLocator(String communityDisplayName);
+    boolean existsByCommunityLocator(String communityLocator);
 
-    Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityId(Long communityId);
+    boolean verifyUserCanPostInCommunity(UUID userId, Long communityId);
+
+    boolean verifyUserCanEditCommunity(UUID userId, Long communityId);
 }

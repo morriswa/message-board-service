@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.service;
 
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.entity.User;
+import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.model.UserProfileResponse;
 import org.morriswa.messageboard.exception.ValidationException;

@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.stores;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.AllCommunityResourceURLs;
+import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.stores.util.CustomS3ServiceImpl;
 import org.morriswa.messageboard.stores.util.ImageScaleService;
@@ -43,8 +43,8 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
     }
 
     @Override
-    public AllCommunityResourceURLs getAllCommunityResources(Long communityId) {
-        var response = new AllCommunityResourceURLs();
+    public Community.AllCommunityResourceURLs getAllCommunityResources(Long communityId) {
+        var response = new Community.AllCommunityResourceURLs();
 
         if (s3Store.doesObjectExist(COMMUNITY_BANNER_PATH+communityId)) {
             var bannerUrl = s3Store.getSignedObjectUrl(COMMUNITY_BANNER_PATH+communityId, 60);

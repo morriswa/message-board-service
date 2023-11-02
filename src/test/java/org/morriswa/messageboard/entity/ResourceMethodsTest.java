@@ -2,6 +2,7 @@ package org.morriswa.messageboard.entity;
 
 import org.junit.jupiter.api.Test;
 import org.morriswa.messageboard.MessageboardTest;
+import org.morriswa.messageboard.model.Resource;
 
 import java.util.ArrayList;
 import java.util.List;

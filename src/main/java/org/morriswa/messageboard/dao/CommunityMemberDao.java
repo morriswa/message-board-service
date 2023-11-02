@@ -1,20 +1,20 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.entity.CommunityMember;
-import org.morriswa.messageboard.model.AllCommunityInfoResponse;
+import org.morriswa.messageboard.model.CommunityMember;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface CommunityMemberDao {
 
-    Optional<CommunityMember> findCommunityMemberByUserIdAndCommunityId(UUID userId, Long communityId);
+    @Deprecated Optional<CommunityMember> findCommunityMemberByUserIdAndCommunityId(UUID userId, Long communityId);
 
-    int countCommunityMembersByCommunityId(Long communityId);
+    @Deprecated int countCommunityMembersByCommunityId(Long communityId);
 
     void createNewRelationship(@Valid CommunityMember newRelationship);
+
+    boolean relationshipExists(UUID userId, Long communityId);
 
     void deleteRelationship(UUID userId, Long communityId);
 }

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.*;
-import org.morriswa.messageboard.entity.User;
+import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.dao.UserProfileDao;
 import org.morriswa.messageboard.stores.ProfileImageStoreImpl;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;

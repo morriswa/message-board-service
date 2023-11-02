@@ -5,13 +5,12 @@ import org.morriswa.messageboard.dao.CommunityDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.model.AllCommunityInfoResponse;
-import org.morriswa.messageboard.model.CommunityStanding;
+import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.model.CreateNewCommunityRequest;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
 import org.morriswa.messageboard.stores.CommunityResourceStore;
-import org.morriswa.messageboard.entity.Community;
-import org.morriswa.messageboard.entity.CommunityMember;
+import org.morriswa.messageboard.model.NewCommunityRequest;
+import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -47,12 +46,11 @@ public class CommunityServiceImpl implements CommunityService {
         this.resourceService = resourceService;
     }
 
-
     @Override
     public void createNewCommunity(JwtAuthenticationToken token, CreateNewCommunityRequest request) throws BadRequestException {
         var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
-        var newCommunity = new Community(request.getCommunityRef(), request.getCommunityName(), userId);
+        var newCommunity = new NewCommunityRequest(request.getCommunityRef(), request.getCommunityName(), userId);
 
         this.validator.validateBeanOrThrow(newCommunity);
 
@@ -78,10 +76,10 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public AllCommunityInfoResponse getAllCommunityInfo(String communityLocator) throws BadRequestException {
+    public Community getAllCommunityInfo(String communityLocator) throws BadRequestException {
 
-        AllCommunityInfoResponse community = communityDao
-                .getAllCommunityInfoByCommunityLocator(communityLocator)
+        Community community = communityDao
+                .getAllCommunityInfo(communityLocator)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
                                 e.getRequiredProperty("community.service.errors.missing-community"),
@@ -95,10 +93,10 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public AllCommunityInfoResponse getAllCommunityInfo(Long communityId) throws BadRequestException {
+    public Community getAllCommunityInfo(Long communityId) throws BadRequestException {
 
         var community = communityDao
-                .getAllCommunityInfoByCommunityId(communityId)
+                .getAllCommunityInfo(communityId)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
                                 e.getRequiredProperty("community.service.errors.missing-community-by-id"),
@@ -115,9 +113,7 @@ public class CommunityServiceImpl implements CommunityService {
     public void joinCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
         var userId = userProfileService.authenticateAndGetUserEntity(token).getUserId();
 
-        var result = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId,communityId);
-
-        if (result.isPresent())
+        if (communityMemberRepo.relationshipExists(userId,communityId))
             return;
 
         var newRelationship = new CommunityMember(userId, communityId);
@@ -134,32 +130,16 @@ public class CommunityServiceImpl implements CommunityService {
         communityMemberRepo.deleteRelationship(userId, communityId);
     }
 
-    private boolean canUserPostInCommunity(UUID userId, Long communityId) throws BadRequestException {
-
-        var checkCommunityOwner = communityDao.findCommunityByCommunityIdAndCommunityOwnerUserId(communityId, userId);
-
-        if (checkCommunityOwner.isPresent()) return true;
-
-        var communityMember = communityMemberRepo.findCommunityMemberByUserIdAndCommunityId(userId, communityId)
-                .orElseThrow(()->new BadRequestException(
-                        e.getRequiredProperty("community.service.errors.no-relation-found")));
-
-        if (communityMember.getCommunityStanding().equals(CommunityStanding.HEALTHY))
-            return true;
-
-        return false;
-    }
-
     @Override
     public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
-        if (!canUserPostInCommunity(userId, communityId))
+        if (!communityDao.verifyUserCanPostInCommunity(userId, communityId))
             throw new BadRequestException(
                     e.getRequiredProperty("community.service.errors.user-cannot-post")
             );
     }
 
     @Override
-    public List<AllCommunityInfoResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException {
+    public List<Community> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException {
 
         var user = userProfileService.authenticateAndGetUserEntity(token);
 
@@ -172,21 +152,13 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public Community verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
-        var community = communityDao.findCommunityByCommunityId(communityId)
-                .orElseThrow(()->new BadRequestException(String.format(
-                        e.getRequiredProperty("community.service.errors.missing-community-by-id"),
-                        communityId
-                )));
-
-        if (!userId.equals(community.getCommunityOwnerUserId()))
+    public void verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
+        if (!communityDao.verifyUserCanEditCommunity(userId, communityId))
             throw new BadRequestException(String.format(
                     e.getRequiredProperty("community.service.errors.user-cannot-edit"),
                     userId,
                     communityId
             ));
-
-        return community;
     }
 
     @Override
@@ -197,13 +169,22 @@ public class CommunityServiceImpl implements CommunityService {
 
         var user = userProfileService.authenticateAndGetUserEntity(token);
 
-        var community = verifyUserCanEditCommunityOrThrow(user.getUserId(), communityId);
+        verifyUserCanEditCommunityOrThrow(user.getUserId(), communityId);
+
+        var community = communityDao.getAllCommunityInfo(communityId)
+                .orElseThrow(()->new BadRequestException(
+                String.format(
+                        e.getRequiredProperty("community.service.errors.missing-community"),
+                        communityId)));
 
         if (communityRef.isPresent()) {
             var requestedRef = communityRef.get();
             // if the user requested the same name they already had, ignore
             if (!requestedRef.equals(community.getCommunityLocator())) {
-                communityRefIsAvailableOrThrow(requestedRef);
+                if (communityDao.existsByCommunityLocator(requestedRef))
+                    throw new BadRequestException(
+                            e.getRequiredProperty("community.service.errors.ref-already-taken")
+                    );
                 validator.validateCommunityRefOrThrow(requestedRef);
                 communityDao.setCommunityLocator(communityId, requestedRef);
             }
@@ -216,12 +197,4 @@ public class CommunityServiceImpl implements CommunityService {
         }
 
     }
-
-    private void communityRefIsAvailableOrThrow(String communityRef) throws BadRequestException {
-        if (communityDao.existsByCommunityLocator(communityRef))
-            throw new BadRequestException(
-                    e.getRequiredProperty("community.service.errors.ref-already-taken")
-            );
-    }
-
 }

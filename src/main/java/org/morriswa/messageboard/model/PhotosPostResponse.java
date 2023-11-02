@@ -3,7 +3,6 @@ package org.morriswa.messageboard.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.morriswa.messageboard.entity.Post;
 
 import java.net.URL;
 import java.util.List;

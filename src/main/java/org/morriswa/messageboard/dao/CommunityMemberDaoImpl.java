@@ -2,13 +2,13 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.entity.CommunityMember;
-import org.morriswa.messageboard.model.AllCommunityInfoResponse;
+import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.model.CommunityStanding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.sql.ResultSet;
 import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
@@ -79,6 +79,17 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
         }};
 
         jdbc.update(query, params);
+    }
+
+    @Override
+    public boolean relationshipExists(UUID userId, Long communityId) {
+        final String query = "select 1 from community_member where community_id=:communityId";
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("communityId", communityId);
+        }};
+
+        return jdbc.query(query, params, ResultSet::next);
     }
 
     @Override

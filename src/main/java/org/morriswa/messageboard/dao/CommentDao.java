@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.entity.Comment;
+import org.morriswa.messageboard.model.Comment;
 
 import java.util.List;
 

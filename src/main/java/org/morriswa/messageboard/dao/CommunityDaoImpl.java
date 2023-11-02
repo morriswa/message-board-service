@@ -1,8 +1,9 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.entity.Community;
-import org.morriswa.messageboard.model.AllCommunityInfoResponse;
+import org.morriswa.messageboard.model.NewCommunityRequest;
+import org.morriswa.messageboard.model.Community;
+import org.morriswa.messageboard.model.CommunityStanding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -26,20 +27,7 @@ public class CommunityDaoImpl implements CommunityDao {
 
     private Optional<Community> unwrapCommunityResultSet(ResultSet rs) throws SQLException {
         if (rs.next())
-            return Optional.of(Community.builder()
-                    .communityId(rs.getLong("id"))
-                    .communityLocator(rs.getString("community_ref"))
-                    .communityDisplayName(rs.getString("display_name"))
-                    .communityOwnerUserId(rs.getObject("owner", UUID.class))
-                    .dateCreated(timestampToGregorian(rs.getTimestamp("date_created")))
-                    .build());
-
-        return Optional.empty();
-    }
-
-    private Optional<AllCommunityInfoResponse> unwrapAllCommunityInfoResultSet(ResultSet rs) throws SQLException {
-        if (rs.next())
-            return Optional.of(new AllCommunityInfoResponse(
+            return Optional.of(new Community(
                     rs.getLong("communityId"),
                     rs.getString("communityLocator"),
                     rs.getString("displayName"),
@@ -52,49 +40,7 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public Optional<Community> findCommunityByCommunityLocator(String communityLocator) {
-        final String query = """
-            select id, community_ref, display_name, owner, date_created
-            from community
-            where community_ref=:communityLocator
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("communityLocator", communityLocator);
-        }};
-
-        return jdbc.query(query, params, this::unwrapCommunityResultSet);
-    }
-
-    @Override
-    public Optional<Community> findCommunityByCommunityIdAndCommunityOwnerUserId(Long communityId, UUID communityOwnerUserId) {
-        final String query = """
-            select id, community_ref, display_name, owner, date_created
-            from community
-            where id=:id and owner=:owner
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("id", communityId);
-            put("owner", communityOwnerUserId);
-        }};
-
-        return jdbc.query(query, params, this::unwrapCommunityResultSet);
-    }
-
-    @Override
-    public Optional<Community> findCommunityByCommunityId(Long communityId) {
-        final String query = "select id, community_ref, display_name, owner, date_created from community where id=:id";
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("id", communityId);
-        }};
-
-        return jdbc.query(query, params, this::unwrapCommunityResultSet);
-    }
-
-    @Override
-    public List<AllCommunityInfoResponse> findAllCommunitiesByUserId(UUID userId) {
+    public List<Community> findAllCommunitiesByUserId(UUID userId) {
         final String query = """            
             select DISTINCT
                     co.id communityId,
@@ -115,10 +61,10 @@ public class CommunityDaoImpl implements CommunityDao {
 
         try {
             return jdbc.query(query, params, rs -> {
-                List<AllCommunityInfoResponse> response = new ArrayList<>();
+                List<Community> response = new ArrayList<>();
 
                 while (rs.next())
-                    response.add(new AllCommunityInfoResponse(
+                    response.add(new Community(
                             rs.getLong("communityId"),
                             rs.getString("communityLocator"),
                             rs.getString("displayName"),
@@ -147,17 +93,16 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public void createNewCommunity(Community newCommunity) {
+    public void createNewCommunity(NewCommunityRequest newNewCommunityRequest) {
         final String query = """
             insert into community(id, community_ref, display_name, owner, date_created)
-            values (DEFAULT, :communityRef, :displayName, :owner, :dateCreated)
+            values (DEFAULT, :communityRef, :displayName, :owner, current_timestamp)
         """;
 
         Map<String, Object> params = new HashMap<>(){{
-            put("communityRef", newCommunity.getCommunityLocator());
-            put("displayName", newCommunity.getCommunityDisplayName());
-            put("owner", newCommunity.getCommunityOwnerUserId());
-            put("dateCreated", newCommunity.getDateCreated());
+            put("communityRef", newNewCommunityRequest.getCommunityLocator());
+            put("displayName", newNewCommunityRequest.getCommunityDisplayName());
+            put("owner", newNewCommunityRequest.getCommunityOwnerUserId());
         }};
 
 
@@ -209,7 +154,72 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityLocator(String communityLocator) {
+    public boolean verifyUserCanPostInCommunity(UUID userId, Long communityId) {
+        final String query = """            
+            select DISTINCT
+                    co.owner ownerId,
+                    cm.user_id userId,
+                    cm.standing standing
+                from community_member cm
+                full join community co
+                    on co.id=cm.community_id
+                where (cm.user_id=:userId or co.owner=:userId) and co.id=:communityId
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+            put("communityId", communityId);
+        }};
+
+        try {
+            return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
+                if (rs.next()) {
+                    var owner = rs.getObject("ownerId", UUID.class);
+                    var user = rs.getObject("userId", UUID.class);
+                    var standing = CommunityStanding.valueOf(rs.getString("standing"));
+
+                    if (owner.equals(userId)) return true;
+                    if (user.equals(userId) && standing.equals(CommunityStanding.HEALTHY)) return true;
+                }
+
+                return false;
+            }));
+        } catch (Exception e) {
+            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityId", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean verifyUserCanEditCommunity(UUID userId, Long communityId) {
+        final String query = """            
+            select owner
+            from community co
+            where co.owner=:userId and co.id=:communityId
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+            put("communityId", communityId);
+        }};
+
+        try {
+            return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
+                if (rs.next()) {
+                    var owner = rs.getObject("ownerId", UUID.class);
+                    return owner.equals(userId);
+                }
+
+                return false;
+            }));
+        } catch (Exception e) {
+            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityId", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<Community> getAllCommunityInfo(String communityLocator) {
         final String query = """            
             select
                 co.id communityId,
@@ -227,7 +237,7 @@ public class CommunityDaoImpl implements CommunityDao {
         }};
 
         try {
-            return jdbc.query(query, params, this::unwrapAllCommunityInfoResultSet);
+            return jdbc.query(query, params, this::unwrapCommunityResultSet);
         } catch (Exception e) {
             log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityLocator", e);
             throw new RuntimeException(e);
@@ -235,7 +245,7 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public Optional<AllCommunityInfoResponse> getAllCommunityInfoByCommunityId(Long communityId) {
+    public Optional<Community> getAllCommunityInfo(Long communityId) {
         final String query = """            
             select
                 co.id communityId,
@@ -253,7 +263,7 @@ public class CommunityDaoImpl implements CommunityDao {
         }};
 
         try {
-            return jdbc.query(query, params, this::unwrapAllCommunityInfoResultSet);
+            return jdbc.query(query, params, this::unwrapCommunityResultSet);
         } catch (Exception e) {
             log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityId", e);
             throw new RuntimeException(e);
