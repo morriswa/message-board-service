@@ -1,11 +1,10 @@
 package org.morriswa.messageboard.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.UploadImageRequest;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -31,7 +30,7 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
     }
 
     @Override
-    public File getScaledImage(UploadImageRequest imageRequest, int IMAGE_X, int IMAGE_Y) throws IOException {
+    public BufferedImage getScaledImage(UploadImageRequest imageRequest, int IMAGE_X, int IMAGE_Y) throws IOException {
 
         final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
 
@@ -47,27 +46,16 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
                 BufferedImage.TYPE_INT_RGB);
         outputImage.getGraphics().drawImage(scaledImage, 0, 0, null);
 
-        if ("heic".equalsIgnoreCase(imageRequest.getImageFormat())) {
-            imageRequest.setImageFormat("jpeg");
-        }
+//        if ("heic".equalsIgnoreCase(imageRequest.getImageFormat())) {
+//            imageRequest.setImageFormat("jpeg");
+//        }
 
-        final UUID newImagePath = UUID.randomUUID();
 
-        File outfile = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath);
-
-        ImageIO.write(outputImage, "png", outfile);
-
-        if (!outfile.exists()) {
-            throw new IOException(
-                    String.format(e.getRequiredProperty("user-profile.service.errors.bad-image-format"),
-                            imageRequest.getImageFormat()));
-        }
-
-        return outfile;
+        return outputImage;
     }
 
     @Override
-    public File getScaledImage(UploadImageRequest imageRequest, float scale) throws IOException {
+    public BufferedImage getScaledImage(UploadImageRequest imageRequest, float scale) throws IOException {
 
         final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
 
@@ -86,22 +74,6 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
                 BufferedImage.TYPE_INT_RGB);
         outputImage.getGraphics().drawImage(scaledImage, 0, 0, null);
 
-        if ("heic".equalsIgnoreCase(imageRequest.getImageFormat())) {
-            imageRequest.setImageFormat("jpeg");
-        }
-
-        final UUID newImagePath = UUID.randomUUID();
-
-        File outfile = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath);
-
-        ImageIO.write(outputImage, "png", outfile);
-
-        if (!outfile.exists()) {
-            throw new IOException(
-                    String.format(e.getRequiredProperty("user-profile.service.errors.bad-image-format"),
-                            imageRequest.getImageFormat()));
-        }
-
-        return outfile;
+        return outputImage;
     }
 }

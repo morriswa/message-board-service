@@ -2,8 +2,8 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.CreateUserRequest;
-import org.morriswa.messageboard.model.UserProfile;
+import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
+import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -26,8 +26,8 @@ public class UserProfileDaoImpl implements UserProfileDao {
         this.jdbc = jdbc;
     }
 
-    private Optional<UserProfile> unwrapUserResultSet(ResultSet rs) throws SQLException {
-        if (rs.next()) return Optional.of(new UserProfile(
+    private Optional<User> unwrapUserResultSet(ResultSet rs) throws SQLException {
+        if (rs.next()) return Optional.of(new User(
             rs.getObject("id", UUID.class),
             rs.getString("auth_zero_id"),
             rs.getString("email"),
@@ -37,7 +37,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
         return Optional.empty();
     }
     @Override
-    public Optional<UserProfile> getUserProfile(UUID userId) {
+    public Optional<User> getUser(UUID userId) {
 
         final String query = "select id, auth_zero_id, display_name, email, role from user_profile where id=:userId";
 
@@ -49,7 +49,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public Optional<UserProfile> getUserProfile(String authZeroId) {
+    public Optional<User> getUser(String authZeroId) {
 
         final String query = "select id, auth_zero_id, display_name, email, role from user_profile where auth_zero_id=:authZeroId";
 

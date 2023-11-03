@@ -2,7 +2,7 @@ package org.morriswa.messageboard.control.advice;
 
 import jakarta.validation.ConstraintViolationException;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.DefaultErrorResponse;
+import org.morriswa.messageboard.model.responsebody.DefaultErrorResponse;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;

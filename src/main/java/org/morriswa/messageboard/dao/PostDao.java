@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.model.CreatePostRequest;
-import org.morriswa.messageboard.model.Post;
+import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
+import org.morriswa.messageboard.model.entity.Post;
 
 import java.util.List;
 import java.util.Optional;

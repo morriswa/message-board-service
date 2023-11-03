@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.responsebody;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

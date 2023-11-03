@@ -1,10 +1,10 @@
 package org.morriswa.messageboard.stores;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.UploadImageRequest;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3UtilImpl;
 import org.morriswa.messageboard.util.ImageScaleUtil;
-import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -18,16 +18,13 @@ public class ProfileImageStoreImpl implements ProfileImageStore {
     private final int IMAGE_PX_WIDTH;
     private final String DEFAULT_PROFILE_IMAGE_OBJECT_ID;
     private final String PROFILE_DIR;
-    private final UserProfileServiceValidator validator;
     private final ImageScaleUtil iss;
     private final CustomS3UtilImpl s3Store;
 
     @Autowired
     ProfileImageStoreImpl(Environment e,
-                         UserProfileServiceValidator validator,
                          ImageScaleUtil iss,
                          CustomS3UtilImpl s3Store) {
-        this.validator = validator;
         this.PROFILE_DIR = e.getRequiredProperty("common.stores.profile-images");
         this.DEFAULT_PROFILE_IMAGE_OBJECT_ID = e.getRequiredProperty("common.static-content.default-profile-image");
         IMAGE_PX_WIDTH = Integer.parseInt(
@@ -37,12 +34,11 @@ public class ProfileImageStoreImpl implements ProfileImageStore {
     }
 
     @Override
-    public void updateUserProfileImage(UUID userId, UploadImageRequest request) throws IOException {
-        validator.validateBeanOrThrow(request);
+    public void updateUserProfileImage(UUID userId, @Valid UploadImageRequest request) throws IOException {
 
-        var outfile = iss.getScaledImage(request, IMAGE_PX_WIDTH, IMAGE_PX_WIDTH);
+        var image = iss.getScaledImage(request, IMAGE_PX_WIDTH, IMAGE_PX_WIDTH);
 
-        s3Store.uploadObjectToS3(outfile, PROFILE_DIR+userId);
+        s3Store.uploadToS3(image, PROFILE_DIR+userId);
     }
 
     @Override

@@ -1,22 +1,24 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.validatedrequest;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.morriswa.messageboard.model.UserRole;
 
-@Getter @Setter @Builder
-@AllArgsConstructor @NoArgsConstructor
+@Valid @AllArgsConstructor @Getter
 public class CreateUserRequest {
     @NotBlank
     private String authZeroId;
 
-    @NotNull
-    private UserRole role;
+    @Email
+    private String email;
 
     @NotBlank
     private String displayName;
 
-    @Email
-    private String email;
+    @NotNull
+    private UserRole role;
+
 }

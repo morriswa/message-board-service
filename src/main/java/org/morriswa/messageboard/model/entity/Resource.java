@@ -1,7 +1,6 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -9,12 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-//@Entity @Table(name = "post_resource")
-@Builder @Getter
-@AllArgsConstructor
+@Getter @AllArgsConstructor
 public class Resource {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID resourceId;
     private UUID resourceId1;
     private UUID resourceId2;

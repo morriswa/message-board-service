@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.model.Resource;
+import org.morriswa.messageboard.model.entity.Resource;
 
 import java.util.Optional;
 import java.util.UUID;

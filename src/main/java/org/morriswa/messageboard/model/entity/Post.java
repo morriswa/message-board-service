@@ -1,15 +1,14 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import org.morriswa.messageboard.model.PostContentType;
 
-import java.net.URL;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.UUID;
 
-@Data @AllArgsConstructor
+@Getter
+@AllArgsConstructor
 public class Post {
     private final Long postId;
     private final UUID userId;

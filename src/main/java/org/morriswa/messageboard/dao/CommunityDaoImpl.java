@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.NewCommunityRequest;
-import org.morriswa.messageboard.model.Community;
+import org.morriswa.messageboard.model.validatedrequest.CreateCommunityRequest;
+import org.morriswa.messageboard.model.entity.Community;
 import org.morriswa.messageboard.model.CommunityStanding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -33,14 +33,13 @@ public class CommunityDaoImpl implements CommunityDao {
                     rs.getString("displayName"),
                     rs.getObject("owner", UUID.class),
                     timestampToGregorian(rs.getTimestamp("dateCreated")),
-                    null,
                     rs.getInt("count")));
 
         return Optional.empty();
     }
 
     @Override
-    public List<Community> findAllCommunitiesByUserId(UUID userId) {
+    public List<Community> findAllCommunities(UUID userId) {
         final String query = """            
             select DISTINCT
                     co.id communityId,
@@ -70,7 +69,6 @@ public class CommunityDaoImpl implements CommunityDao {
                             rs.getString("displayName"),
                             rs.getObject("owner", UUID.class),
                             timestampToGregorian(rs.getTimestamp("dateCreated")),
-                            null,
                             rs.getInt("count")));
 
                 return response;
@@ -93,16 +91,16 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public void createNewCommunity(NewCommunityRequest newNewCommunityRequest) {
+    public void createNewCommunity(CreateCommunityRequest newCreateCommunityRequest) {
         final String query = """
             insert into community(id, community_ref, display_name, owner, date_created)
             values (DEFAULT, :communityRef, :displayName, :owner, current_timestamp)
         """;
 
         Map<String, Object> params = new HashMap<>(){{
-            put("communityRef", newNewCommunityRequest.getCommunityLocator());
-            put("displayName", newNewCommunityRequest.getCommunityDisplayName());
-            put("owner", newNewCommunityRequest.getCommunityOwnerUserId());
+            put("communityRef", newCreateCommunityRequest.getCommunityLocator());
+            put("displayName", newCreateCommunityRequest.getCommunityDisplayName());
+            put("owner", newCreateCommunityRequest.getCommunityOwnerUserId());
         }};
 
 
@@ -219,7 +217,7 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public Optional<Community> getAllCommunityInfo(String communityLocator) {
+    public Optional<Community> findCommunity(String communityLocator) {
         final String query = """            
             select
                 co.id communityId,
@@ -245,7 +243,7 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public Optional<Community> getAllCommunityInfo(Long communityId) {
+    public Optional<Community> findCommunity(Long communityId) {
         final String query = """            
             select
                 co.id communityId,

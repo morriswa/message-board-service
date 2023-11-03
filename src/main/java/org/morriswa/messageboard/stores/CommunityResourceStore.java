@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.stores;
 
-import org.morriswa.messageboard.model.Community;
-import org.morriswa.messageboard.model.UploadImageRequest;
+import org.morriswa.messageboard.model.responsebody.CommunityResponse;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 
 import java.io.IOException;
 
@@ -10,5 +10,5 @@ public interface CommunityResourceStore {
 
     void setCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId) throws IOException;
 
-    Community.AllCommunityResourceURLs getAllCommunityResources(Long communityId);
+    CommunityResponse.AllCommunityResourceURLs getAllCommunityResources(Long communityId);
 }

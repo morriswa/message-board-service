@@ -1,7 +1,8 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.model.CommunityMember;
+import org.morriswa.messageboard.model.entity.CommunityMember;
+import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -12,7 +13,7 @@ public interface CommunityMemberDao {
 
     @Deprecated int countCommunityMembersByCommunityId(Long communityId);
 
-    void createNewRelationship(@Valid CommunityMember newRelationship);
+    void createNewRelationship(@Valid JoinCommunityRequest newRelationship);
 
     boolean relationshipExists(UUID userId, Long communityId);
 

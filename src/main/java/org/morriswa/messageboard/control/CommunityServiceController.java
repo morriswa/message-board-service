@@ -2,9 +2,9 @@ package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.DefaultResponse;
-import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.model.CreateNewCommunityRequest;
+import org.morriswa.messageboard.model.responsebody.DefaultResponse;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.service.CommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -29,7 +29,7 @@ public class CommunityServiceController {
 
     @PostMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> createCommunity(JwtAuthenticationToken jwt,
-                                             @RequestBody CreateNewCommunityRequest request) throws BadRequestException {
+                                             @RequestBody CreateCommunityRequestBody request) throws BadRequestException {
         this.community.createNewCommunity(jwt, request);
 
         return ResponseEntity.ok(new DefaultResponse<>(

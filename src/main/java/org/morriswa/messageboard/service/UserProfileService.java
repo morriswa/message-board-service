@@ -1,13 +1,13 @@
 package org.morriswa.messageboard.service;
 
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.model.UserProfile;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.responsebody.UserProfile;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.UUID;
 
 /**
@@ -24,6 +24,15 @@ public interface UserProfileService {
      * @throws BadRequestException if the user cannot be found or authenticated
      */
     UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException;
+
+    /**
+     * Authenticates an Oauth2 user with provided token
+     *
+     * @param token to authenticate with
+     * @return a User Response
+     * @throws BadRequestException if the user cannot be found or authenticated
+     */
+    User authenticateAndGetUser(JwtAuthenticationToken token) throws BadRequestException;
 
     /**
      * Authenticates an Oauth2 user with provided token

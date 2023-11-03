@@ -1,11 +1,14 @@
 package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
+import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.dao.UserProfileDao;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.model.responsebody.UserProfile;
+import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
 import org.morriswa.messageboard.stores.ProfileImageStoreImpl;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +17,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
 import java.util.UUID;
 
 @Service @Slf4j
@@ -51,14 +52,18 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException {
-        var user = userProfileDao.getUserProfile(token.getName())
+        var user = userProfileDao.getUser(token.getName())
                 .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
 
-        user.setUserProfileImage(
-                profileImageStoreImpl.getSignedUserProfileImage(user.getUserId())
-        );
+        var profileImage = profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
 
-        return user;
+        return new UserProfile(user, profileImage);
+    }
+
+    @Override
+    public User authenticateAndGetUser(JwtAuthenticationToken token) throws BadRequestException {
+        return userProfileDao.getUser(token.getName())
+                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
     }
 
     @Override
@@ -69,14 +74,13 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfile getUserProfile(UUID userId) throws BadRequestException {
-        var user = userProfileDao.getUserProfile(userId)
+        var user = userProfileDao.getUser(userId)
                 .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
 
-        user.setUserProfileImage(
-                profileImageStoreImpl.getSignedUserProfileImage(user.getUserId())
-        );
+        var profileImage =
+                profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
 
-        return user;
+        return new UserProfile(user, profileImage);
     }
 
     @Override
@@ -86,24 +90,25 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         displayNameIsAvailableOrThrow(displayName);
 
-        var newUser = CreateUserRequest.builder();
-        newUser.authZeroId(token.getName());
-        newUser.email(extractEmailFromJwt(token));
-        newUser.displayName(displayName);
-        newUser.role(UserRole.DEFAULT);
+        var newUser = new CreateUserRequest(
+                token.getName(),
+                extractEmailFromJwt(token),
+                displayName,
+                UserRole.DEFAULT);
 
-        var user = newUser.build();
-        validator.validateBeanOrThrow(user);
+        validator.validateBeanOrThrow(newUser);
 
-        userProfileDao.createNewUser(user);
+        userProfileDao.createNewUser(newUser);
 
-        return user.getDisplayName();
+        return newUser.getDisplayName();
     }
 
     @Override
     public void updateUserProfileImage(JwtAuthenticationToken token, UploadImageRequest request) throws BadRequestException, IOException {
 
         var userId = authenticate(token);
+
+        validator.validateBeanOrThrow(request);
 
         profileImageStoreImpl.updateUserProfileImage(userId, request);
     }
@@ -113,12 +118,13 @@ public class UserProfileServiceImpl implements UserProfileService {
         // ensure display name follows basic rules
         this.validator.validateDisplayNameOrThrow(requestedDisplayName);
 
-        UUID userId = authenticate(token);
+        User user = authenticateAndGetUser(token);
 
-        displayNameIsAvailableOrThrow(requestedDisplayName);
+        if (!user.getDisplayName().equals(requestedDisplayName))
+            displayNameIsAvailableOrThrow(requestedDisplayName);
 
         // save changes
-        this.userProfileDao.updateUserDisplayName(userId, requestedDisplayName);
+        this.userProfileDao.updateUserDisplayName(user.getUserId(), requestedDisplayName);
     }
 
 }

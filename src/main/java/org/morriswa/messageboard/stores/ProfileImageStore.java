@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.stores;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.model.UploadImageRequest;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 
 import java.io.IOException;
 import java.net.URL;

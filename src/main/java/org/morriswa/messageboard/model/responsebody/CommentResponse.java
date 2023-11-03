@@ -1,6 +1,7 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.responsebody;
 
 import lombok.Data;
+import org.morriswa.messageboard.model.Comment;
 
 import java.util.ArrayList;
 import java.util.List;

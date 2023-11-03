@@ -2,15 +2,16 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
+import org.morriswa.messageboard.model.entity.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.model.Community;
-import org.morriswa.messageboard.model.CreateNewCommunityRequest;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
+import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.model.responsebody.CommunityResponse;
+import org.morriswa.messageboard.model.validatedrequest.CreateCommunityRequest;
+import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
 import org.morriswa.messageboard.stores.CommunityResourceStore;
-import org.morriswa.messageboard.model.NewCommunityRequest;
-import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,10 +49,10 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void createNewCommunity(JwtAuthenticationToken token, CreateNewCommunityRequest request) throws BadRequestException {
+    public void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
-        var newCommunity = new NewCommunityRequest(request.getCommunityRef(), request.getCommunityName(), userId);
+        var newCommunity = new CreateCommunityRequest(request.getCommunityRef(), request.getCommunityName(), userId);
 
         this.validator.validateBeanOrThrow(newCommunity);
 
@@ -76,37 +78,35 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public Community getAllCommunityInfo(String communityLocator) throws BadRequestException {
+    public CommunityResponse getAllCommunityInfo(String communityLocator) throws BadRequestException {
 
         Community community = communityDao
-                .getAllCommunityInfo(communityLocator)
+                .findCommunity(communityLocator)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityLocator)));
 
-        community.setResourceUrls(
-                resources.getAllCommunityResources(community.getCommunityId())
-        );
+        var communityResources =
+                resources.getAllCommunityResources(community.getCommunityId());
 
-        return community;
+        return new CommunityResponse(community, communityResources);
     }
 
     @Override
-    public Community getAllCommunityInfo(Long communityId) throws BadRequestException {
+    public CommunityResponse getAllCommunityInfo(Long communityId) throws BadRequestException {
 
         var community = communityDao
-                .getAllCommunityInfo(communityId)
+                .findCommunity(communityId)
                 .orElseThrow(()->new BadRequestException(
                         String.format(
                                 e.getRequiredProperty("community.service.errors.missing-community-by-id"),
                                 communityId.toString())));
 
-        community.setResourceUrls(
-                resources.getAllCommunityResources(community.getCommunityId())
-        );
+        var communityResources =
+                resources.getAllCommunityResources(community.getCommunityId());
 
-        return community;
+        return new CommunityResponse(community, communityResources);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class CommunityServiceImpl implements CommunityService {
         if (communityMemberDao.relationshipExists(userId,communityId))
             return;
 
-        var newRelationship = new CommunityMember(userId, communityId);
+        var newRelationship = new JoinCommunityRequest(userId, communityId);
 
         validator.validateBeanOrThrow(newRelationship);
 
@@ -139,16 +139,16 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<Community> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException {
+    public List<CommunityResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException {
 
         var userId = userProfileService.authenticate(token);
 
-        var communities = communityDao.findAllCommunitiesByUserId(userId);
+        var communities = communityDao.findAllCommunities(userId);
 
-        for (var community : communities)
-            community.setResourceUrls(resources.getAllCommunityResources(community.getCommunityId()));
-
-        return communities;
+        return new ArrayList<>() {{
+            for (var community : communities)
+                add(new CommunityResponse(community, resources.getAllCommunityResources(community.getCommunityId())));
+        }};
     }
 
     @Override
@@ -171,7 +171,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
-        var community = communityDao.getAllCommunityInfo(communityId)
+        var community = communityDao.findCommunity(communityId)
                 .orElseThrow(()->new BadRequestException(
                 String.format(
                         e.getRequiredProperty("community.service.errors.missing-community"),

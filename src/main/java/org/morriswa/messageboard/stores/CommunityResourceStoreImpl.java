@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.stores;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.Community;
-import org.morriswa.messageboard.model.UploadImageRequest;
+import org.morriswa.messageboard.model.responsebody.CommunityResponse;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3UtilImpl;
 import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +16,9 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
 
     private final String COMMUNITY_ICON_PATH;
     private final String COMMUNITY_BANNER_PATH;
-
     private final ImageScaleUtil iss;
     private final CustomS3UtilImpl s3Store;
+
     @Autowired
     CommunityResourceStoreImpl(Environment e, ImageScaleUtil iss1, CustomS3UtilImpl s3Store) {
         this.COMMUNITY_ICON_PATH = e.getRequiredProperty("common.stores.community-icons");
@@ -27,24 +27,23 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
         this.s3Store = s3Store;
     }
 
-
     @Override
     public void setCommunityBanner(UploadImageRequest uploadImageRequest, Long communityId) throws IOException {
-        var fileToUpload = iss.getScaledImage(uploadImageRequest, 0.6f);
+        var image = iss.getScaledImage(uploadImageRequest, 0.6f);
 
-        s3Store.uploadObjectToS3(fileToUpload, this.COMMUNITY_BANNER_PATH+communityId);
+        s3Store.uploadToS3(image, this.COMMUNITY_BANNER_PATH+communityId);
     }
 
     @Override
     public void setCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId) throws IOException {
-        var fileToUpload = iss.getScaledImage(uploadImageRequest, 0.6f);
+        var image = iss.getScaledImage(uploadImageRequest, 0.6f);
 
-        s3Store.uploadObjectToS3(fileToUpload, this.COMMUNITY_ICON_PATH+communityId);
+        s3Store.uploadToS3(image, this.COMMUNITY_ICON_PATH+communityId);
     }
 
     @Override
-    public Community.AllCommunityResourceURLs getAllCommunityResources(Long communityId) {
-        var response = new Community.AllCommunityResourceURLs();
+    public CommunityResponse.AllCommunityResourceURLs getAllCommunityResources(Long communityId) {
+        var response = new CommunityResponse.AllCommunityResourceURLs();
 
         if (s3Store.doesObjectExist(COMMUNITY_BANNER_PATH+communityId)) {
             var bannerUrl = s3Store.getSignedObjectUrl(COMMUNITY_BANNER_PATH+communityId, 60);

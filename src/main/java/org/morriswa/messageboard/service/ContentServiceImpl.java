@@ -9,11 +9,16 @@ import java.util.UUID;
 import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.ResourceDao;
+import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.model.Comment;
-import org.morriswa.messageboard.model.CreatePostRequest;
-import org.morriswa.messageboard.model.Resource;
+import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.model.responsebody.CommentResponse;
+import org.morriswa.messageboard.model.responsebody.PostResponse;
+import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
+import org.morriswa.messageboard.model.entity.Resource;
 import org.morriswa.messageboard.stores.ImageStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +59,7 @@ public class ContentServiceImpl implements ContentService {
 
 
     @Override
-    public void createPost(JwtAuthenticationToken token, Long communityId, NewPostRequest request) throws BadRequestException, IOException {
+    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request) throws BadRequestException, IOException {
 
         var userId = userProfileService.authenticate(token);
 
@@ -66,12 +71,18 @@ public class ContentServiceImpl implements ContentService {
 
         switch (request.getContentType()) {
             case PHOTO -> {
+                var uploadRequest = new UploadImageRequest(
+                        (String) request.getContent().get("baseEncodedImage"),
+                        (String) request.getContent().get("imageFormat")
+                );
+
+                validator.validateBeanOrThrow(uploadRequest);
+
+
                 imageStore.uploadIndividualImage(
                         newResource.getResourceId(),
-                        new UploadImageRequest(
-                                (String) request.getContent().get("baseEncodedImage"),
-                                (String) request.getContent().get("imageFormat")
-                        ));
+                        uploadRequest
+                        );
 
                 resources.createNewPostResource(newResource);
             }
@@ -90,11 +101,14 @@ public class ContentServiceImpl implements ContentService {
 
                     generatedSource.add(newResourceUUID);
 
-                    imageStore.uploadIndividualImage(newResourceUUID,
-                            new UploadImageRequest(
-                                    (String) request.getContent().get("baseEncodedImage" + i),
-                                    (String) request.getContent().get("imageFormat" + i)
-                            ));
+                    var uploadRequest = new UploadImageRequest(
+                            (String) request.getContent().get("baseEncodedImage" + i),
+                            (String) request.getContent().get("imageFormat" + i)
+                    );
+
+                    validator.validateBeanOrThrow(uploadRequest);
+
+                    imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
                 }
 
                 try {
@@ -123,7 +137,7 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public void addCommentToPost(JwtAuthenticationToken token, NewCommentRequest request) throws BadRequestException {
-        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
+        var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(request.getPostId())
                 .orElseThrow(()->new BadRequestException(

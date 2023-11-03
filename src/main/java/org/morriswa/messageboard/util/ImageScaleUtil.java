@@ -1,7 +1,8 @@
 package org.morriswa.messageboard.util;
 
-import org.morriswa.messageboard.model.UploadImageRequest;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -19,6 +20,6 @@ public interface ImageScaleUtil {
      * @return
      * @throws IOException
      */
-    File getScaledImage(UploadImageRequest imageRequest, int IMAGE_X, int IMAGE_Y) throws IOException;
-    File getScaledImage(UploadImageRequest imageRequest, float scale) throws IOException;
+    BufferedImage getScaledImage(UploadImageRequest imageRequest, int IMAGE_X, int IMAGE_Y) throws IOException;
+    BufferedImage getScaledImage(UploadImageRequest imageRequest, float scale) throws IOException;
 }

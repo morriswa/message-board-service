@@ -2,8 +2,9 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.CommunityMember;
+import org.morriswa.messageboard.model.entity.CommunityMember;
 import org.morriswa.messageboard.model.CommunityStanding;
+import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -64,7 +65,7 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
     }
 
     @Override
-    public void createNewRelationship(@Valid CommunityMember newRelationship) {
+    public void createNewRelationship(@Valid JoinCommunityRequest newRelationship) {
         final String query =
             """
                 insert into community_member(id, community_id, user_id, moderation_level, standing, date_updated, date_created)

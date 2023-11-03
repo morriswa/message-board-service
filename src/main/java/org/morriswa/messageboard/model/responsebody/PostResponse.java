@@ -1,8 +1,9 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.responsebody;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.morriswa.messageboard.model.entity.Post;
+import org.morriswa.messageboard.model.PostContentType;
 
 import java.net.URL;
 import java.util.GregorianCalendar;
