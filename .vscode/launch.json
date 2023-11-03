@@ -11,8 +11,6 @@
             "mainClass": "org.morriswa.messageboard.MessageboardServiceRunner",
             "projectName": "message-board-service",
             "env": {
-                "APPCONFIG_APPLICATION_ID":"messageboard",
-                "APPCONFIG_PROFILE_ID":"config",
                 "APPCONFIG_ENV_ID":"local"
             }
         }
