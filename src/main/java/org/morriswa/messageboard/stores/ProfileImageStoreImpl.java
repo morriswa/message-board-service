@@ -2,31 +2,31 @@ package org.morriswa.messageboard.stores;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.stores.util.CustomS3ServiceImpl;
-import org.morriswa.messageboard.stores.util.ImageScaleService;
+import org.morriswa.messageboard.util.CustomS3UtilImpl;
+import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 
-@Service @Slf4j
+@Component @Slf4j
 public class ProfileImageStoreImpl implements ProfileImageStore {
     private final int IMAGE_PX_WIDTH;
     private final String DEFAULT_PROFILE_IMAGE_OBJECT_ID;
     private final String PROFILE_DIR;
     private final UserProfileServiceValidator validator;
-    private final ImageScaleService iss;
-    private final CustomS3ServiceImpl s3Store;
+    private final ImageScaleUtil iss;
+    private final CustomS3UtilImpl s3Store;
 
     @Autowired
     ProfileImageStoreImpl(Environment e,
                          UserProfileServiceValidator validator,
-                         ImageScaleService iss,
-                         CustomS3ServiceImpl s3Store) {
+                         ImageScaleUtil iss,
+                         CustomS3UtilImpl s3Store) {
         this.validator = validator;
         this.PROFILE_DIR = e.getRequiredProperty("common.stores.profile-images");
         this.DEFAULT_PROFILE_IMAGE_OBJECT_ID = e.getRequiredProperty("common.static-content.default-profile-image");

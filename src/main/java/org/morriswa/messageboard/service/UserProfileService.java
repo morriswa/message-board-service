@@ -25,15 +25,14 @@ public interface UserProfileService {
      */
     UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException;
 
-//    /**
-//     * Authenticates an Oauth2 user with provided token
-//     *
-//     * @param token to authenticate with
-//     * @return a User Entity from the DB
-//     * @throws BadRequestException if the User cannot be authenticated or located in the DB
-//     */
-//    @Deprecated User authenticateAndGetUserEntity(JwtAuthenticationToken token) throws BadRequestException;
-
+    /**
+     * Authenticates an Oauth2 user with provided token
+     *
+     * @param token to authenticate with
+     * @return a UUID representing the user
+     * @throws BadRequestException if the user cannot be found or authenticated
+     */
+    UUID authenticate(JwtAuthenticationToken token) throws BadRequestException;
 
     /**
      * <h1>NOT MEANT FOR AUTHENTICATING A USER</h1>
@@ -64,15 +63,6 @@ public interface UserProfileService {
      * @throws IOException if the image cannot be processed and uploaded successfully
      */
     void updateUserProfileImage(JwtAuthenticationToken token, UploadImageRequest request) throws BadRequestException, IOException;
-
-    /**
-     * Retrieves a Signed URL to User's Profile Image
-     *
-     * @param token to authenticate with
-     * @return a signed URL
-     * @throws BadRequestException if the user cannot be authenticated
-     */
-    @Deprecated URL getUserProfileImage(JwtAuthenticationToken token) throws BadRequestException;
 
     /**
      * Updates a user's display name

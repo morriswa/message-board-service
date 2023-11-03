@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.stores.util;
+package org.morriswa.messageboard.util;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.regions.Regions;
@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -19,14 +20,14 @@ import java.nio.file.FileSystemException;
 import java.time.Instant;
 import java.util.Date;
 
-@Service @Slf4j
-public class CustomS3ServiceImpl implements CustomS3Service {
+@Component @Slf4j
+public class CustomS3UtilImpl implements CustomS3Util {
     private final Environment e;
     private final AmazonS3 s3;
     private final String ACTIVE_BUCKET;
 
     @Autowired
-    CustomS3ServiceImpl(Environment e) {
+    CustomS3UtilImpl(Environment e) {
         this.e = e;
         this.s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
         this.ACTIVE_BUCKET = e.getRequiredProperty("aws.s3.bucket");

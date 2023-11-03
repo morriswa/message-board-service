@@ -43,14 +43,6 @@ public class UserProfileController {
             newUserDisplayName)));
     }
 
-    @GetMapping("${user-profile.service.endpoints.user-profile-image.path}")
-    public ResponseEntity<?> getProfileImage(JwtAuthenticationToken jwt) throws BadRequestException {
-        var profileImageUrl = userProfileService.getUserProfileImage(jwt);
-        return ResponseEntity.ok(new DefaultResponse<>(
-            e.getProperty("user-profile.service.endpoints.user-profile-image.messages.get"),
-            profileImageUrl));
-    }
-
     @PostMapping("${user-profile.service.endpoints.user-profile-image.path}")
     public ResponseEntity<?> updateUserProfileImage(JwtAuthenticationToken jwt,
                                                     @RequestBody UploadImageRequest request) throws BadRequestException, IOException {

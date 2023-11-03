@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.stores.util;
+package org.morriswa.messageboard.util;
 
 import org.morriswa.messageboard.model.UploadImageRequest;
 
@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  * Provides an easy Interface to scale images across services
  */
-public interface ImageScaleService {
+public interface ImageScaleUtil {
 
     /**
      *
@@ -20,5 +20,5 @@ public interface ImageScaleService {
      * @throws IOException
      */
     File getScaledImage(UploadImageRequest imageRequest, int IMAGE_X, int IMAGE_Y) throws IOException;
-    File getImageScaledByPercent(UploadImageRequest imageRequest, float scale) throws IOException;
+    File getScaledImage(UploadImageRequest imageRequest, float scale) throws IOException;
 }

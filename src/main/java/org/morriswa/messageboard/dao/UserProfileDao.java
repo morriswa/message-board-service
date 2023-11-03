@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.dao;
 
+import jakarta.validation.Valid;
 import org.morriswa.messageboard.model.CreateUserRequest;
 import org.morriswa.messageboard.model.UserProfile;
 
@@ -14,7 +15,10 @@ public interface UserProfileDao {
 
     Optional<UserProfile> getUserProfile(UUID userId);
 
-    void createNewUser(CreateUserRequest user);
+    void createNewUser(@Valid CreateUserRequest user);
 
     void updateUserDisplayName(UUID userId, String displayName);
+
+    Optional<UUID> getUserId(String authZeroId);
+
 }

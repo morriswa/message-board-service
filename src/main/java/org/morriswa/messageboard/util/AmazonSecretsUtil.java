@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.util;
 
-public interface AmazonSecretService {
+public interface AmazonSecretsUtil {
     /**
      * Retrieves a secret
      * @param key of secret to retrieve

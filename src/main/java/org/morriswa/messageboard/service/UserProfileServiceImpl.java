@@ -37,12 +37,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.profileImageStoreImpl = profileImageStoreImpl;
     }
 
-//    private UserProfile buildUserProfileResponse(User user) {
-//        var userProfileImage = profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
-//
-//        return new UserProfile(user,userProfileImage);
-//    }
-
     private void displayNameIsAvailableOrThrow(String displayName) throws ValidationException {
         if (userProfileDao.existsByDisplayName(displayName))
             throw new ValidationException(
@@ -52,19 +46,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     private String extractEmailFromJwt(JwtAuthenticationToken token) {
-        String email; // get email logic for new user
-        if (    // if the application is running a test
-                Arrays.asList(e.getActiveProfiles()).contains("test")
-                ||      // or the application is running in a local development environment
-                (       System.getenv("APPCONFIG_ENV_ID").equals("local")
-                        && // and the user has not included an email in their JWT
-                        !token.getTokenAttributes().containsKey("email"))
-        ) { // in local/test environments, this value may be filled by local property
-            email = e.getProperty("testemail");
-        } else
-            // in most cases this value should come from users token
-            email = String.valueOf(token.getTokenAttributes().get("email"));
-        return email;
+        return String.valueOf(token.getTokenAttributes().get("email"));
     }
 
     @Override
@@ -77,6 +59,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         );
 
         return user;
+    }
+
+    @Override
+    public UUID authenticate(JwtAuthenticationToken token) throws BadRequestException {
+        return userProfileDao.getUserId(token.getName())
+                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
     }
 
     @Override
@@ -118,14 +106,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         var user = authenticateAndGetUserProfile(token);
 
         profileImageStoreImpl.updateUserProfileImage(user.getUserId(), request);
-    }
-
-    @Override
-    public URL getUserProfileImage(JwtAuthenticationToken token) throws BadRequestException {
-
-        var user = authenticateAndGetUserProfile(token);
-
-        return profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
     }
 
     @Override

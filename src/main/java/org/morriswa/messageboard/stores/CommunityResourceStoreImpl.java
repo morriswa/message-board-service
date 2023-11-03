@@ -3,24 +3,24 @@ package org.morriswa.messageboard.stores;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.stores.util.CustomS3ServiceImpl;
-import org.morriswa.messageboard.stores.util.ImageScaleService;
+import org.morriswa.messageboard.util.CustomS3UtilImpl;
+import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Service @Slf4j
+@Component @Slf4j
 public class CommunityResourceStoreImpl implements CommunityResourceStore {
 
     private final String COMMUNITY_ICON_PATH;
     private final String COMMUNITY_BANNER_PATH;
 
-    private final ImageScaleService iss;
-    private final CustomS3ServiceImpl s3Store;
+    private final ImageScaleUtil iss;
+    private final CustomS3UtilImpl s3Store;
     @Autowired
-    CommunityResourceStoreImpl(Environment e, ImageScaleService iss1, CustomS3ServiceImpl s3Store) {
+    CommunityResourceStoreImpl(Environment e, ImageScaleUtil iss1, CustomS3UtilImpl s3Store) {
         this.COMMUNITY_ICON_PATH = e.getRequiredProperty("common.stores.community-icons");
         this.COMMUNITY_BANNER_PATH = e.getRequiredProperty("common.stores.community-banners");
         this.iss = iss1;
@@ -30,14 +30,14 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
 
     @Override
     public void setCommunityBanner(UploadImageRequest uploadImageRequest, Long communityId) throws IOException {
-        var fileToUpload = iss.getImageScaledByPercent(uploadImageRequest, 0.6f);
+        var fileToUpload = iss.getScaledImage(uploadImageRequest, 0.6f);
 
         s3Store.uploadObjectToS3(fileToUpload, this.COMMUNITY_BANNER_PATH+communityId);
     }
 
     @Override
     public void setCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId) throws IOException {
-        var fileToUpload = iss.getImageScaledByPercent(uploadImageRequest, 0.6f);
+        var fileToUpload = iss.getScaledImage(uploadImageRequest, 0.6f);
 
         s3Store.uploadObjectToS3(fileToUpload, this.COMMUNITY_ICON_PATH+communityId);
     }

@@ -48,7 +48,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void createNewCommunity(JwtAuthenticationToken token, CreateNewCommunityRequest request) throws BadRequestException {
-        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
+        var userId = userProfileService.authenticate(token);
 
         var newCommunity = new NewCommunityRequest(request.getCommunityRef(), request.getCommunityName(), userId);
 
@@ -59,7 +59,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
-        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
+        var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
@@ -68,7 +68,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
-        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
+        var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
@@ -111,7 +111,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void joinCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
-        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
+        var userId = userProfileService.authenticate(token);
 
         if (communityMemberRepo.relationshipExists(userId,communityId))
             return;
@@ -125,7 +125,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
-        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
+        var userId = userProfileService.authenticate(token);
 
         communityMemberRepo.deleteRelationship(userId, communityId);
     }
@@ -141,9 +141,9 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public List<Community> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException {
 
-        var user = userProfileService.authenticateAndGetUserProfile(token);
+        var userId = userProfileService.authenticate(token);
 
-        var communities = communityDao.findAllCommunitiesByUserId(user.getUserId());
+        var communities = communityDao.findAllCommunitiesByUserId(userId);
 
         for (var community : communities)
             community.setResourceUrls(resourceService.getAllCommunityResources(community.getCommunityId()));
@@ -167,9 +167,9 @@ public class CommunityServiceImpl implements CommunityService {
                                           Optional<String> communityRef,
                                           Optional<String> communityDisplayName) throws BadRequestException, ValidationException {
 
-        var user = userProfileService.authenticateAndGetUserProfile(token);
+        var userId = userProfileService.authenticate(token);
 
-        verifyUserCanEditCommunityOrThrow(user.getUserId(), communityId);
+        verifyUserCanEditCommunityOrThrow(userId, communityId);
 
         var community = communityDao.getAllCommunityInfo(communityId)
                 .orElseThrow(()->new BadRequestException(

@@ -1,8 +1,10 @@
-package org.morriswa.messageboard.stores.util;
+package org.morriswa.messageboard.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.UploadImageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -13,8 +15,8 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.UUID;
 
-@Service
-public class ImageScaleServiceImpl implements ImageScaleService {
+@Component @Slf4j
+public class ImageScaleUtilImpl implements ImageScaleUtil {
 
     private final Environment e;
     private final Base64.Decoder b64decoder;
@@ -22,7 +24,7 @@ public class ImageScaleServiceImpl implements ImageScaleService {
 
 
     @Autowired
-    public ImageScaleServiceImpl(Environment e) {
+    public ImageScaleUtilImpl(Environment e) {
         this.e = e;
         this.INTERNAL_FILE_CACHE_PATH = e.getRequiredProperty("server.filecache");
         this.b64decoder = java.util.Base64.getDecoder();
@@ -65,7 +67,7 @@ public class ImageScaleServiceImpl implements ImageScaleService {
     }
 
     @Override
-    public File getImageScaledByPercent(UploadImageRequest imageRequest, float scale) throws IOException {
+    public File getScaledImage(UploadImageRequest imageRequest, float scale) throws IOException {
 
         final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
 

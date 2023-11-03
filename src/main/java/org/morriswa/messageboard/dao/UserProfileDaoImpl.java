@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.dao;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.CreateUserRequest;
 import org.morriswa.messageboard.model.UserProfile;
@@ -26,17 +27,12 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     private Optional<UserProfile> unwrapUserResultSet(ResultSet rs) throws SQLException {
-        if (rs.next()) {
-            UserProfile user = new UserProfile(
-                    rs.getObject("id", UUID.class),
-                    rs.getString("auth_zero_id"),
-                    rs.getString("email"),
-                    rs.getString("display_name"),
-                    UserRole.valueOf(rs.getString("role"))
-            );
-
-            return Optional.of(user);
-        }
+        if (rs.next()) return Optional.of(new UserProfile(
+            rs.getObject("id", UUID.class),
+            rs.getString("auth_zero_id"),
+            rs.getString("email"),
+            rs.getString("display_name"),
+            UserRole.valueOf(rs.getString("role"))));
 
         return Optional.empty();
     }
@@ -65,9 +61,8 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public void createNewUser(CreateUserRequest user) {
-        final String query =
-        """
+    public void createNewUser(@Valid CreateUserRequest user) {
+        final String query = """
             insert into user_profile(id, auth_zero_id, display_name, email, role)
             values (gen_random_uuid(), :authZeroId, :displayName, :email, :role)
         """;
@@ -79,23 +74,20 @@ public class UserProfileDaoImpl implements UserProfileDao {
             put("role", user.getRole().toString());
         }};
 
-
         try {
             jdbc.update(query, params);
         } catch (Exception e) {
             log.error("encountered error ", e);
         }
-
     }
 
     @Override
     public void updateUserDisplayName(UUID userId, String requestedDisplayName) {
-        final String query =
-                """
-                    update user_profile
-                        set display_name = :displayName
-                    where id = :userId
-                """;
+        final String query = """
+            update user_profile
+                set display_name = :displayName
+            where id = :userId
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("userId", userId);
@@ -110,13 +102,30 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
+    public Optional<UUID> getUserId(String authZeroId) {
+
+        final String query = "select id from user_profile where auth_zero_id=:authZeroId";
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("authZeroId", authZeroId);
+        }};
+
+        return jdbc.query(query, params, rs -> {
+            if (rs.next()) return Optional.of(
+                rs.getObject("id", UUID.class));
+            return Optional.empty();
+        });
+    }
+
+    @Override
     public boolean existsByDisplayName(String displayName) {
+
         final String query = "select 1 from user_profile where display_name=:displayName";
 
         Map<String, Object> params = new HashMap<>(){{
             put("displayName", displayName);
         }};
 
-        return jdbc.query(query, params, ResultSet::next);
+        return Boolean.TRUE.equals(jdbc.query(query, params, ResultSet::next));
     }
 }

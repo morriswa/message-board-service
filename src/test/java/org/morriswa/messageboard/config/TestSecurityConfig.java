@@ -22,6 +22,9 @@ public class TestSecurityConfig {
     @Value("${auth0.scope.secureroutes}")
     String[] SCOPE;
 
+    @Value("${testemail}")
+    String TEST_EMAIL;
+
     @Bean @Profile("test")
     public JwtDecoder jwtDecoder() {
         // This anonymous class needs for the possibility of using SpyBean in test methods
@@ -37,6 +40,7 @@ public class TestSecurityConfig {
             StringBuilder response = new StringBuilder();
             for (String scope : SCOPE) response.append(String.format("%s ",scope));
             put("scope", response.toString().trim());
+            put("email", TEST_EMAIL);
         }};
 
         //This is an object that represents contents of jwt token after parsing

@@ -9,20 +9,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
-@Service
-@Profile("!test")
-public class AmazonSecretServiceImpl implements AmazonSecretService {
+@Component @Profile("!test")
+public class AmazonSecretsUtilImpl implements AmazonSecretsUtil {
     private final Map<String,Object> secrets;
 
     @Autowired
-    public AmazonSecretServiceImpl(Environment env) throws JsonProcessingException {
+    public AmazonSecretsUtilImpl(Environment env) throws JsonProcessingException {
         this.secrets = getSecret(
                 env.getProperty("aws.secret-name"),
                 env.getProperty("aws.region"));

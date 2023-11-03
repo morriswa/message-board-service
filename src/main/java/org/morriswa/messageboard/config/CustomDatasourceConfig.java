@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.config;
 
-import org.morriswa.messageboard.util.AmazonSecretService;
+import org.morriswa.messageboard.util.AmazonSecretsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -14,10 +14,10 @@ import javax.sql.DataSource;
 @Profile("!test")
 public class CustomDatasourceConfig {
     private final Environment e;
-    private final AmazonSecretService ss;
+    private final AmazonSecretsUtil ss;
 
     @Autowired
-    public CustomDatasourceConfig(Environment e, AmazonSecretService ss) {
+    public CustomDatasourceConfig(Environment e, AmazonSecretsUtil ss) {
         this.e = e;
         this.ss = ss;
     }
