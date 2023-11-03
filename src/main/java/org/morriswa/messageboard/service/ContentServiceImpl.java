@@ -3,6 +3,7 @@ package org.morriswa.messageboard.service;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -200,6 +201,8 @@ public class ContentServiceImpl implements ContentService {
             response.add(new PostResponse(post, user, resourceUrls));
         }
 
-        return response;
+        return response.stream().sorted(
+                Comparator.comparing(PostResponse::getDateCreated).reversed()
+        ).toList();
     }
 }
