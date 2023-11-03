@@ -74,7 +74,7 @@ public class CommunityDaoImpl implements CommunityDao {
                 return response;
             });
         } catch (Exception e) {
-            log.error("Exception occurred CommunityMemberDao.findAllByUserId", e);
+            log.error("Exception occurred CommunityDao.findAllByUserId", e);
             throw new RuntimeException(e);
         }
     }
@@ -183,7 +183,7 @@ public class CommunityDaoImpl implements CommunityDao {
                 return false;
             }));
         } catch (Exception e) {
-            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityId", e);
+            log.error("Exception occurred CommunityDao.verifyUserCanPostInCommunity", e);
             throw new RuntimeException(e);
         }
     }
@@ -192,8 +192,8 @@ public class CommunityDaoImpl implements CommunityDao {
     public boolean verifyUserCanEditCommunity(UUID userId, Long communityId) {
         final String query = """            
             select owner
-            from community co
-            where co.owner=:userId and co.id=:communityId
+            from community
+            where owner=:userId and id=:communityId
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -204,14 +204,14 @@ public class CommunityDaoImpl implements CommunityDao {
         try {
             return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
                 if (rs.next()) {
-                    var owner = rs.getObject("ownerId", UUID.class);
+                    var owner = rs.getObject("owner", UUID.class);
                     return owner.equals(userId);
                 }
 
                 return false;
             }));
         } catch (Exception e) {
-            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityId", e);
+            log.error("Exception occurred CommunityDao.verifyUserCanEditCommunity", e);
             throw new RuntimeException(e);
         }
     }
@@ -237,7 +237,7 @@ public class CommunityDaoImpl implements CommunityDao {
         try {
             return jdbc.query(query, params, this::unwrapCommunityResultSet);
         } catch (Exception e) {
-            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityLocator", e);
+            log.error("Exception occurred CommunityDao.findCommunity", e);
             throw new RuntimeException(e);
         }
     }
@@ -263,7 +263,7 @@ public class CommunityDaoImpl implements CommunityDao {
         try {
             return jdbc.query(query, params, this::unwrapCommunityResultSet);
         } catch (Exception e) {
-            log.error("Exception occurred CommunityMemberDao.getAllCommunityInfoByCommunityId", e);
+            log.error("Exception occurred CommunityDao.findCommunity", e);
             throw new RuntimeException(e);
         }
     }

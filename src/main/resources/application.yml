@@ -86,7 +86,7 @@ user-profile:
         regexp: "^[A-Za-z0-9._-]*$"
         min-length: 3
         max-length: 30
-      user-profile-image-dimension: 256
+      user-profile-image-dimension: 128
 
 community:
   service:
@@ -148,3 +148,5 @@ content:
     errors:
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
       too-many-images: Please do not upload more than 10 images for a single post!
+    rules:
+      image-scale-factor: 0.5

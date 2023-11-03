@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component @Slf4j
 public class ImageStoreImpl implements ImageStore {
 
+    private final float IMAGE_SCALE_FACTOR;
     private final String POST_RESOURCE_IMAGE_STORE;
     private final ImageScaleUtil iss;
     private final CustomS3Util s3Store;
@@ -26,6 +27,8 @@ public class ImageStoreImpl implements ImageStore {
                           ImageScaleUtil iss,
                           CustomS3Util s3Store){
         this.POST_RESOURCE_IMAGE_STORE = e.getRequiredProperty("common.stores.post-resources");
+        this.IMAGE_SCALE_FACTOR = Float.parseFloat(
+                e.getRequiredProperty("content.service.rules.image-scale-factor"));
         this.iss = iss;
         this.s3Store = s3Store;
     }
@@ -33,7 +36,7 @@ public class ImageStoreImpl implements ImageStore {
     @Override
     public void uploadIndividualImage(UUID resourceID, @Valid UploadImageRequest request) throws IOException {
 
-        var image = iss.getScaledImage(request, 0.8f);
+        var image = iss.getScaledImage(request, IMAGE_SCALE_FACTOR);
 
         s3Store.uploadToS3(image, POST_RESOURCE_IMAGE_STORE+resourceID);
     }
