@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
+import org.morriswa.messageboard.model.CreatePostRequest;
 import org.morriswa.messageboard.model.Post;
 
 import java.util.List;
@@ -12,5 +13,5 @@ public interface PostDao {
 
     List<Post> findAllPostsByCommunityId(Long communityId);
 
-    void createNewPost(@Valid Post newPost);
+    void createNewPost(@Valid CreatePostRequest newCreatePostRequest);
 }

@@ -1,66 +1,22 @@
 package org.morriswa.messageboard.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
-import org.morriswa.messageboard.model.PostContentType;
 
+import java.net.URL;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.UUID;
 
-//@Entity @Table(name = "user_post")
-@AllArgsConstructor
-@NoArgsConstructor @Getter
+@Data @AllArgsConstructor
 public class Post {
-//    @Id
-//    @SequenceGenerator(name = "user_post_seq_gen", sequenceName = "user_post_seq")
-//    @GeneratedValue(generator = "user_post_seq_gen",strategy = GenerationType.AUTO)
-    private Long postId;
-
-    @NotNull
-//    @Column(nullable = false, updatable = false)
-    private UUID userId;
-
-    @NotNull
-//    @Column(nullable = false, updatable = false)
-    private Long communityId;
-
-    @NotBlank
-    @Length(min=5, max = 100)
-//    @Column(nullable = false, updatable = false)
-    private String caption;
-
-    @Length(max = 10000)
-//    @Column(updatable = false)
-    private String description;
-
-    @NotNull
-//    @Column(nullable = false, updatable = false)
-    private GregorianCalendar dateCreated;
-
-    @NotNull
-//    @Column(nullable = false, updatable = false)
-    private PostContentType postContentType;
-
-    @NotNull
-//    @Column(nullable = false, updatable = false, unique = true)
-    private UUID resourceId;
-
-    public Post(UUID userId,
-    Long communityId, 
-    String caption, 
-    String description, 
-    PostContentType contentType, 
-    UUID resourceId) {
-        this.userId = userId;
-        this.communityId = communityId;
-        this.caption = caption;
-        this.description = description;
-        this.postContentType = contentType;
-        this.resourceId = resourceId;
-        this.dateCreated = new GregorianCalendar();
-    }
+    private final Long postId;
+    private final UUID userId;
+    private final Long communityId;
+    private final String caption;
+    private final String description;
+    private final PostContentType contentType;
+    private final GregorianCalendar dateCreated;
+    private final UUID resourceId;
 }

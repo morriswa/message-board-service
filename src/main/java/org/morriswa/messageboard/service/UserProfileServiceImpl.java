@@ -103,9 +103,9 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public void updateUserProfileImage(JwtAuthenticationToken token, UploadImageRequest request) throws BadRequestException, IOException {
 
-        var user = authenticateAndGetUserProfile(token);
+        var userId = authenticate(token);
 
-        profileImageStoreImpl.updateUserProfileImage(user.getUserId(), request);
+        profileImageStoreImpl.updateUserProfileImage(userId, request);
     }
 
     @Override
@@ -113,12 +113,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         // ensure display name follows basic rules
         this.validator.validateDisplayNameOrThrow(requestedDisplayName);
 
-        UserProfile user = authenticateAndGetUserProfile(token);
+        UUID userId = authenticate(token);
 
         displayNameIsAvailableOrThrow(requestedDisplayName);
 
         // save changes
-        this.userProfileDao.updateUserDisplayName(user.getUserId(), user.getDisplayName());
+        this.userProfileDao.updateUserDisplayName(userId, requestedDisplayName);
     }
 
 }

@@ -12,7 +12,7 @@ import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.model.Comment;
-import org.morriswa.messageboard.model.Post;
+import org.morriswa.messageboard.model.CreatePostRequest;
 import org.morriswa.messageboard.model.Resource;
 import org.morriswa.messageboard.stores.ImageStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
@@ -56,7 +56,7 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public void createPost(JwtAuthenticationToken token, Long communityId, NewPostRequest request) throws BadRequestException, IOException {
 
-        var userId = userProfileService.authenticateAndGetUserProfile(token).getUserId();
+        var userId = userProfileService.authenticate(token);
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, communityId);
 
@@ -109,7 +109,7 @@ public class ContentServiceImpl implements ContentService {
                 throw new BadRequestException(e.getRequiredProperty("content.service.errors.content-type-not-supported"));
         }
 
-        var newPost = new Post(userId,
+        var newPost = new CreatePostRequest(userId,
                 communityId,
                 request.getCaption(),
                 request.getDescription(),
@@ -167,9 +167,9 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<PhotosPostResponse> getFeedForCommunity(Long communityId) throws BadRequestException {
+    public List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException {
 
-        var response = new ArrayList<PhotosPostResponse>();
+        var response = new ArrayList<PostResponse>();
 
         var allCommunityPosts = posts.findAllPostsByCommunityId(communityId);
 
@@ -183,8 +183,7 @@ public class ContentServiceImpl implements ContentService {
                     add(imageStore.retrieveImageResource(resource));
             }};
 
-            response.add(new PhotosPostResponse(post, user, resourceUrls));
-
+            response.add(new PostResponse(post, user, resourceUrls));
         }
 
         return response;

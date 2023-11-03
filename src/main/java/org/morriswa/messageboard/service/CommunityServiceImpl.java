@@ -27,23 +27,23 @@ public class CommunityServiceImpl implements CommunityService {
 
     private final Environment e;
     private final CommunityDao communityDao;
-    private final CommunityMemberDao communityMemberRepo;
+    private final CommunityMemberDao communityMemberDao;
     private final UserProfileService userProfileService;
     private final CommunityServiceValidator validator;
-    private final CommunityResourceStore resourceService;
+    private final CommunityResourceStore resources;
 
     @Autowired
     public CommunityServiceImpl(Environment e,
                                 CommunityDao communityDao,
                                 CommunityMemberDao communityMemberDao, UserProfileService userProfileService,
                                 CommunityServiceValidator validator,
-                                CommunityResourceStore resourceService) {
+                                CommunityResourceStore resources) {
         this.e = e;
         this.communityDao = communityDao;
-        this.communityMemberRepo = communityMemberDao;
+        this.communityMemberDao = communityMemberDao;
         this.userProfileService = userProfileService;
         this.validator = validator;
-        this.resourceService = resourceService;
+        this.resources = resources;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
-        resourceService.setCommunityIcon(uploadImageRequest, communityId);
+        resources.setCommunityIcon(uploadImageRequest, communityId);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
-        resourceService.setCommunityBanner(uploadImageRequest, communityId);
+        resources.setCommunityBanner(uploadImageRequest, communityId);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class CommunityServiceImpl implements CommunityService {
                                 communityLocator)));
 
         community.setResourceUrls(
-                resourceService.getAllCommunityResources(community.getCommunityId())
+                resources.getAllCommunityResources(community.getCommunityId())
         );
 
         return community;
@@ -103,7 +103,7 @@ public class CommunityServiceImpl implements CommunityService {
                                 communityId.toString())));
 
         community.setResourceUrls(
-                resourceService.getAllCommunityResources(community.getCommunityId())
+                resources.getAllCommunityResources(community.getCommunityId())
         );
 
         return community;
@@ -113,21 +113,21 @@ public class CommunityServiceImpl implements CommunityService {
     public void joinCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
-        if (communityMemberRepo.relationshipExists(userId,communityId))
+        if (communityMemberDao.relationshipExists(userId,communityId))
             return;
 
         var newRelationship = new CommunityMember(userId, communityId);
 
         validator.validateBeanOrThrow(newRelationship);
 
-        communityMemberRepo.createNewRelationship(newRelationship);
+        communityMemberDao.createNewRelationship(newRelationship);
     }
 
     @Override
     public void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
-        communityMemberRepo.deleteRelationship(userId, communityId);
+        communityMemberDao.deleteRelationship(userId, communityId);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class CommunityServiceImpl implements CommunityService {
         var communities = communityDao.findAllCommunitiesByUserId(userId);
 
         for (var community : communities)
-            community.setResourceUrls(resourceService.getAllCommunityResources(community.getCommunityId()));
+            community.setResourceUrls(resources.getAllCommunityResources(community.getCommunityId()));
 
         return communities;
     }
