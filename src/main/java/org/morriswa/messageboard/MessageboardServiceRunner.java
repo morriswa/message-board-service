@@ -17,20 +17,22 @@ public class MessageboardServiceRunner {
                 .sources(MessageboardServiceRunner.class)
                 .initializers(applicationContext -> {
                     try {
-                        switch (System.getenv("APPCONFIG_ENV_ID")) {
-                            case "local","local-docker" -> {
-                                var userSpecifiedFolder = System.getenv("DEV_CONTENT_FOLDER");
-                                System.setProperty("common.stores.prefix",
-                                        Objects.requireNonNullElse(userSpecifiedFolder, "default-developer"));
-                            }
-                            default ->{
-                                var appConfig = new AppConfig();
+                        final String RUNTIME_ENV = System.getenv("APPCONFIG_ENV_ID");
 
-                                applicationContext
-                                        .getEnvironment()
-                                        .getPropertySources()
-                                        .addFirst(appConfig.retrieveApplicationPropertySource());
-                            }
+                        if (!RUNTIME_ENV.equals("local")) {
+                            var appConfig = new AppConfig();
+
+                            applicationContext
+                                    .getEnvironment()
+                                    .getPropertySources()
+                                    .addFirst(appConfig.retrieveApplicationPropertySource());
+                        }
+
+                        if (RUNTIME_ENV.equals("local")||
+                                RUNTIME_ENV.equals("local-docker")) {
+                            var userSpecifiedFolder = System.getenv("DEV_CONTENT_FOLDER");
+                            System.setProperty("common.stores.prefix",
+                                    Objects.requireNonNullElse(userSpecifiedFolder, "default-developer"));
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
