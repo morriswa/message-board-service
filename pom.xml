@@ -115,7 +115,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
-        <finalName>message-board-service</finalName>
+        <finalName>${project.name}</finalName>
     </build>
 
 </project>
