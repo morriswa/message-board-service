@@ -8,9 +8,9 @@ ENV AWS_SECRET_ACCESS_KEY secretid
 
 WORKDIR /app
 
-COPY target/message-board-service-0.0.4-SNAPSHOT.jar app.jar
+COPY target/message-board-service.jar message-board-service.jar
 RUN mkdir /files
 
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/message-board-service.jar"]
 
 EXPOSE 8080
