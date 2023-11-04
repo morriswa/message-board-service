@@ -3,15 +3,18 @@ package org.morriswa.messageboard.validation;
 import io.micrometer.common.util.StringUtils;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 @Service
 public class ContentServiceValidator extends BasicBeanValidator {
-    public ContentServiceValidator() {
+
+    private final Environment e;
+    public ContentServiceValidator(Environment e) {
         super();
+        this.e = e;
     }
 
     public void validateImageRequestOrThrow(UploadImageRequest uploadRequest) throws ValidationException {
@@ -21,13 +24,13 @@ public class ContentServiceValidator extends BasicBeanValidator {
             errors.add(new ValidationException.ValidationError(
                     "imageFormat",
                     uploadRequest.getImageFormat(),
-                    "image format must NOT be empty"));
+                    e.getRequiredProperty("common.service.errors.upload-image-request.empty-image-format")));
 
         if (StringUtils.isBlank(uploadRequest.getBaseEncodedImage()))
             errors.add(new ValidationException.ValidationError(
                     "baseEncodedImage",
                     uploadRequest.getBaseEncodedImage().substring(0, 10).concat("..."),
-                    "image blob must NOT be empty"));
+                    e.getRequiredProperty("common.service.errors.upload-image-request.bad-image-repr")));
 
         switch (uploadRequest.getImageFormat().toLowerCase()) {
             case "jpg", "jpeg", "png", "gif":
@@ -35,9 +38,9 @@ public class ContentServiceValidator extends BasicBeanValidator {
             default:
                 errors.add(new ValidationException.ValidationError(
                     "imageFormat",
-                    uploadRequest.getImageFormat(),
-                    //todo
-                    "image format must NOT be " + uploadRequest.getImageFormat() + "! convert this on the front please :)"));
+                    uploadRequest.getImageFormat(), String.format(
+                    e.getRequiredProperty("common.service.errors.upload-image-request.bad-image-format"),
+                        uploadRequest.getImageFormat())));
         }
 
         if (!errors.isEmpty()) throw new ValidationException(errors);

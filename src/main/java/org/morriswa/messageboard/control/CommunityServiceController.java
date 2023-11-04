@@ -61,7 +61,7 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.update-community-banner.path}")
     public ResponseEntity<?> updateCommunityBanner(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId,
-                                             @RequestBody UploadImageRequest request) throws BadRequestException, IOException {
+                                             @RequestBody UploadImageRequest request) throws BadRequestException, IOException, ValidationException {
         this.community.updateCommunityBanner(jwt, request, communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(
@@ -72,7 +72,7 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.update-community-icon.path}")
     public ResponseEntity<?> updateCommunityIcon(JwtAuthenticationToken jwt,
                                                  @PathVariable Long communityId,
-                                                 @RequestBody UploadImageRequest request) throws BadRequestException, IOException {
+                                                 @RequestBody UploadImageRequest request) throws BadRequestException, IOException, ValidationException {
         this.community.updateCommunityIcon(jwt, request, communityId);
 
         return ResponseEntity.ok(new DefaultResponse<>(

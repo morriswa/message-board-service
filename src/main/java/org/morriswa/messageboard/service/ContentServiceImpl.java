@@ -87,8 +87,7 @@ public class ContentServiceImpl implements ContentService {
                             uploadRequest
                     );
                 } catch (IOException ioe) {
-                    // todo add error
-                    throw new InternalServerError("failed to upload image, please add error");
+                    throw new InternalServerError(ioe.getMessage());
                 }
 
 
@@ -119,19 +118,13 @@ public class ContentServiceImpl implements ContentService {
                     try {
                         imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
                     }catch (IOException ioe) {
-                        //todo
-                        throw new InternalServerError("failed to upload image, please add error");
+                        throw new InternalServerError(ioe.getMessage());
                     }
 
                 }
 
-                try {
-                    newResource.setList(generatedSource);
-                    resources.createNewPostResource(newResource);
-                } catch (Exception e) {
-                    //todo add
-                    throw new InternalServerError("naughty");
-                }
+                newResource.setList(generatedSource);
+                resources.createNewPostResource(newResource);
             }
 
             default ->

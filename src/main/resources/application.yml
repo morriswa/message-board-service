@@ -36,6 +36,9 @@ common:
   static-content:
     default-profile-image: "static-content/DEFAULT_USER_PROFILE_0"
   service:
+    rules:
+      square-icon-image-dimension: 128
+      signed-url-expiration-minutes: 60
     endpoints:
       health:
         path: health
@@ -56,6 +59,12 @@ common:
       audience:
         code: invalid_token
         error: The required audience is missing
+      unable-to-delete-cached-file: Could not delete cached file...
+      failed-to-cache-file: Could not cache file...
+      upload-image-request:
+        empty-image-format: image format must NOT be empty
+        bad-image-repr: image blob must NOT be empty
+        bad-image-format: image format must NOT be %s! convert this on the front please :)
 
 user-profile:
   service:
@@ -76,8 +85,6 @@ user-profile:
           patch: "Successfully updated user's display name"
     errors:
       missing-user: No registered user
-      bad-image-format: "*** COULD NOT SAVE FILE WITH FORMAT: %s ***"
-      unable-to-delete-cached-file: Could not delete cached file...
       display-name-already-exists: Could not update your display name because another user is already registered with that display name!
       bad-display-name: "Alphanumeric chars, underscores, hyphens and periods only please."
       bad-display-name-length: "Display Name should be at least 3 and not more than 30 chars."
@@ -86,7 +93,6 @@ user-profile:
         regexp: "^[A-Za-z0-9._-]*$"
         min-length: 3
         max-length: 30
-      user-profile-image-dimension: 128
 
 community:
   service:
@@ -115,6 +121,7 @@ community:
         messages:
           get: "Successfully retrieved all of users' communities"
     rules:
+      banner-scale-factor: 0.5
       display-name:
         min-length: 0
         max-length: 100

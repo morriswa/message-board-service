@@ -25,6 +25,7 @@ import java.util.UUID;
 
 @Component @Slf4j
 public class CustomS3UtilImpl implements CustomS3Util {
+    private final String ACTIVE_USER_CONTENT_STORE;
     private final String INTERNAL_FILE_CACHE_PATH;
     private final Environment e;
     private final AmazonS3 s3;
@@ -34,6 +35,10 @@ public class CustomS3UtilImpl implements CustomS3Util {
     CustomS3UtilImpl(Environment e) {
         this.e = e;
         this.s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
+        var contentStoreEnv = System.getenv("DEV_CONTENT_STORE");
+        final String contentStore = contentStoreEnv.isEmpty()? "default" : contentStoreEnv;
+        this.ACTIVE_USER_CONTENT_STORE = System.getenv("APPCONFIG_ENV_ID").startsWith("local")?
+                String.format("developer-content/%s/", contentStore) : "";
         this.ACTIVE_BUCKET = e.getRequiredProperty("aws.s3.bucket");
         this.INTERNAL_FILE_CACHE_PATH = e.getRequiredProperty("server.filecache");
     }
@@ -47,25 +52,20 @@ public class CustomS3UtilImpl implements CustomS3Util {
 
         File temp = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath + "." + originalRequest.getImageFormat());
 
-//        log.info("caching image with format {}", originalRequest.getImageFormat());
-
         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(temp));
         outputStream.write(stuff);
 
-        if (!temp.exists()) {
-            throw new IOException("Bad");
-//                    String.format(e.getRequiredProperty("user-profile.service.errors.bad-image-format"),
-//                            imageRequest.getImageFormat()));
-        }
+        if (!temp.exists())
+            throw new FileSystemException(
+                    e.getRequiredProperty("common.service.errors.failed-to-cache-file"));
 
         s3.putObject(new PutObjectRequest(ACTIVE_BUCKET,
-                destination,
+                ACTIVE_USER_CONTENT_STORE+destination,
                 temp).withCannedAcl(CannedAccessControlList.Private));
 
-        if (!temp.delete()) {
+        if (!temp.delete())
             throw new FileSystemException(
-                    e.getRequiredProperty("user-profile.service.errors.unable-to-delete-cached-file"));
-        }
+                    e.getRequiredProperty("common.service.errors.unable-to-delete-cached-file"));
     }
 
     @Override
@@ -75,30 +75,25 @@ public class CustomS3UtilImpl implements CustomS3Util {
 
         File temp = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath);
 
-//        log.info("caching image with format {}", originalRequest.getImageFormat());
-
         ImageIO.write(scaledImageToUpload, originalRequest.getImageFormat(), temp);
 
-        if (!temp.exists()) {
-            throw new IOException("Bad");
-//                    String.format(e.getRequiredProperty("user-profile.service.errors.bad-image-format"),
-//                            imageRequest.getImageFormat()));
-        }
+        if (!temp.exists())
+            throw new FileSystemException(
+                    e.getRequiredProperty("common.service.errors.failed-to-cache-file"));
 
         s3.putObject(new PutObjectRequest(ACTIVE_BUCKET,
-                destination,
+                ACTIVE_USER_CONTENT_STORE+destination,
                 temp).withCannedAcl(CannedAccessControlList.Private));
 
-        if (!temp.delete()) {
+        if (!temp.delete())
             throw new FileSystemException(
-                    e.getRequiredProperty("user-profile.service.errors.unable-to-delete-cached-file"));
-        }
+                    e.getRequiredProperty("common.service.errors.unable-to-delete-cached-file"));
     }
 
     public boolean doesObjectExist(String pathToCheck) {
         boolean objectExists;
         try {
-            objectExists = s3.doesObjectExist(this.ACTIVE_BUCKET, pathToCheck);
+            objectExists = s3.doesObjectExist(this.ACTIVE_BUCKET, ACTIVE_USER_CONTENT_STORE+pathToCheck);
         } catch (Exception e) {
             objectExists = false;
         }
@@ -116,7 +111,7 @@ public class CustomS3UtilImpl implements CustomS3Util {
         return s3.generatePresignedUrl(
                 new GeneratePresignedUrlRequest(
                         ACTIVE_BUCKET,
-                        pathToObject)
+                        ACTIVE_USER_CONTENT_STORE+pathToObject)
                         .withMethod(HttpMethod.GET)
                         .withExpiration(expiration));
     }

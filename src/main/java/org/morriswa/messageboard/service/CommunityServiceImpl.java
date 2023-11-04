@@ -60,19 +60,23 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
+    public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException, ValidationException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
+
+        validator.validateImageRequestOrThrow(uploadImageRequest);
 
         resources.setCommunityIcon(uploadImageRequest, communityId);
     }
 
     @Override
-    public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException {
+    public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException, ValidationException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
+
+        validator.validateImageRequestOrThrow(uploadImageRequest);
 
         resources.setCommunityBanner(uploadImageRequest, communityId);
     }

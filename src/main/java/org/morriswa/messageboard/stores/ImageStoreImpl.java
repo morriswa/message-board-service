@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component @Slf4j
 public class ImageStoreImpl implements ImageStore {
 
+    private final int SIGNED_URL_EXPIRATION_MINUTES;
     private final float IMAGE_SCALE_FACTOR;
     private final String POST_RESOURCE_IMAGE_STORE;
     private final ImageScaleUtil iss;
@@ -29,6 +30,8 @@ public class ImageStoreImpl implements ImageStore {
         this.POST_RESOURCE_IMAGE_STORE = e.getRequiredProperty("common.stores.post-resources");
         this.IMAGE_SCALE_FACTOR = Float.parseFloat(
                 e.getRequiredProperty("content.service.rules.image-scale-factor"));
+        this.SIGNED_URL_EXPIRATION_MINUTES = Integer.parseInt(
+                e.getRequiredProperty("common.service.rules.signed-url-expiration-minutes"));
         this.iss = iss;
         this.s3Store = s3Store;
     }
@@ -48,6 +51,6 @@ public class ImageStoreImpl implements ImageStore {
 
     @Override
     public URL retrieveImageResource(UUID resourceId) {
-        return s3Store.getSignedObjectUrl(POST_RESOURCE_IMAGE_STORE+resourceId, 60);
+        return s3Store.getSignedObjectUrl(POST_RESOURCE_IMAGE_STORE+resourceId, SIGNED_URL_EXPIRATION_MINUTES);
     }
 }
