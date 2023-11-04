@@ -8,18 +8,18 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.FileSystemException;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
@@ -38,13 +38,46 @@ public class CustomS3UtilImpl implements CustomS3Util {
         this.INTERNAL_FILE_CACHE_PATH = e.getRequiredProperty("server.filecache");
     }
 
-    public void uploadToS3(BufferedImage toUpload, String destination) throws IOException {
+    @Override
+    public void uploadToS3(UploadImageRequest originalRequest, String destination) throws IOException {
+
+        final UUID newImagePath = UUID.randomUUID();
+
+        final byte[] stuff = Base64.getDecoder().decode(originalRequest.getBaseEncodedImage());
+
+        File temp = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath + "." + originalRequest.getImageFormat());
+
+//        log.info("caching image with format {}", originalRequest.getImageFormat());
+
+        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(temp));
+        outputStream.write(stuff);
+
+        if (!temp.exists()) {
+            throw new IOException("Bad");
+//                    String.format(e.getRequiredProperty("user-profile.service.errors.bad-image-format"),
+//                            imageRequest.getImageFormat()));
+        }
+
+        s3.putObject(new PutObjectRequest(ACTIVE_BUCKET,
+                destination,
+                temp).withCannedAcl(CannedAccessControlList.Private));
+
+        if (!temp.delete()) {
+            throw new FileSystemException(
+                    e.getRequiredProperty("user-profile.service.errors.unable-to-delete-cached-file"));
+        }
+    }
+
+    @Override
+    public void uploadToS3(BufferedImage scaledImageToUpload, UploadImageRequest originalRequest, String destination) throws IOException {
 
         final UUID newImagePath = UUID.randomUUID();
 
         File temp = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath);
 
-        ImageIO.write(toUpload, "png", temp);
+//        log.info("caching image with format {}", originalRequest.getImageFormat());
+
+        ImageIO.write(scaledImageToUpload, originalRequest.getImageFormat(), temp);
 
         if (!temp.exists()) {
             throw new IOException("Bad");

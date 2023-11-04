@@ -36,9 +36,14 @@ public class ImageStoreImpl implements ImageStore {
     @Override
     public void uploadIndividualImage(UUID resourceID, @Valid UploadImageRequest request) throws IOException {
 
+        if (request.getImageFormat().equals("gif")) {
+            s3Store.uploadToS3(request, POST_RESOURCE_IMAGE_STORE+resourceID);
+            return;
+        }
+
         var image = iss.getScaledImage(request, IMAGE_SCALE_FACTOR);
 
-        s3Store.uploadToS3(image, POST_RESOURCE_IMAGE_STORE+resourceID);
+        s3Store.uploadToS3(image, request, POST_RESOURCE_IMAGE_STORE+resourceID);
     }
 
     @Override

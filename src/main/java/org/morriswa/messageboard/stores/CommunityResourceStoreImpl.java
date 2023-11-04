@@ -31,14 +31,14 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
     public void setCommunityBanner(UploadImageRequest uploadImageRequest, Long communityId) throws IOException {
         var image = iss.getScaledImage(uploadImageRequest, 0.6f);
 
-        s3Store.uploadToS3(image, this.COMMUNITY_BANNER_PATH+communityId);
+        s3Store.uploadToS3(image, uploadImageRequest, this.COMMUNITY_BANNER_PATH+communityId);
     }
 
     @Override
     public void setCommunityIcon(UploadImageRequest uploadImageRequest, Long communityId) throws IOException {
         var image = iss.getScaledImage(uploadImageRequest, 0.6f);
 
-        s3Store.uploadToS3(image, this.COMMUNITY_ICON_PATH+communityId);
+        s3Store.uploadToS3(image, uploadImageRequest, this.COMMUNITY_ICON_PATH+communityId);
     }
 
     @Override

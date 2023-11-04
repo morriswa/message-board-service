@@ -10,6 +10,8 @@ import java.util.UUID;
 import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.ResourceDao;
+import org.morriswa.messageboard.exception.InternalServerError;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.*;
@@ -60,7 +62,7 @@ public class ContentServiceImpl implements ContentService {
 
 
     @Override
-    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request) throws BadRequestException, IOException {
+    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request) throws BadRequestException, ValidationException, InternalServerError {
 
         var userId = userProfileService.authenticate(token);
 
@@ -77,13 +79,18 @@ public class ContentServiceImpl implements ContentService {
                         (String) request.getContent().get("imageFormat")
                 );
 
-                validator.validateBeanOrThrow(uploadRequest);
+                validator.validateImageRequestOrThrow(uploadRequest);
 
+                try {
+                    imageStore.uploadIndividualImage(
+                            newResource.getResourceId(),
+                            uploadRequest
+                    );
+                } catch (IOException ioe) {
+                    // todo add error
+                    throw new InternalServerError("failed to upload image, please add error");
+                }
 
-                imageStore.uploadIndividualImage(
-                        newResource.getResourceId(),
-                        uploadRequest
-                        );
 
                 resources.createNewPostResource(newResource);
             }
@@ -107,16 +114,23 @@ public class ContentServiceImpl implements ContentService {
                             (String) request.getContent().get("imageFormat" + i)
                     );
 
-                    validator.validateBeanOrThrow(uploadRequest);
+                    validator.validateImageRequestOrThrow(uploadRequest);
 
-                    imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
+                    try {
+                        imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
+                    }catch (IOException ioe) {
+                        //todo
+                        throw new InternalServerError("failed to upload image, please add error");
+                    }
+
                 }
 
                 try {
                     newResource.setList(generatedSource);
                     resources.createNewPostResource(newResource);
                 } catch (Exception e) {
-                    throw new RuntimeException("naughty");
+                    //todo add
+                    throw new InternalServerError("naughty");
                 }
             }
 

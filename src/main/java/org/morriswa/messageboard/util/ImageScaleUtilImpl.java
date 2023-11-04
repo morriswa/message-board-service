@@ -46,11 +46,6 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
                 BufferedImage.TYPE_INT_RGB);
         outputImage.getGraphics().drawImage(scaledImage, 0, 0, null);
 
-//        if ("heic".equalsIgnoreCase(imageRequest.getImageFormat())) {
-//            imageRequest.setImageFormat("jpeg");
-//        }
-
-
         return outputImage;
     }
 

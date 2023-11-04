@@ -38,7 +38,7 @@ public class ProfileImageStoreImpl implements ProfileImageStore {
 
         var image = iss.getScaledImage(request, IMAGE_PX_WIDTH, IMAGE_PX_WIDTH);
 
-        s3Store.uploadToS3(image, PROFILE_DIR+userId);
+        s3Store.uploadToS3(image, request, PROFILE_DIR+userId);
     }
 
     @Override
