@@ -8,7 +8,7 @@ ENV AWS_SECRET_ACCESS_KEY secretid
 
 WORKDIR /app
 
-COPY target/message-board-service-0.0.3-SNAPSHOT.jar app.jar
+COPY target/message-board-service-0.0.4-SNAPSHOT.jar app.jar
 RUN mkdir /files
 
 ENTRYPOINT ["java","-jar","/app/app.jar"]
