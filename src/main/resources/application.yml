@@ -29,10 +29,11 @@ testemail: test@email.com
 
 common:
   stores:
-    profile-images: "user-content/profiles/"
-    community-icons: "user-content/communities/icons/"
-    community-banners: "user-content/communities/banners/"
-    post-resources: "user-content/post/resources/"
+    prefix: ""
+    profile-images: "${common.stores.prefix}user-content/profiles/"
+    community-icons: "${common.stores.prefix}user-content/communities/icons/"
+    community-banners: "${common.stores.prefix}user-content/communities/banners/"
+    post-resources: "${common.stores.prefix}user-content/post/resources/"
   static-content:
     default-profile-image: "static-content/DEFAULT_USER_PROFILE_0"
   service:

@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
+import java.util.Objects;
+
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 public class MessageboardServiceRunner {
 
@@ -14,14 +16,20 @@ public class MessageboardServiceRunner {
                 .sources(MessageboardServiceRunner.class)
                 .initializers(applicationContext -> {
                     try {
-                        if (!System.getenv("APPCONFIG_ENV_ID").equals("local")) {
+                        switch (System.getenv("APPCONFIG_ENV_ID")) {
+                            case "local", "local-docker" -> {
+                                var userSpecifiedFolder = System.getenv("DEV_CONTENT_FOLDER");
+                                System.setProperty("common.stores.prefix",
+                                        Objects.requireNonNullElse(userSpecifiedFolder, "default-developer")+"/");
+                            }
+                            default ->{
+                                var appConfig = new AppConfig();
 
-                            var appConfig = new AppConfig();
-
-                            applicationContext
-                                    .getEnvironment()
-                                    .getPropertySources()
-                                    .addFirst(appConfig.retrieveApplicationPropertySource());
+                                applicationContext
+                                        .getEnvironment()
+                                        .getPropertySources()
+                                        .addFirst(appConfig.retrieveApplicationPropertySource());
+                            }
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
