@@ -36,7 +36,7 @@ public class CustomS3UtilImpl implements CustomS3Util {
         this.e = e;
         this.s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
         var contentStoreEnv = System.getenv("DEV_CONTENT_STORE");
-        final String contentStore = contentStoreEnv.isEmpty()? "default" : contentStoreEnv;
+        final String contentStore = contentStoreEnv == null ? "default" : contentStoreEnv;
         this.ACTIVE_USER_CONTENT_STORE = System.getenv("APPCONFIG_ENV_ID").startsWith("local")?
                 String.format("developer-content/%s/", contentStore) : "";
         this.ACTIVE_BUCKET = e.getRequiredProperty("aws.s3.bucket");
