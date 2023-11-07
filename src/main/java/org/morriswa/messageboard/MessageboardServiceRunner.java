@@ -5,8 +5,10 @@ import org.morriswa.messageboard.config.AppConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import java.util.Objects;
+import java.util.Properties;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class }) @Slf4j
 public class MessageboardServiceRunner {
@@ -36,7 +38,13 @@ public class MessageboardServiceRunner {
 
                             if (DEV_CONTENT_FOLDER != null) {
                                 log.info("OVERRIDING DEFAULT DEVELOPER-CONTENT STORE WITH {}",DEV_CONTENT_FOLDER);
-                                System.setProperty("common.stores.prefix", DEV_CONTENT_FOLDER);
+
+                                applicationContext
+                                        .getEnvironment()
+                                        .getPropertySources()
+                                        .addFirst(new PropertiesPropertySource("OVERRIDES", new Properties(){{
+                                            put("common.stores.prefix", DEV_CONTENT_FOLDER);
+                                        }}));
                             }
                         }
                     } catch (Exception e) {
