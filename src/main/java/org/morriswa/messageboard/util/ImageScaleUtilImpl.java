@@ -2,30 +2,21 @@ package org.morriswa.messageboard.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.UUID;
 
 @Component @Slf4j
 public class ImageScaleUtilImpl implements ImageScaleUtil {
 
-    private final Environment e;
     private final Base64.Decoder b64decoder;
-    protected final String INTERNAL_FILE_CACHE_PATH;
 
 
-    @Autowired
-    public ImageScaleUtilImpl(Environment e) {
-        this.e = e;
-        this.INTERNAL_FILE_CACHE_PATH = e.getRequiredProperty("server.filecache");
+    public ImageScaleUtilImpl() {
         this.b64decoder = java.util.Base64.getDecoder();
     }
 

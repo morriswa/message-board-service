@@ -22,7 +22,7 @@ public class TestSecurityConfig {
     @Value("${auth0.scope.secureroutes}")
     String[] SCOPE;
 
-    @Value("${testemail}")
+    @Value("${testing.email}")
     String TEST_EMAIL;
 
     @Bean @Profile("test")

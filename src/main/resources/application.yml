@@ -2,7 +2,6 @@ server:
   port: 8081
   path: v0/
   error.include-message: always
-  filecache: ./localfilecache/
 
 spring:
   datasource:
@@ -25,9 +24,11 @@ aws:
   s3:
     bucket: circlesdevocean
 
-testemail: test@email.com
+testing:
+  email: test@email.com
 
 common:
+  cache: ./localfilecache/
   stores:
     prefix: developer-content
     profile-images: "/profiles/"

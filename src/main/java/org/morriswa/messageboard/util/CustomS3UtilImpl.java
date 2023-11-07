@@ -35,7 +35,7 @@ public class CustomS3UtilImpl implements CustomS3Util {
         this.e = e;
         this.s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
         this.ACTIVE_BUCKET = e.getRequiredProperty("aws.s3.bucket");
-        this.INTERNAL_FILE_CACHE_PATH = e.getRequiredProperty("server.filecache");
+        this.INTERNAL_FILE_CACHE_PATH = e.getRequiredProperty("common.cache");
     }
 
     @Override
