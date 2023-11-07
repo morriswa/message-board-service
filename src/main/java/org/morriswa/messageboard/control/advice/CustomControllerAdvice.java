@@ -2,9 +2,8 @@ package org.morriswa.messageboard.control.advice;
 
 import jakarta.validation.ConstraintViolationException;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.InternalServerError;
-import org.morriswa.messageboard.model.responsebody.DefaultErrorResponse;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.responsebody.DefaultErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,7 @@ public class CustomControllerAdvice {
         this.env = env;
     }
 
-    @ExceptionHandler({Exception.class, InternalServerError.class}) // Catch any and all unhandled exceptions thrown in this controller
+    @ExceptionHandler({Exception.class}) // Catch any and all unhandled exceptions thrown in this controller
     public ResponseEntity<?> internalServerError(Exception e, WebRequest r) {
         var response = DefaultErrorResponse.builder()
                 .error(e.getClass().getName())

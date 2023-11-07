@@ -60,7 +60,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException, ValidationException {
+    public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, ValidationException, IOException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
@@ -71,7 +71,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException, ValidationException {
+    public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, ValidationException, IOException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);

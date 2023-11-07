@@ -16,9 +16,9 @@ public interface CommunityService {
 
     void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws BadRequestException;
 
-    void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException, ValidationException;
+    void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, ValidationException, IOException;
 
-    void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, IOException, ValidationException;
+    void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, ValidationException, IOException;
 
     CommunityResponse getAllCommunityInfo(String communityLocator) throws BadRequestException;
 

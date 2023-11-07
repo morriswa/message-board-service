@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.ResourceDao;
-import org.morriswa.messageboard.exception.InternalServerError;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.exception.BadRequestException;
@@ -62,7 +61,7 @@ public class ContentServiceImpl implements ContentService {
 
 
     @Override
-    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request) throws BadRequestException, ValidationException, InternalServerError {
+    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request) throws BadRequestException, ValidationException, IOException {
 
         var userId = userProfileService.authenticate(token);
 
@@ -81,15 +80,10 @@ public class ContentServiceImpl implements ContentService {
 
                 validator.validateImageRequestOrThrow(uploadRequest);
 
-                try {
-                    imageStore.uploadIndividualImage(
-                            newResource.getResourceId(),
-                            uploadRequest
-                    );
-                } catch (IOException ioe) {
-                    throw new InternalServerError(ioe.getMessage());
-                }
-
+                imageStore.uploadIndividualImage(
+                        newResource.getResourceId(),
+                        uploadRequest
+                );
 
                 resources.createNewPostResource(newResource);
             }
@@ -115,12 +109,7 @@ public class ContentServiceImpl implements ContentService {
 
                     validator.validateImageRequestOrThrow(uploadRequest);
 
-                    try {
-                        imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
-                    }catch (IOException ioe) {
-                        throw new InternalServerError(ioe.getMessage());
-                    }
-
+                    imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
                 }
 
                 newResource.setList(generatedSource);

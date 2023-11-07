@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.InternalServerError;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.model.responsebody.DefaultResponse;
@@ -11,6 +10,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController @CrossOrigin
 @RequestMapping("${server.path}")
@@ -28,8 +29,7 @@ public class ContentServiceController {
     public ResponseEntity<?> createPost(JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
                                         @RequestBody CreatePostRequestBody request)
-            throws BadRequestException, ValidationException, InternalServerError
-    {
+            throws BadRequestException, ValidationException, IOException {
         contentService.createPost(token, communityId, request);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getProperty("content.service.endpoints.create-post.messages.post")));
