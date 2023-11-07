@@ -26,7 +26,9 @@ public class ProfileImageStoreImpl implements ProfileImageStore {
     ProfileImageStoreImpl(Environment e,
                          ImageScaleUtil iss,
                          CustomS3UtilImpl s3Store) {
-        this.PROFILE_DIR = e.getRequiredProperty("common.stores.profile-images");
+        this.PROFILE_DIR =
+                e.getRequiredProperty("common.stores.prefix")+
+                e.getRequiredProperty("common.stores.profile-images");
         this.DEFAULT_PROFILE_IMAGE_OBJECT_ID = e.getRequiredProperty("common.static-content.default-profile-image");
         this.IMAGE_SIZE = Integer.parseInt(
                         e.getRequiredProperty("common.service.rules.square-icon-image-dimension"));

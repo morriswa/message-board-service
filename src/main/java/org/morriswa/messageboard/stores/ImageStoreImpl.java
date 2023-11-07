@@ -27,7 +27,9 @@ public class ImageStoreImpl implements ImageStore {
     public ImageStoreImpl(Environment e,
                           ImageScaleUtil iss,
                           CustomS3Util s3Store){
-        this.POST_RESOURCE_IMAGE_STORE = e.getRequiredProperty("common.stores.post-resources");
+        this.POST_RESOURCE_IMAGE_STORE =
+                e.getRequiredProperty("common.stores.prefix")+
+                e.getRequiredProperty("common.stores.post-resources");
         this.IMAGE_SCALE_FACTOR = Float.parseFloat(
                 e.getRequiredProperty("content.service.rules.image-scale-factor"));
         this.SIGNED_URL_EXPIRATION_MINUTES = Integer.parseInt(

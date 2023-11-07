@@ -25,8 +25,12 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
 
     @Autowired
     CommunityResourceStoreImpl(Environment e, ImageScaleUtil iss1, CustomS3UtilImpl s3Store) {
-        this.COMMUNITY_ICON_PATH = e.getRequiredProperty("common.stores.community-icons");
-        this.COMMUNITY_BANNER_PATH = e.getRequiredProperty("common.stores.community-banners");
+        this.COMMUNITY_ICON_PATH =
+                e.getRequiredProperty("common.stores.prefix")+
+                e.getRequiredProperty("common.stores.community-icons");
+        this.COMMUNITY_BANNER_PATH =
+                e.getRequiredProperty("common.stores.prefix")+
+                e.getRequiredProperty("common.stores.community-banners");
         this.SIGNED_URL_EXPIRATION_MINUTES = Integer.parseInt(
                 e.getRequiredProperty("common.service.rules.signed-url-expiration-minutes"));
         this.ICON_SIZE = Integer.parseInt(
