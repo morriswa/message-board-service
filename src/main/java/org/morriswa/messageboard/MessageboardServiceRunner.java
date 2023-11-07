@@ -30,22 +30,18 @@ public class MessageboardServiceRunner {
                                     .addFirst(AppConfig.build());
                         }
 
-                        // if the app is running in local or local-docker mode...
-                        if (RUNTIME_ENV.equals("local") || RUNTIME_ENV.equals("local-docker")) {
-                            log.info("DETECTED LOCAL DEVELOPMENT ENVIRONMENT, OVERRIDING DEFAULT USER-CONTENT STORE");
-
-                            final String DEV_CONTENT_FOLDER = System.getenv("DEV_CONTENT_FOLDER");
-
-                            if (DEV_CONTENT_FOLDER != null) {
-                                log.info("OVERRIDING DEFAULT DEVELOPER-CONTENT STORE WITH {}",DEV_CONTENT_FOLDER);
-
-                                applicationContext
-                                        .getEnvironment()
-                                        .getPropertySources()
-                                        .addFirst(new PropertiesPropertySource("OVERRIDES", new Properties(){{
-                                            put("common.stores.prefix", DEV_CONTENT_FOLDER);
-                                        }}));
-                            }
+                        // get optional environment variable DEV_CONTENT_FOLDER
+                        final String DEV_CONTENT_FOLDER = System.getenv("DEV_CONTENT_FOLDER");
+                        // if DEV_CONTENT_FOLDER was set...
+                        if (DEV_CONTENT_FOLDER != null) {
+                            log.info("OVERRIDING DEFAULT DEVELOPER-CONTENT STORE WITH {}",DEV_CONTENT_FOLDER);
+                            // override "common.stores.prefix" key from AWS_PROPS
+                            applicationContext
+                                    .getEnvironment()
+                                    .getPropertySources()
+                                    .addFirst(new PropertiesPropertySource("OVERRIDES", new Properties(){{
+                                        put("common.stores.prefix", DEV_CONTENT_FOLDER);
+                                    }}));
                         }
                     } catch (Exception e) {
                         // throw any errors encountered while initializing application context as runtime errors
