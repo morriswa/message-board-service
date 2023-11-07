@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import java.util.Objects;
 import java.util.Properties;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class }) @Slf4j
@@ -34,7 +33,7 @@ public class MessageboardServiceRunner {
                         final String DEV_CONTENT_FOLDER = System.getenv("DEV_CONTENT_FOLDER");
                         // if DEV_CONTENT_FOLDER was set...
                         if (DEV_CONTENT_FOLDER != null) {
-                            log.info("OVERRIDING DEFAULT DEVELOPER-CONTENT STORE WITH {}",DEV_CONTENT_FOLDER);
+                            log.info("OVERRIDING DEFAULT USER-CONTENT STORE WITH {}",DEV_CONTENT_FOLDER);
                             // override "common.stores.prefix" key from AWS_PROPS
                             applicationContext
                                     .getEnvironment()
