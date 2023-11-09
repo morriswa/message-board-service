@@ -16,7 +16,8 @@ spring:
 auth0:
   audience: "http://127.0.0.1:8081/v0"
   issuer-uri: "https://dev-9deub659.us.auth0.com/"
-  scope.secureroutes: "org.morriswa.messageboard:develop"
+  rbac:
+    permissions: "org.morriswa.messageboard:test"
 
 aws:
   secret-name: "messageboard/local"

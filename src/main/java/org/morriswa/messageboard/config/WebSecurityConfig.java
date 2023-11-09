@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.responsebody.DefaultErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
@@ -28,7 +31,7 @@ import java.util.GregorianCalendar;
  *
  * @author William A. Morris [william@morriswa.org]
  */
-@Configuration
+@Configuration @Slf4j
 @EnableWebSecurity // Enables Spring Security for Web Services importing this config
 public class WebSecurityConfig
 {
@@ -61,13 +64,36 @@ public class WebSecurityConfig
         return jwtDecoder;
     }
 
-    private AuthorizationManager<RequestAuthorizationContext> getScopeAuthManagers() {
-        ArrayList<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
-        final String[] securedRoutesScope =
-                e.getRequiredProperty("auth0.scope.secureroutes", String[].class);
+    /**
+     * converts Permission claims on Auth0 JWTs to Authorities claims.
+     * SOURCE:
+     *  https://developer.auth0.com/resources/code-samples/api/spring/basic-role-based-access-control#set-up-and-run-the-spring-project
+     * @return
+     */
+    private JwtAuthenticationConverter makePermissionsConverter() {
+        final var jwtAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        jwtAuthoritiesConverter.setAuthoritiesClaimName("permissions");
+        jwtAuthoritiesConverter.setAuthorityPrefix("AUTH0_");
 
-        for (String scope : securedRoutesScope)
-            list.add(AuthorityAuthorizationManager.hasAuthority("SCOPE_"+scope));
+        final var jwtAuthConverter = new JwtAuthenticationConverter();
+        jwtAuthConverter.setJwtGrantedAuthoritiesConverter(jwtAuthoritiesConverter);
+
+        return jwtAuthConverter;
+    }
+
+    private AuthorizationManager<RequestAuthorizationContext> getConfiguredAuthorizationManager() {
+        ArrayList<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
+        final String usePermissions = e.getProperty("auth0.rbac.permissions", "none");
+
+        if (usePermissions.equals("none"))
+            return AuthorizationManagers.allOf();
+
+        final String[] permissions =
+                e.getRequiredProperty("auth0.rbac.permissions", String[].class);
+
+        for (String scope : permissions) {
+            list.add(AuthorityAuthorizationManager.hasAuthority("AUTH0_"+scope));
+        }
 
         return AuthorizationManagers.allOf(list.toArray(new AuthorityAuthorizationManager[0]));
     }
@@ -90,8 +116,7 @@ public class WebSecurityConfig
                         .requestMatchers("/"+healthPath).permitAll()
                         // Will require authentication for secured routes
                         .requestMatchers("/" + path + "**")
-//                        .hasAuthority("SCOPE_"+securedRoutesScope)
-                        .access(getScopeAuthManagers())
+                        .access(getConfiguredAuthorizationManager())
                         // Will deny all other unauthenticated requests
                         .anyRequest().denyAll())
                 // Will allow cors
@@ -119,6 +144,7 @@ public class WebSecurityConfig
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
+//                        log.error("bad found {}",authException.getMessage());
                         response.getOutputStream().println(
                                 objectMapper.writeValueAsString(customErrorResponse));
                         response.setContentType("application/json");
@@ -154,7 +180,7 @@ public class WebSecurityConfig
                         response.setStatus(403);
                     })
                 // provide a jwt
-                .jwt();
+                .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(makePermissionsConverter()));
 
                 
 
