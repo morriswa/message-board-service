@@ -24,6 +24,7 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * MorrisWA Custom Spring Security Configurations.
@@ -82,18 +83,16 @@ public class WebSecurityConfig
     }
 
     private AuthorizationManager<RequestAuthorizationContext> getConfiguredAuthorizationManager() {
-        ArrayList<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
-        final String usePermissions = e.getProperty("auth0.rbac.permissions", "none");
+        List<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
+        final String permissionString = e.getProperty("auth0.rbac.permissions", "none");
 
-        if (usePermissions.equals("none"))
+        if (permissionString.equals("none"))
             return AuthorizationManagers.allOf();
 
-        final String[] permissions =
-                e.getRequiredProperty("auth0.rbac.permissions", String[].class);
+        final List<String> permissions = List.of(permissionString.split(" "));
 
-        for (String scope : permissions) {
+        for (String scope : permissions)
             list.add(AuthorityAuthorizationManager.hasAuthority("AUTH0_"+scope));
-        }
 
         return AuthorizationManagers.allOf(list.toArray(new AuthorityAuthorizationManager[0]));
     }
