@@ -66,7 +66,7 @@ public class WebSecurityConfig
     }
 
     /**
-     * converts Permission claims on Auth0 JWTs to Authorities claims.
+     * converts Permission claims on Auth0 JWTs to Spring Granted Authorities claims.
      * SOURCE:
      *  https://developer.auth0.com/resources/code-samples/api/spring/basic-role-based-access-control#set-up-and-run-the-spring-project
      * @return
@@ -113,9 +113,8 @@ public class WebSecurityConfig
                 .authorizeHttpRequests(authorize -> authorize
                         // Will allow any request on /health endpoint
                         .requestMatchers("/"+healthPath).permitAll()
-                        // Will require authentication for secured routes
-                        .requestMatchers("/" + path + "**")
-                        .access(getConfiguredAuthorizationManager())
+                        // Will require authentication and proper permissions for secured routes
+                        .requestMatchers("/" + path + "**").access(getConfiguredAuthorizationManager())
                         // Will deny all other unauthenticated requests
                         .anyRequest().denyAll())
                 // Will allow cors
@@ -143,14 +142,12 @@ public class WebSecurityConfig
                                 .timestamp(new GregorianCalendar())
                                 .build();
 
-//                        log.error("bad found {}",authException.getMessage());
                         response.getOutputStream().println(
                                 objectMapper.writeValueAsString(customErrorResponse));
                         response.setContentType("application/json");
                         response.setStatus(403);
                     })
                 .and()
-
                 // Conform toto oauth2 security standards
                 .oauth2ResourceServer()
                     .authenticationEntryPoint((request, response, exception) -> {
@@ -180,8 +177,6 @@ public class WebSecurityConfig
                     })
                 // provide a jwt
                 .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(makePermissionsConverter()));
-
-                
 
         return http.build();
     }

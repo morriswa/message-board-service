@@ -1,5 +1,6 @@
 package org.morriswa.messageboard;
 
+import org.morriswa.messageboard.config.JwtTestUtils;
 import org.morriswa.messageboard.config.TestSecurityConfig;
 import org.morriswa.messageboard.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,5 +33,4 @@ public class MessageboardTest {
     @MockBean protected ResourceDao resourceDao;
 
     @MockBean protected UserProfileDao userProfileDao;
-
 }
