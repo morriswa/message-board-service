@@ -1,6 +1,8 @@
 package org.morriswa.messageboard.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
 import org.morriswa.messageboard.model.entity.User;
 
@@ -17,7 +19,7 @@ public interface UserProfileDao {
 
     boolean existsByDisplayName(String displayName);
 
-    void createNewUser(@Valid CreateUserRequest user);
+    void createNewUser(@Valid CreateUserRequest user) throws ValidationException, JsonProcessingException;
 
-    void updateUserDisplayName(UUID userId, String displayName);
+    void updateUserDisplayName(UUID userId, String displayName) throws ValidationException;
 }

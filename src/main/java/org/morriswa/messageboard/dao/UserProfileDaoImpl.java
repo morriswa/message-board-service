@@ -1,11 +1,15 @@
 package org.morriswa.messageboard.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
 import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +23,12 @@ import java.util.UUID;
 @Component @Slf4j
 public class UserProfileDaoImpl implements UserProfileDao {
 
+    private final Environment environment;
     private final NamedParameterJdbcTemplate jdbc;
 
     @Autowired
-    public UserProfileDaoImpl(NamedParameterJdbcTemplate jdbc) {
+    public UserProfileDaoImpl(Environment environment, NamedParameterJdbcTemplate jdbc) {
+        this.environment = environment;
         this.jdbc = jdbc;
     }
 
@@ -61,7 +67,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public void createNewUser(@Valid CreateUserRequest user) {
+    public void createNewUser(@Valid CreateUserRequest user) throws ValidationException, JsonProcessingException {
         final String query = """
             insert into user_profile(id, auth_zero_id, display_name, email, role)
             values (gen_random_uuid(), :authZeroId, :displayName, :email, :role)
@@ -76,13 +82,26 @@ public class UserProfileDaoImpl implements UserProfileDao {
 
         try {
             jdbc.update(query, params);
-        } catch (Exception e) {
-            log.error("encountered error ", e);
+        } catch (DuplicateKeyException e) {
+            if (e.getMostSpecificCause().getMessage().contains(
+                    "duplicate key value violates unique constraint \"user_profile_auth_zero_id_key\""
+            )) {
+                throw new ValidationException("user",user.getClass().getSimpleName(), "User is already registered!");
+            }
+
+            if (e.getMostSpecificCause().getMessage().contains(
+                    "duplicate key value violates unique constraint \"user_profile_display_name_key\""
+            )) {
+                throw new ValidationException("displayName",user.getDisplayName(),
+                        environment.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
+            }
+
+            log.error("encountered unexpected error in data layer ", e);
         }
     }
 
     @Override
-    public void updateUserDisplayName(UUID userId, String requestedDisplayName) {
+    public void updateUserDisplayName(UUID userId, String requestedDisplayName) throws ValidationException {
         final String query = """
             update user_profile
                 set display_name = :displayName
@@ -96,8 +115,15 @@ public class UserProfileDaoImpl implements UserProfileDao {
 
         try {
             jdbc.update(query, params);
-        } catch (Exception e) {
-            log.error("encountered error ", e);
+        } catch (DuplicateKeyException e) {
+            if (e.getMostSpecificCause().getMessage().contains(
+                    "duplicate key value violates unique constraint \"user_profile_display_name_key\""
+            )) {
+                throw new ValidationException("displayName",requestedDisplayName,
+                        environment.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
+            }
+
+            log.error("encountered unexpected error in data layer ", e);
         }
     }
 

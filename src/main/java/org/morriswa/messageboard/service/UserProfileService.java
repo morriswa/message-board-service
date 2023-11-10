@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.model.entity.User;
@@ -61,7 +62,7 @@ public interface UserProfileService {
      * @return the display name that the user was registered with
      * @throws ValidationException if the displayName is poorly formatted or already taken
      */
-    String createNewUser(JwtAuthenticationToken token, String displayName) throws BadRequestException, ValidationException;
+    String createNewUser(JwtAuthenticationToken token, String displayName) throws BadRequestException, ValidationException, JsonProcessingException;
 
     /**
      * Updates a User's profile image

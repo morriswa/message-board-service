@@ -1,8 +1,10 @@
 package org.morriswa.messageboard.control;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.responsebody.DefaultResponse;
+import org.morriswa.messageboard.model.responsebody.UserProfile;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ public class UserProfileController {
 
     @GetMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws BadRequestException {
-        var user = userProfileService.authenticateAndGetUserProfile(jwt);
+        UserProfile user = userProfileService.authenticateAndGetUserProfile(jwt);
         return ResponseEntity.ok(new DefaultResponse<>(
                 e.getRequiredProperty("user-profile.service.endpoints.user.messages.get"),
                 user));
@@ -37,7 +39,7 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
-                                           @RequestParam String displayName) throws BadRequestException, ValidationException {
+                                           @RequestParam String displayName) throws BadRequestException, ValidationException, JsonProcessingException {
         var newUserDisplayName = userProfileService.createNewUser(jwt, displayName);
         return ResponseEntity.ok(new DefaultResponse<>(String.format(
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.post"),

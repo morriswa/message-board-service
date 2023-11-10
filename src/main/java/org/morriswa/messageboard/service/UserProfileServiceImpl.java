@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.exception.BadRequestException;
@@ -84,11 +85,11 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public String createNewUser(JwtAuthenticationToken token, String displayName) throws ValidationException {
+    public String createNewUser(JwtAuthenticationToken token, String displayName) throws ValidationException, JsonProcessingException {
 
         validator.validateDisplayNameOrThrow(displayName);
 
-        displayNameIsAvailableOrThrow(displayName);
+//        displayNameIsAvailableOrThrow(displayName);
 
         var newUser = new CreateUserRequest(
                 token.getName(),
@@ -120,8 +121,8 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         User user = authenticateAndGetUser(token);
 
-        if (!user.getDisplayName().equals(requestedDisplayName))
-            displayNameIsAvailableOrThrow(requestedDisplayName);
+//        if (!user.getDisplayName().equals(requestedDisplayName))
+//            displayNameIsAvailableOrThrow(requestedDisplayName);
 
         // save changes
         this.userProfileDao.updateUserDisplayName(user.getUserId(), requestedDisplayName);
