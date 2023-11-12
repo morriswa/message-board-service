@@ -15,7 +15,6 @@
     <description>A FOSS Online Messageboard API</description>
     <packaging>jar</packaging>
     <properties>
-        <resource.delimiter>^^^</resource.delimiter>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -111,6 +110,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <finalName>${project.name}</finalName>

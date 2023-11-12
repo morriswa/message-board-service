@@ -1,7 +1,9 @@
 package org.morriswa.messageboard.util;
 
-import lombok.*;
-import org.springframework.core.env.Environment;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -69,9 +71,10 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
         }
     }
 
-    public HttpResponseFactoryImpl(Environment e) {
-        this.APPLICATION_NAME = e.getRequiredProperty("maven-props.name");
-        this.APPLICATION_VERSION = e.getRequiredProperty("maven-props.version");
+    @Autowired
+    public HttpResponseFactoryImpl(BuildProperties build) {
+        this.APPLICATION_NAME = build.getName();
+        this.APPLICATION_VERSION = build.getVersion();
     }
 
     public ResponseEntity<?> getResponse(HttpStatus status, String message) {
