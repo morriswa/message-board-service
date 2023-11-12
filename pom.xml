@@ -15,6 +15,7 @@
     <description>A FOSS Online Messageboard API</description>
     <packaging>jar</packaging>
     <properties>
+        <resource.delimiter>^^^</resource.delimiter>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>

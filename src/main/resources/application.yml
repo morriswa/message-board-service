@@ -1,6 +1,6 @@
 maven-props:
-  name: @project.name@
-  version: @project.version@
+  name: ^^^project.name^^^
+  version: ^^^project.version^^^
 
 server:
   port: 8081
