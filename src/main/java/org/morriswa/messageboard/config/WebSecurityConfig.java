@@ -2,12 +2,13 @@ package org.morriswa.messageboard.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.responsebody.DefaultErrorResponse;
+import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.authorization.AuthorizationManagers;
@@ -23,7 +24,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -37,11 +37,13 @@ import java.util.List;
 public class WebSecurityConfig
 {
     private final Environment e;
+    private final HttpResponseFactoryImpl responseFactory;
     private final AudienceValidator audienceValidator;
 
     @Autowired
-    public WebSecurityConfig(Environment e, AudienceValidator audienceValidator) {
+    public WebSecurityConfig(Environment e, HttpResponseFactoryImpl responseFactory, AudienceValidator audienceValidator) {
         this.e = e;
+        this.responseFactory = responseFactory;
         this.audienceValidator = audienceValidator;
     }
 
@@ -123,57 +125,56 @@ public class WebSecurityConfig
                 .exceptionHandling()
                 // UNAUTHENTICATED REQUEST ERROR HANDLING
                     .authenticationEntryPoint((request, response, authException) -> {
-                        var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(e.getRequiredProperty("common.service.errors.security.not-allowed"))
-                                .message(e.getRequiredProperty("common.service.errors.security.not-allowed-desc"))
-                                .timestamp(new GregorianCalendar())
-                                .build();
+                        var customErrorResponse =
+                                responseFactory.getErrorResponse(
+                                        HttpStatus.UNAUTHORIZED,
+                                        e.getRequiredProperty("common.service.errors.security.not-allowed"),
+                                        e.getRequiredProperty("common.service.errors.security.not-allowed-desc"));
 
                         response.getOutputStream().println(
-                                objectMapper.writeValueAsString(customErrorResponse));
+                                objectMapper.writeValueAsString(customErrorResponse.getBody()));
                         response.setContentType("application/json");
-                        response.setStatus(401);
+                        response.setStatus(customErrorResponse.getStatusCode().value());
                     })
                 // INSUFFICIENT SCOPE ERROR HANDLING
                     .accessDeniedHandler((request, response, authException) -> {
-                        var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(e.getRequiredProperty("common.service.errors.security.not-allowed"))
-                                .message(e.getRequiredProperty("common.service.errors.security.scope-error-message"))
-                                .timestamp(new GregorianCalendar())
-                                .build();
+                        var customErrorResponse =
+                                responseFactory.getErrorResponse(
+                                        HttpStatus.FORBIDDEN,
+                                        e.getRequiredProperty("common.service.errors.security.not-allowed"),
+                                        e.getRequiredProperty("common.service.errors.security.scope-error-message"));
 
                         response.getOutputStream().println(
-                                objectMapper.writeValueAsString(customErrorResponse));
+                                objectMapper.writeValueAsString(customErrorResponse.getBody()));
                         response.setContentType("application/json");
-                        response.setStatus(403);
+                        response.setStatus(customErrorResponse.getStatusCode().value());
                     })
                 .and()
                 // Conform toto oauth2 security standards
                 .oauth2ResourceServer()
                     .authenticationEntryPoint((request, response, exception) -> {
-                        var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(e.getRequiredProperty("common.service.errors.security.invalid-jwt"))
-                                .message(exception.getMessage())
-                                .timestamp(new GregorianCalendar())
-                                .build();
+                        var customErrorResponse =
+                                responseFactory.getErrorResponse(
+                                        HttpStatus.UNAUTHORIZED,
+                                        e.getRequiredProperty("common.service.errors.security.invalid-jwt"),
+                                        exception.getMessage());
 
                         response.getOutputStream().println(
-                                objectMapper.writeValueAsString(customErrorResponse));
+                                objectMapper.writeValueAsString(customErrorResponse.getBody()));
 
                         response.setContentType("application/json");
-                        response.setStatus(401);
+                        response.setStatus(customErrorResponse.getStatusCode().value());
                     })
                     .accessDeniedHandler((request, response, authException) -> {
-                        var customErrorResponse = DefaultErrorResponse.builder()
-                                .error(e.getRequiredProperty("common.service.errors.security.not-allowed"))
-                                .message(e.getRequiredProperty("common.service.errors.security.not-allowed-desc"))
-                                .timestamp(new GregorianCalendar())
-                                .build();
+                        var customErrorResponse = responseFactory.getErrorResponse(
+                                HttpStatus.FORBIDDEN,
+                                e.getRequiredProperty("common.service.errors.security.not-allowed"),
+                                e.getRequiredProperty("common.service.errors.security.not-allowed-desc"));
 
                         response.getOutputStream().println(
-                                objectMapper.writeValueAsString(customErrorResponse));
+                                objectMapper.writeValueAsString(customErrorResponse.getBody()));
                         response.setContentType("application/json");
-                        response.setStatus(403);
+                        response.setStatus(customErrorResponse.getStatusCode().value());
                     })
                 // provide a jwt
                 .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(makePermissionsConverter()));

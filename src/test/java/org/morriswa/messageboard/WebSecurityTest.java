@@ -80,7 +80,7 @@ public class WebSecurityTest extends MessageboardTest {
 
                    .andExpect(status().is(403))
                             .andExpect(jsonPath(
-                        "$.message",
+                        "$.description",
                         Matchers.equalTo(e.getRequiredProperty("common.service.errors.security.scope-error-message"))));
     }
 
@@ -108,7 +108,7 @@ public class WebSecurityTest extends MessageboardTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
                 .andExpect(status().is(403))
                 .andExpect(jsonPath(
-                        "$.message",
+                        "$.description",
                         Matchers.equalTo(e.getRequiredProperty("common.service.errors.security.scope-error-message"))));
     }
 
@@ -123,7 +123,7 @@ public class WebSecurityTest extends MessageboardTest {
                         .get(targetUrl))
                 .andExpect(status().is(401))
                 .andExpect(jsonPath(
-                        "$.message",
+                        "$.description",
                         Matchers.equalTo(e.getRequiredProperty("common.service.errors.security.not-allowed-desc"))));
     }
 

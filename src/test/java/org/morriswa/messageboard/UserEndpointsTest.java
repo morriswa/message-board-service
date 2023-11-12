@@ -71,7 +71,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .get(targetUrl)
                         .header("Authorization",DEFAULT_TOKEN))
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message",Matchers.is(
+                .andExpect(jsonPath("$.description",Matchers.is(
                         e.getRequiredProperty("user-profile.service.errors.missing-user"))))
         ;
     }
@@ -110,7 +110,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .param("displayName",badDisplayName))
 
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.is(
+                .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
@@ -142,7 +142,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .param("displayName",DISPLAY_NAME))
 
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.is(
+                .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
@@ -169,7 +169,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .param("displayName",badDisplayName))
 
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.is(
+                .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
@@ -202,7 +202,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .param("displayName",newDisplayName))
 
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.is(
+                .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
@@ -231,7 +231,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .param("displayName",longDisplayName))
 
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.is(
+                .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
@@ -258,7 +258,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .param("displayName",shortDisplayName))
 
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.message", Matchers.is(
+                .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
