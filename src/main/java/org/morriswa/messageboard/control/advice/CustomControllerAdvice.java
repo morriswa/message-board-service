@@ -28,7 +28,7 @@ public class CustomControllerAdvice {
         // and return a 500 with as much relevant information as they deserve
         return responseFactory.getErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR,
-            e.getClass().getName(),
+            e.getClass().getSimpleName(),
             e.getMessage());
     }
 
@@ -40,7 +40,7 @@ public class CustomControllerAdvice {
         // and assume user fault [400]
         return responseFactory.getErrorResponse(
                         HttpStatus.BAD_REQUEST,
-                        e.getClass().getName(),
+                        e.getClass().getSimpleName(),
                         e.getMessage());
     }
 
@@ -54,7 +54,7 @@ public class CustomControllerAdvice {
         // and assume user fault [400]
         return responseFactory.getErrorResponse(
                 HttpStatus.BAD_REQUEST,
-                e.getClass().getName(),
+                e.getClass().getSimpleName(),
                 env.getRequiredProperty("common.service.errors.validation-exception-thrown"),
                 v.getValidationErrors());
     }

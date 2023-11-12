@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.util;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
@@ -16,26 +15,26 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
     private final String APPLICATION_VERSION;
 
     @Getter
-    public static class DefaultResponse<T> {
+    public class DefaultResponse<T> {
         private final String message;
         private final GregorianCalendar timestamp;
         private final String applicationName;
         private final String version;
         private final T payload;
 
-        public DefaultResponse(String message, String applicationName, String version) {
+        public DefaultResponse(String message) {
             this.message = message;
             this.timestamp = new GregorianCalendar();
-            this.applicationName = applicationName;
-            this.version = version;
+            this.applicationName = APPLICATION_NAME;
+            this.version = APPLICATION_VERSION;
             this.payload = null;
         };
 
-        public DefaultResponse(String message, String applicationName, String version, T payload) {
+        public DefaultResponse(String message, T payload) {
             this.message = message;
             this.timestamp = new GregorianCalendar();
-            this.applicationName = applicationName;
-            this.version = version;
+            this.applicationName = APPLICATION_NAME;
+            this.version = APPLICATION_VERSION;
             this.payload = payload;
         };
     }
@@ -44,7 +43,7 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
      * Default Response to send when an Exception needs to be returned
      */
     @Getter
-    public static class DefaultErrorResponse {
+    public class DefaultErrorResponse {
         private final String error;
         private final String description;
         private final GregorianCalendar timestamp;
@@ -52,21 +51,21 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
         private final String version;
         private final Object stack;
 
-        public DefaultErrorResponse(String error, String description, String applicationName, String version) {
+        public DefaultErrorResponse(String error, String description) {
             this.error = error;
             this.description = description;
             this.timestamp = new GregorianCalendar();
-            this.applicationName = applicationName;
-            this.version = version;
+            this.applicationName = APPLICATION_NAME;
+            this.version = APPLICATION_VERSION;
             this.stack = null;
         }
 
-        public DefaultErrorResponse(String error, String description, String applicationName, String version, Object stack) {
+        public DefaultErrorResponse(String error, String description, Object stack) {
             this.error = error;
             this.description = description;
             this.timestamp = new GregorianCalendar();
-            this.applicationName = applicationName;
-            this.version = version;
+            this.applicationName = APPLICATION_NAME;
+            this.version = APPLICATION_VERSION;
             this.stack = stack;
         }
     }
@@ -80,24 +79,24 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
     public ResponseEntity<?> getResponse(HttpStatus status, String message) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultResponse<>(message, APPLICATION_NAME, APPLICATION_VERSION));
+                .body(new DefaultResponse<>(message));
     }
 
     public ResponseEntity<?> getResponse(HttpStatus status, String message, Object payload) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultResponse<>(message,APPLICATION_NAME, APPLICATION_VERSION, payload));
+                .body(new DefaultResponse<>(message, payload));
     }
 
     public ResponseEntity<?> getErrorResponse(HttpStatus status, String message, String description) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultErrorResponse(message, description, APPLICATION_NAME, APPLICATION_VERSION));
+                .body(new DefaultErrorResponse(message, description));
     }
 
     public ResponseEntity<?> getErrorResponse(HttpStatus status, String message, String description, Object stack) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultErrorResponse(message, description, APPLICATION_NAME, APPLICATION_VERSION, stack));
+                .body(new DefaultErrorResponse(message, description, stack));
     }
 }
