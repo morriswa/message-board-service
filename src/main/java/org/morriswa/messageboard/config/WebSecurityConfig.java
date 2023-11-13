@@ -22,6 +22,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +70,18 @@ public class WebSecurityConfig
         return jwtDecoder;
     }
 
+    private CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration(
+                String.format("/%s**", e.getRequiredProperty("server.path")),
+                configuration);
+        return source;
+    }
+
     /**
      * converts Permission claims on Auth0 JWTs to Spring Granted Authorities claims.
      * SOURCE:
@@ -107,22 +122,20 @@ public class WebSecurityConfig
         final String path = e.getRequiredProperty("server.path");
         final String healthPath = e.getRequiredProperty("common.service.endpoints.health.path");
 
-        http // All http requests will...
+        http    // All http requests will...
                 // Be stateless
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-
+                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Will allow any request on /health endpoint
+                // Will allow any request on /health endpoint
                         .requestMatchers("/"+healthPath).permitAll()
-                        // Will require authentication and proper permissions for secured routes
+                // Will require authentication and proper permissions for secured routes
                         .requestMatchers("/" + path + "**").access(getConfiguredAuthorizationManager())
-                        // Will deny all other unauthenticated requests
+                // Will deny all other unauthenticated requests
                         .anyRequest().denyAll())
-                // Will allow cors
-                .cors().and()
-
-                .exceptionHandling()
+                // Will allow certain cross origin requests
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(exceptions -> {
+                    exceptions
                 // UNAUTHENTICATED REQUEST ERROR HANDLING
                     .authenticationEntryPoint((request, response, authException) -> {
                         var customErrorResponse =
@@ -148,10 +161,11 @@ public class WebSecurityConfig
                                 objectMapper.writeValueAsString(customErrorResponse.getBody()));
                         response.setContentType("application/json");
                         response.setStatus(customErrorResponse.getStatusCode().value());
-                    })
-                .and()
+                    });
+                })
                 // Conform toto oauth2 security standards
-                .oauth2ResourceServer()
+                .oauth2ResourceServer(oauth2 -> {
+                    oauth2
                     .authenticationEntryPoint((request, response, exception) -> {
                         var customErrorResponse =
                                 responseFactory.getErrorResponse(
@@ -177,7 +191,11 @@ public class WebSecurityConfig
                         response.setStatus(customErrorResponse.getStatusCode().value());
                     })
                 // provide a jwt
-                .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(makePermissionsConverter()));
+
+                    .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(makePermissionsConverter()));
+
+                });
+
 
         return http.build();
     }
