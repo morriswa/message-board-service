@@ -84,10 +84,11 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
 
     @Override
     public boolean relationshipExists(UUID userId, Long communityId) {
-        final String query = "select 1 from community_member where community_id=:communityId";
+        final String query = "select 1 from community_member where community_id=:communityId and user_id=:userId";
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityId", communityId);
+            put("userId", userId);
         }};
 
         return jdbc.query(query, params, ResultSet::next);
