@@ -84,6 +84,17 @@ public class CommunityServiceController {
             e.getRequiredProperty("community.service.endpoints.update-community-icon.messages.post"));
     }
 
+    @GetMapping("${community.service.endpoints.community-membership.path}")
+    public ResponseEntity<?> getCommunityMembershipInfo(JwtAuthenticationToken jwt,
+                                           @PathVariable Long communityId) throws BadRequestException {
+        var membership = this.community.getCommunityMembershipInfo(jwt, communityId);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("community.service.endpoints.community-membership.messages.get"),
+                membership);
+    }
+
     @PostMapping("${community.service.endpoints.community-membership.path}")
     public ResponseEntity<?> joinCommunity(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId) throws BadRequestException {

@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
+import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.entity.CommunityMember;
 import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
 
@@ -18,4 +19,6 @@ public interface CommunityMemberDao {
     boolean relationshipExists(UUID userId, Long communityId);
 
     void deleteRelationship(UUID userId, Long communityId);
+
+    CommunityMembership retrieveRelationship(UUID userId, Long communityId);
 }

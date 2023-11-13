@@ -2,6 +2,7 @@ package org.morriswa.messageboard.service;
 
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.responsebody.CommunityResponse;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
@@ -35,4 +36,6 @@ public interface CommunityService {
     List<CommunityResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException;
 
     void updateCommunityAttributes(JwtAuthenticationToken token, Long communityId, Optional<String> communityRef, Optional<String> communityDisplayName) throws BadRequestException, ValidationException;
+
+    CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws BadRequestException;
 }

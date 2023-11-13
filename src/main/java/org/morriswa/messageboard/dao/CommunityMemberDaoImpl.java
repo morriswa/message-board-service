@@ -2,6 +2,7 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.entity.CommunityMember;
 import org.morriswa.messageboard.model.CommunityStanding;
 import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
@@ -104,5 +105,27 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
         }};
 
         jdbc.update(query, params);
+    }
+
+    @Override
+    public CommunityMembership retrieveRelationship(UUID userId, Long communityId) {
+        final String query = "select user_id, community_id, standing from community_member where community_id=:communityId and user_id=:userId";
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("communityId", communityId);
+            put("userId", userId);
+        }};
+
+        return jdbc.query(query, params, rs -> {
+            if (rs.next()) {
+                return new CommunityMembership(
+                        rs.getObject("user_id", UUID.class),
+                        rs.getLong("community_id"),
+                        CommunityStanding.valueOf(rs.getString("standing"))
+                );
+            }
+
+            return new CommunityMembership();
+        });
     }
 }

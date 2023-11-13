@@ -110,6 +110,7 @@ community:
       community-membership:
         path: community/{communityId}/membership
         messages:
+          get: Retrieved relationship info
           post: "You have successfully joined the requested community!"
           delete: "You have successfully left the requested community"
       update-community-banner:
