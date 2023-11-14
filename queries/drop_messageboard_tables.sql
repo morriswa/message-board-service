@@ -3,3 +3,4 @@ drop table user_post;
 drop table post_resource;
 drop table community;
 drop table community_member;
+drop table user_ui_profile;
