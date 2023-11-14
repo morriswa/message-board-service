@@ -2,6 +2,8 @@ package org.morriswa.messageboard.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.model.entity.UserUiProfile;
+import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.exception.ValidationException;
@@ -83,4 +85,8 @@ public interface UserProfileService {
      * @throws ValidationException
      */
     void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws BadRequestException, ValidationException;
+
+    UserUiProfile getUserUiProfile(JwtAuthenticationToken jwt) throws BadRequestException;
+
+    void updateUserUiProfile(JwtAuthenticationToken jwt, UpdateUIProfileRequest request) throws BadRequestException;
 }

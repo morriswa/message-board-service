@@ -7,6 +7,8 @@ import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.dao.UserProfileDao;
+import org.morriswa.messageboard.model.entity.UserUiProfile;
+import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.model.responsebody.UserProfile;
 import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
@@ -126,6 +128,20 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // save changes
         this.userProfileDao.updateUserDisplayName(user.getUserId(), requestedDisplayName);
+    }
+
+    @Override
+    public UserUiProfile getUserUiProfile(JwtAuthenticationToken jwt) throws BadRequestException {
+        var userId = authenticate(jwt);
+
+        return userProfileDao.getUIProfile(userId);
+    }
+
+    @Override
+    public void updateUserUiProfile(JwtAuthenticationToken jwt, UpdateUIProfileRequest request) throws BadRequestException {
+        var userId = authenticate(jwt);
+
+        userProfileDao.setUIProfile(userId, request);
     }
 
 }

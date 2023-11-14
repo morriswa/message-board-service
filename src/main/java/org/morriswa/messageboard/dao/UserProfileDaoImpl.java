@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.entity.UserUiProfile;
+import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
 import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
 import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.model.UserRole;
@@ -125,6 +127,60 @@ public class UserProfileDaoImpl implements UserProfileDao {
 
             log.error("encountered unexpected error in data layer ", e);
         }
+    }
+
+    @Override
+    public UserUiProfile getUIProfile(UUID userId) {
+        final String query = "select * from user_ui_profile where user_id=:userId";
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+        }};
+
+        return jdbc.query(query, params, rs -> {
+            if (rs.next()) {
+                return new UserUiProfile(rs.getObject("user_id", UUID.class), rs.getString("theme"));
+            }
+
+            return new UserUiProfile(userId, environment.getRequiredProperty("user-profile.service.rules.default-theme"));
+        });
+    }
+
+    private void createNewUIProfile(UUID userId, UpdateUIProfileRequest uiProfile) {
+        final String queryUpdateUiProfile = "insert into user_ui_profile (user_id, theme) values (:userId, :theme)";
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+            if (!uiProfile.getTheme().isBlank()) put("theme", uiProfile.getTheme());
+        }};
+
+        jdbc.update(queryUpdateUiProfile, params);
+    }
+
+    private void updateExistingUIProfile(UUID userId, UpdateUIProfileRequest uiProfile) {
+        final String queryUpdateUiProfile = "update user_ui_profile set theme=:theme where user_id=:userId";
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+            if (!uiProfile.getTheme().isBlank()) put("theme", uiProfile.getTheme());
+        }};
+
+        jdbc.update(queryUpdateUiProfile, params);
+    }
+
+    @Override
+    public void setUIProfile(UUID userId, UpdateUIProfileRequest uiProfile) {
+        final String queryUiProfileExists = "select 1 from user_ui_profile where user_id=:userId";
+
+        Map<String, Object> paramsUiProfileExists = new HashMap<>(){{
+            put("userId", userId);
+        }};
+
+        final boolean profileExists = Boolean.TRUE.equals(
+                jdbc.query(queryUiProfileExists, paramsUiProfileExists, ResultSet::next));
+
+        if (profileExists) updateExistingUIProfile(userId, uiProfile);
+        else createNewUIProfile(userId, uiProfile);
     }
 
     @Override

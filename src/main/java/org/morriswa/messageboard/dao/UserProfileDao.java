@@ -3,8 +3,10 @@ package org.morriswa.messageboard.dao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
 import org.morriswa.messageboard.model.entity.User;
+import org.morriswa.messageboard.model.entity.UserUiProfile;
+import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
+import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,4 +24,8 @@ public interface UserProfileDao {
     void createNewUser(@Valid CreateUserRequest user) throws ValidationException, JsonProcessingException;
 
     void updateUserDisplayName(UUID userId, String displayName) throws ValidationException;
+
+    UserUiProfile getUIProfile(UUID userId);
+
+    void setUIProfile(UUID userId, UpdateUIProfileRequest uiProfile);
 }

@@ -3,6 +3,8 @@ package org.morriswa.messageboard.control;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.entity.UserUiProfile;
+import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
 import org.morriswa.messageboard.model.responsebody.UserProfile;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.service.UserProfileService;
@@ -69,5 +71,25 @@ public class UserProfileController {
         return responseFactory.getResponse(
             HttpStatus.OK,
             e.getProperty("user-profile.service.endpoints.user-profile-displayname.messages.patch"));
+    }
+
+    @GetMapping("${user-profile.service.endpoints.user-ui.path}")
+    public ResponseEntity<?> getUIProfile(JwtAuthenticationToken jwt) throws BadRequestException {
+        UserUiProfile profile = userProfileService.getUserUiProfile(jwt);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("user-profile.service.endpoints.user-ui.messages.get"),
+                profile);
+    }
+
+    @PatchMapping("${user-profile.service.endpoints.user-ui.path}")
+    public ResponseEntity<?> updateUIProfile(JwtAuthenticationToken jwt,
+                                             @RequestBody UpdateUIProfileRequest request) throws BadRequestException {
+        userProfileService.updateUserUiProfile(jwt, request);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("user-profile.service.endpoints.user-ui.messages.patch"));
     }
 }
