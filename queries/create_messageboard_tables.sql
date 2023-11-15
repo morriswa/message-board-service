@@ -47,3 +47,8 @@ create table community_member (
     date_created timestamp with time zone not null,
     date_updated timestamp with time zone not null
 );
+
+create table user_ui_profile (
+    user_id uuid primary key,
+    theme varchar(10)
+);

@@ -82,6 +82,11 @@ user-profile:
         messages:
           get: Successfully retrieved user profile
           post: Successfully registered new user %s!
+      user-ui:
+        path: user/ui
+        messages:
+          get: Successfully retrieved user ui profile
+          patch: Successfully updated users UI profile
       user-profile-image:
         path: user/profileImage
         messages:
@@ -101,6 +106,7 @@ user-profile:
         regexp: "^[A-Za-z0-9._-]*$"
         min-length: 3
         max-length: 30
+      default-theme: default
 
 community:
   service:
