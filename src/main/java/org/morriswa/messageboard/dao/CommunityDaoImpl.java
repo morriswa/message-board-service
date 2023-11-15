@@ -173,10 +173,11 @@ public class CommunityDaoImpl implements CommunityDao {
             return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
                 if (rs.next()) {
                     var owner = rs.getObject("ownerId", UUID.class);
+                    if (owner.equals(userId)) return true;
+
                     var user = rs.getObject("userId", UUID.class);
                     var standing = CommunityStanding.valueOf(rs.getString("standing"));
 
-                    if (owner.equals(userId)) return true;
                     if (user.equals(userId) && standing.equals(CommunityStanding.HEALTHY)) return true;
                 }
 

@@ -9,7 +9,7 @@ import lombok.Getter;
 public class UploadImageRequest {
 
     @NotBlank
-    private String baseEncodedImage;
+    private byte[] baseEncodedImage;
 
     @NotBlank
     private String imageFormat;

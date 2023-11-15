@@ -16,9 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
+
+import static org.morriswa.messageboard.util.Functions.blobTypeToMyType;
 
 @Service @Slf4j
 public class UserProfileServiceImpl implements UserProfileService {
@@ -105,13 +109,16 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void updateUserProfileImage(JwtAuthenticationToken token, UploadImageRequest request) throws BadRequestException, IOException {
+    public void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile request) throws BadRequestException, IOException {
 
         var userId = authenticate(token);
 
         validator.validateBeanOrThrow(request);
 
-        profileImageStoreImpl.updateUserProfileImage(userId, request);
+        profileImageStoreImpl.updateUserProfileImage(userId,
+            new UploadImageRequest(
+                request.getBytes(),
+                blobTypeToMyType(Objects.requireNonNull(request.getContentType()))));
     }
 
     @Override

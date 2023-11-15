@@ -2,7 +2,6 @@ package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
@@ -12,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -65,8 +65,8 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.update-community-banner.path}")
     public ResponseEntity<?> updateCommunityBanner(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId,
-                                             @RequestBody UploadImageRequest request) throws BadRequestException, IOException, ValidationException {
-        this.community.updateCommunityBanner(jwt, request, communityId);
+                                             @RequestPart("image") MultipartFile file) throws BadRequestException, IOException, ValidationException {
+        this.community.updateCommunityBanner(jwt, file, communityId);
 
         return responseFactory.getResponse(
             HttpStatus.OK,
@@ -76,8 +76,8 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.update-community-icon.path}")
     public ResponseEntity<?> updateCommunityIcon(JwtAuthenticationToken jwt,
                                                  @PathVariable Long communityId,
-                                                 @RequestBody UploadImageRequest request) throws BadRequestException, IOException, ValidationException {
-        this.community.updateCommunityIcon(jwt, request, communityId);
+                                                 @RequestPart("image") MultipartFile file) throws BadRequestException, IOException, ValidationException {
+        this.community.updateCommunityIcon(jwt, file, communityId);
 
         return responseFactory.getResponse(
             HttpStatus.OK,

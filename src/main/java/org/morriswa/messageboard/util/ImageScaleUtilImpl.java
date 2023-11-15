@@ -23,9 +23,9 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
     @Override
     public BufferedImage getScaledImage(UploadImageRequest imageRequest, int IMAGE_X, int IMAGE_Y) throws IOException {
 
-        final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
+//        final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
 
-        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRepr));
+        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRequest.getBaseEncodedImage()));
 
         java.awt.Image scaledImage = retrievedImage.getScaledInstance(
                 IMAGE_X,
@@ -43,9 +43,9 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
     @Override
     public BufferedImage getScaledImage(UploadImageRequest imageRequest, float scale) throws IOException {
 
-        final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
+//        final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
 
-        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRepr));
+        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRequest.getBaseEncodedImage()));
 
         final int IMAGE_X = (int) (retrievedImage.getWidth() * scale);
         final int IMAGE_Y = (int) (retrievedImage.getHeight() * scale);

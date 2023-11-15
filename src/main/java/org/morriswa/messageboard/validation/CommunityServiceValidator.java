@@ -84,11 +84,11 @@ public class CommunityServiceValidator extends BasicBeanValidator {
                     uploadRequest.getImageFormat(),
                     e.getRequiredProperty("common.service.errors.upload-image-request.empty-image-format")));
 
-        if (StringUtils.isBlank(uploadRequest.getBaseEncodedImage()))
-            errors.add(new ValidationException.ValidationError(
-                    "baseEncodedImage",
-                    uploadRequest.getBaseEncodedImage().substring(0, 10).concat("..."),
-                    e.getRequiredProperty("common.service.errors.upload-image-request.bad-image-repr")));
+//        if (StringUtils.isBlank(uploadRequest.getBaseEncodedImage()))
+//            errors.add(new ValidationException.ValidationError(
+//                    "baseEncodedImage",
+//                    uploadRequest.getBaseEncodedImage().substring(0, 10).concat("..."),
+//                    e.getRequiredProperty("common.service.errors.upload-image-request.bad-image-repr")));
 
         switch (uploadRequest.getImageFormat().toLowerCase()) {
             case "jpg", "jpeg", "png":

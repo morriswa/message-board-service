@@ -2,10 +2,7 @@ package org.morriswa.messageboard.service;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
@@ -29,6 +26,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
+
+import static org.morriswa.messageboard.util.Functions.blobTypeToMyType;
 
 @Service @Slf4j
 public class ContentServiceImpl implements ContentService {
@@ -61,7 +61,7 @@ public class ContentServiceImpl implements ContentService {
 
 
     @Override
-    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request) throws BadRequestException, ValidationException, IOException {
+    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile file) throws BadRequestException, ValidationException, IOException {
 
         var userId = userProfileService.authenticate(token);
 
@@ -74,8 +74,8 @@ public class ContentServiceImpl implements ContentService {
         switch (request.getContentType()) {
             case PHOTO -> {
                 var uploadRequest = new UploadImageRequest(
-                        (String) request.getContent().get("baseEncodedImage"),
-                        (String) request.getContent().get("imageFormat")
+                        file.getBytes(),
+                        blobTypeToMyType(Objects.requireNonNull(file.getContentType()))
                 );
 
                 validator.validateImageRequestOrThrow(uploadRequest);
@@ -88,33 +88,33 @@ public class ContentServiceImpl implements ContentService {
                 resources.createNewPostResource(newResource);
             }
 
-            case PHOTO_GALLERY -> {
-                int imagesToUpload = (int) request.getContent().get("count");
-
-                if (imagesToUpload>10) throw new BadRequestException(
-                        e.getRequiredProperty("content.service.errors.too-many-images")
-                );
-
-                var generatedSource = new ArrayList<UUID>();
-
-                for (int i = 0; i < imagesToUpload; i++) {
-                    UUID newResourceUUID = i == 0 ? newResource.getResourceId() : UUID.randomUUID();
-
-                    generatedSource.add(newResourceUUID);
-
-                    var uploadRequest = new UploadImageRequest(
-                            (String) request.getContent().get("baseEncodedImage" + i),
-                            (String) request.getContent().get("imageFormat" + i)
-                    );
-
-                    validator.validateImageRequestOrThrow(uploadRequest);
-
-                    imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
-                }
-
-                newResource.setList(generatedSource);
-                resources.createNewPostResource(newResource);
-            }
+//            case PHOTO_GALLERY -> {
+//                int imagesToUpload = (int) request.getContent().get("count");
+//
+//                if (imagesToUpload>10) throw new BadRequestException(
+//                        e.getRequiredProperty("content.service.errors.too-many-images")
+//                );
+//
+//                var generatedSource = new ArrayList<UUID>();
+//
+//                for (int i = 0; i < imagesToUpload; i++) {
+//                    UUID newResourceUUID = i == 0 ? newResource.getResourceId() : UUID.randomUUID();
+//
+//                    generatedSource.add(newResourceUUID);
+//
+//                    var uploadRequest = new UploadImageRequest(
+//                            (String) request.getContent().get("baseEncodedImage" + i),
+//                            (String) request.getContent().get("imageFormat" + i)
+//                    );
+//
+//                    validator.validateImageRequestOrThrow(uploadRequest);
+//
+//                    imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
+//                }
+//
+//                newResource.setList(generatedSource);
+//                resources.createNewPostResource(newResource);
+//            }
 
             default ->
                 throw new BadRequestException(e.getRequiredProperty("content.service.errors.content-type-not-supported"));

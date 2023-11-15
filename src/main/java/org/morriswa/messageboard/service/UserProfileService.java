@@ -2,11 +2,11 @@ package org.morriswa.messageboard.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.model.responsebody.UserProfile;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -68,11 +68,11 @@ public interface UserProfileService {
      * Updates a User's profile image
      *
      * @param token to authenticate user with
-     * @param request representing new profile image
+     * @param file representing new profile image
      * @throws BadRequestException if the user cannot be authenticated
      * @throws IOException if the image cannot be processed and uploaded successfully
      */
-    void updateUserProfileImage(JwtAuthenticationToken token, UploadImageRequest request) throws BadRequestException, IOException;
+    void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile file) throws BadRequestException, IOException;
 
     /**
      * Updates a user's display name

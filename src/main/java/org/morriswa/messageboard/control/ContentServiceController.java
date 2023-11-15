@@ -1,20 +1,24 @@
 package org.morriswa.messageboard.control;
 
+import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.PostContentType;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@RestController @CrossOrigin
+@RestController @CrossOrigin @Slf4j
 @RequestMapping("${server.path}")
 public class ContentServiceController {
     private final Environment e;
@@ -28,12 +32,22 @@ public class ContentServiceController {
         this.responseFactory = responseFactory;
     }
 
-    @PostMapping("${content.service.endpoints.create-post.path}")
+    @PostMapping(value = "${content.service.endpoints.create-post.path}")
     public ResponseEntity<?> createPost(JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
-                                        @RequestBody CreatePostRequestBody request)
+                                        @RequestPart("image") MultipartFile file,
+                                        @RequestParam("caption") String caption,
+                                        @RequestParam("description") String description,
+                                        @RequestParam("contentType") PostContentType type)
             throws BadRequestException, ValidationException, IOException {
-        contentService.createPost(token, communityId, request);
+
+        log.info("Attempting to upload type: {}", file.getContentType());
+
+        contentService.createPost(token, communityId, new CreatePostRequestBody(
+                caption,
+                description,
+                type
+        ), file);
         return responseFactory.getResponse(
                 HttpStatus.OK,
                 e.getProperty("content.service.endpoints.create-post.messages.post"));

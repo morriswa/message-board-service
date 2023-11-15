@@ -18,12 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
+import static org.morriswa.messageboard.util.Functions.blobTypeToMyType;
 
 @Service @Slf4j
 public class CommunityServiceImpl implements CommunityService {
@@ -61,10 +61,12 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityIcon(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, ValidationException, IOException {
+    public void updateCommunityIcon(JwtAuthenticationToken token, MultipartFile file, Long communityId) throws BadRequestException, ValidationException, IOException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
+
+        var uploadImageRequest = new UploadImageRequest(file.getBytes(),blobTypeToMyType(Objects.requireNonNull(file.getContentType())));
 
         validator.validateImageRequestOrThrow(uploadImageRequest);
 
@@ -72,10 +74,12 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityBanner(JwtAuthenticationToken token, UploadImageRequest uploadImageRequest, Long communityId) throws BadRequestException, ValidationException, IOException {
+    public void updateCommunityBanner(JwtAuthenticationToken token, MultipartFile file, Long communityId) throws BadRequestException, ValidationException, IOException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
+
+        var uploadImageRequest = new UploadImageRequest(file.getBytes(),blobTypeToMyType(Objects.requireNonNull(file.getContentType())));
 
         validator.validateImageRequestOrThrow(uploadImageRequest);
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.responsebody.UserProfile;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.service.UserProfileService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -55,7 +55,7 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user-profile-image.path}")
     public ResponseEntity<?> updateUserProfileImage(JwtAuthenticationToken jwt,
-                                                    @RequestBody UploadImageRequest request) throws BadRequestException, IOException {
+                                                    @RequestPart("image") MultipartFile request) throws BadRequestException, IOException {
         userProfileService.updateUserProfileImage(jwt, request);
         return responseFactory.getResponse(
             HttpStatus.OK,

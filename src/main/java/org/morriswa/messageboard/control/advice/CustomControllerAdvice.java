@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.control.advice;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-@ControllerAdvice
+@ControllerAdvice @Slf4j
 public class CustomControllerAdvice {
     private final Environment env;
     private final HttpResponseFactoryImpl responseFactory;
@@ -25,6 +26,8 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler({Exception.class}) // Catch any and all unhandled exceptions thrown in this controller
     public ResponseEntity<?> internalServerError(Exception e, WebRequest r) {
+        log.error("Encountered 500 error: ", e);
+
         // and return a 500 with as much relevant information as they deserve
         return responseFactory.getErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR,
