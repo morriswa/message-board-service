@@ -119,13 +119,14 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
         return jdbc.query(query, params, rs -> {
             if (rs.next()) {
                 return new CommunityMembership(
+                        true,
                         rs.getObject("user_id", UUID.class),
                         rs.getLong("community_id"),
                         CommunityStanding.valueOf(rs.getString("standing"))
                 );
             }
 
-            return new CommunityMembership();
+            return new CommunityMembership(false, userId, communityId, null);
         });
     }
 }
