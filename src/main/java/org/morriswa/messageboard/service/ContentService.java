@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.model.responsebody.PostResponse;
@@ -24,4 +25,6 @@ public interface ContentService {
     void addCommentToPost(JwtAuthenticationToken token, Long postId, String comment) throws BadRequestException;
 
     void addCommentToPost(JwtAuthenticationToken token, Long postId, Long parentCommentId, String comment) throws BadRequestException;
+
+    void voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws BadRequestException;
 }

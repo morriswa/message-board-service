@@ -172,6 +172,10 @@ content:
         messages:
           get: Successfully retrieved level one comments for post
           post: Successfully left comment on requested post
+      post-voting:
+        path: post/{postId}/vote
+        messages:
+          post: Successfully voted
     errors:
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
       too-many-images: Please do not upload more than 10 images for a single post!

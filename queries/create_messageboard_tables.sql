@@ -60,3 +60,10 @@ create table post_comment (
     parent_id bigint,
     body varchar(1000)
 );
+
+create table post_vote (
+    id bigserial primary key,
+    user_id uuid not null,
+    post_id bigint not null,
+    vote_value int not null
+)

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.PostContentType;
+import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.model.responsebody.CommentRequestBody;
 import org.morriswa.messageboard.service.ContentService;
@@ -64,6 +65,17 @@ public class ContentServiceController {
                 HttpStatus.OK,
                 e.getProperty("content.service.endpoints.community-feed.messages.get"),
                 feed);
+    }
+
+    @PostMapping("${content.service.endpoints.post-voting.path}")
+    public ResponseEntity<?> voteOnPost(JwtAuthenticationToken token,
+                                                @PathVariable Long postId,
+                                                @RequestParam Vote vote) throws BadRequestException {
+        contentService.voteOnPost(token, postId, vote);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.post-voting.messages.post"));
     }
 
     @PostMapping("${content.service.endpoints.comment.path}")

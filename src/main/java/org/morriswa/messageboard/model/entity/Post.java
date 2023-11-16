@@ -18,4 +18,5 @@ public class Post {
     private final PostContentType contentType;
     private final GregorianCalendar dateCreated;
     private final UUID resourceId;
+    private final int vote;
 }

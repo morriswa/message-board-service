@@ -8,6 +8,7 @@ import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.exception.BadRequestException;
@@ -173,6 +174,20 @@ public class ContentServiceImpl implements ContentService {
         validator.validateBeanOrThrow(newComment);
 
         commentRepo.createNewComment(newComment);
+    }
+
+    @Override
+    public void voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws BadRequestException {
+        var userId = userProfileService.authenticate(token);
+
+        var post = posts.findPostByPostId(postId)
+                .orElseThrow(()->new BadRequestException(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-post")
+                ));
+
+        communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
+
+        posts.vote(userId, postId, vote);
     }
 
     @Override
