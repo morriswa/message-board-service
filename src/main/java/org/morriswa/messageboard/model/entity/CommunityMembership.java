@@ -1,7 +1,8 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.morriswa.messageboard.model.CommunityStanding;
 
 import java.util.UUID;
 

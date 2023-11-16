@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.model.CommunityMembership;
+import org.morriswa.messageboard.model.entity.CommunityMembership;
 import org.morriswa.messageboard.model.entity.CommunityMember;
 import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
 

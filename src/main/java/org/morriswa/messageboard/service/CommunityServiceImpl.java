@@ -2,7 +2,7 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
-import org.morriswa.messageboard.model.CommunityMembership;
+import org.morriswa.messageboard.model.entity.CommunityMembership;
 import org.morriswa.messageboard.model.entity.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;

@@ -8,13 +8,13 @@ import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.*;
-import org.morriswa.messageboard.model.Comment;
+import org.morriswa.messageboard.model.responsebody.CommentRequestBody;
+import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.model.responsebody.CommentResponse;
 import org.morriswa.messageboard.model.responsebody.PostResponse;
 import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
 import org.morriswa.messageboard.model.entity.Resource;
@@ -133,7 +133,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void addCommentToPost(JwtAuthenticationToken token, NewCommentRequest request) throws BadRequestException {
+    public void addCommentToPost(JwtAuthenticationToken token, CommentRequestBody request) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(request.getPostId())
@@ -143,15 +143,18 @@ public class ContentServiceImpl implements ContentService {
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
-        var newCommentBuilder = Comment.builder()
-                .userId(userId)
-                .postId(post.getPostId())
-                .commentBody(request.getComment());
-
-        if (request.getParentCommentId() != null)
-            newCommentBuilder.parentCommentId(request.getParentCommentId());
-
-        var newComment = newCommentBuilder.build();
+        final CommentRequest newComment;
+        if (request.getParentCommentId() == null)
+            newComment = CommentRequest.buildCommentRequest(
+                    userId,
+                    request.getPostId(),
+                    request.getComment());
+        else
+            newComment = CommentRequest.buildSubCommentRequest(
+                    userId,
+                    request.getPostId(),
+                    request.getParentCommentId(),
+                    request.getComment());
 
         validator.validateBeanOrThrow(newComment);
 
@@ -159,22 +162,22 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<CommentResponse> getFullCommentMapForPost(Long postId) {
+    public List<Comment> getFullCommentMapForPost(Long postId) {
         var retrievedComments = commentRepo.findAllCommentsByPostId(postId);
+//
+//        List<CommentResponse> comments = new ArrayList<>();
+//
+//        List<CommentResponse> subComments = new ArrayList<>();
+//
+//        for (CommentRequest commentRequest : retrievedComments) {
+//            if (commentRequest.getParentCommentId()==null)
+//                comments.add(new CommentResponse(commentRequest));
+//            else subComments.add(new CommentResponse(commentRequest));
+//        }
+//
+//        // TODO map all subComments to Comments
 
-        List<CommentResponse> comments = new ArrayList<>();
-
-        List<CommentResponse> subComments = new ArrayList<>();
-
-        for (Comment comment : retrievedComments) {
-            if (comment.getParentCommentId()==null)
-                comments.add(new CommentResponse(comment));
-            else subComments.add(new CommentResponse(comment));
-        }
-
-        // TODO map all subComments to Comments
-
-        return comments;
+        return retrievedComments;
     }
 
     @Override

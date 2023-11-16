@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.validatedrequest;
 
 //import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -14,27 +14,27 @@ import java.util.UUID;
 
 //@Entity @Table(name = "user_comments")
 @Valid
-@NoArgsConstructor @Getter @Builder
-@AllArgsConstructor
-public class Comment {
-//    @Id
-//    @SequenceGenerator(name = "user_comments_seq_qen", sequenceName = "user_comments_seq")
-//    @GeneratedValue(generator = "user_comments_seq_gen", strategy = GenerationType.AUTO)
-    private Long commentId;
+@AllArgsConstructor @Getter
+public class CommentRequest {
 
     @NotNull
-//    @Column(nullable = false, updatable = false)
     private UUID userId;
 
     @NotNull
-//    @Column(name = "post_id", nullable = false, updatable = false)
     private Long postId;
 
-//    @Column(name = "parent_comment_id")
+    @NotNull
     private Long parentCommentId;
 
     @NotBlank
     @Length(max = 5000)
-//    @Column(nullable = false)
     private String commentBody;
+
+    public static CommentRequest buildSubCommentRequest(UUID userId, Long postId, Long parentCommentId, String commentBody) {
+        return new CommentRequest(userId, postId, parentCommentId, commentBody);
+    }
+
+    public static CommentRequest buildCommentRequest(UUID userId, Long postId, String commentBody) {
+        return new CommentRequest(userId, postId, -1L, commentBody);
+    }
 }
