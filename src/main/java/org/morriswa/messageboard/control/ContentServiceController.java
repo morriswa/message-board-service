@@ -104,4 +104,15 @@ public class ContentServiceController {
                 comments);
     }
 
+    @PostMapping("${content.service.endpoints.comment-voting.path}")
+    public ResponseEntity<?> voteOnComment(JwtAuthenticationToken token,
+                                        @PathVariable Long postId,
+                                        @PathVariable Long commentId,
+                                        @RequestParam Vote vote) throws BadRequestException {
+        contentService.voteOnComment(token, postId, commentId, vote);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.post-voting.messages.post"));
+    }
 }

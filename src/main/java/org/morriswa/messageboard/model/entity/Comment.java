@@ -12,4 +12,5 @@ public class Comment {
     private Long postId;
     private Long parentId;
     private String body;
+    private final int vote;
 }

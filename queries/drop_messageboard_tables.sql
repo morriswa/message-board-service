@@ -6,3 +6,4 @@ drop table community_member;
 drop table user_ui_profile;
 drop table post_comment;
 drop table post_vote;
+drop table comment_vote;

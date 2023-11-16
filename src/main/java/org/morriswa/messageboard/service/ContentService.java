@@ -27,4 +27,6 @@ public interface ContentService {
     void addCommentToPost(JwtAuthenticationToken token, Long postId, Long parentCommentId, String comment) throws BadRequestException;
 
     void voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws BadRequestException;
+
+    void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws BadRequestException;
 }

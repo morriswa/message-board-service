@@ -191,6 +191,20 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
+    public void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws BadRequestException {
+        var userId = userProfileService.authenticate(token);
+
+        var post = posts.findPostByPostId(postId)
+                .orElseThrow(()->new BadRequestException(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-post")
+                ));
+
+        communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
+
+        commentRepo.vote(userId, postId, commentId, vote);
+    }
+
+    @Override
     public List<Comment> getComments(Long postId) {
         return commentRepo.findAllCommentsByPostId(postId);
     }

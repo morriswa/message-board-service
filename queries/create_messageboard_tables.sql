@@ -66,4 +66,12 @@ create table post_vote (
     user_id uuid not null,
     post_id bigint not null,
     vote_value int not null
-)
+);
+
+create table comment_vote (
+    id bigserial primary key,
+    user_id uuid not null,
+    post_id bigint not null,
+    comment_id bigint not null,
+    vote_value int not null
+);
