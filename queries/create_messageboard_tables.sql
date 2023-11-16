@@ -52,3 +52,11 @@ create table user_ui_profile (
     user_id uuid primary key,
     theme varchar(10)
 );
+
+create table post_comment (
+    id bigserial primary key,
+    user_id uuid not null,
+    post_id bigint not null,
+    parent_id bigint,
+    body varchar(1000)
+);

@@ -11,7 +11,6 @@ import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.responsebody.CommentRequestBody;
 import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
@@ -133,32 +132,52 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void addCommentToPost(JwtAuthenticationToken token, CommentRequestBody request) throws BadRequestException {
+    public void addCommentToPost(JwtAuthenticationToken token, Long postId, String comment) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
-        var post = posts.findPostByPostId(request.getPostId())
+        var post = posts.findPostByPostId(postId)
                 .orElseThrow(()->new BadRequestException(
                         e.getRequiredProperty("content.service.errors.cannot-locate-post")
                 ));
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
-        final CommentRequest newComment;
-        if (request.getParentCommentId() == null)
-            newComment = CommentRequest.buildCommentRequest(
+        final CommentRequest newComment= CommentRequest.buildCommentRequest(
                     userId,
-                    request.getPostId(),
-                    request.getComment());
-        else
-            newComment = CommentRequest.buildSubCommentRequest(
-                    userId,
-                    request.getPostId(),
-                    request.getParentCommentId(),
-                    request.getComment());
+                    postId,
+                    comment);
+
 
         validator.validateBeanOrThrow(newComment);
 
         commentRepo.createNewComment(newComment);
+    }
+
+    @Override
+    public void addCommentToPost(JwtAuthenticationToken token, Long postId, Long parentCommentId, String comment) throws BadRequestException {
+        var userId = userProfileService.authenticate(token);
+
+        var post = posts.findPostByPostId(postId)
+                .orElseThrow(()->new BadRequestException(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-post")
+                ));
+
+        communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
+
+        final CommentRequest newComment= CommentRequest.buildSubCommentRequest(
+                userId,
+                postId,
+                parentCommentId,
+                comment);
+
+        validator.validateBeanOrThrow(newComment);
+
+        commentRepo.createNewComment(newComment);
+    }
+
+    @Override
+    public List<Comment> getComments(Long postId) {
+        return commentRepo.findAllCommentsByPostId(postId);
     }
 
     @Override

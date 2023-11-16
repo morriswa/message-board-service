@@ -20,7 +20,7 @@ public class CommentDaoImpl implements CommentDao{
     @Override
     public List<Comment> findAllCommentsByPostId(Long postId) {
         final String query = """
-            select * from comment where post_id = :postId
+            select * from post_comment where post_id = :postId
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -49,14 +49,14 @@ public class CommentDaoImpl implements CommentDao{
     @Override
     public void createNewComment(CommentRequest newCommentRequest) {
         final String query = """
-            insert into comment (id, user_id, post_id, parent_id, body)
+            insert into post_comment (id, user_id, post_id, parent_id, body)
             values(default, :userId, :postId, :parentId, :body)
         """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("userId", newCommentRequest.getUserId());
             put("postId", newCommentRequest.getPostId());
-            put("parentId", newCommentRequest.getUserId());
+            put("parentId", newCommentRequest.getParentCommentId());
             put("body", newCommentRequest.getCommentBody());
         }};
 
