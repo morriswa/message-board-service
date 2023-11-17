@@ -8,9 +8,9 @@ import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.PostContentType;
+import org.morriswa.messageboard.model.enumerated.PostContentType;
 import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
-import org.morriswa.messageboard.model.Vote;
+import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.model.entity.Resource;
@@ -211,7 +211,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException {
+    public void addContentToDraft(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
         Objects.requireNonNull(file.getContentType());
@@ -257,7 +257,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public PostDraftResponse getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
+    public PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
         userProfileService.authenticate(token);
 
         var session = sessions.getSession(sessionToken)
@@ -287,11 +287,14 @@ public class ContentServiceImpl implements ContentService {
     }
 
     PostContentType getDraftType(int size) {
-        return size>1? PostContentType.PHOTO_GALLERY: PostContentType.PHOTO;
+        if (size > 1) return PostContentType.PHOTO_GALLERY;
+        else if (size == 1) return PostContentType.PHOTO;
+        else if (size == 0) return PostContentType.TEXT;
+        return PostContentType.TEXT;
     }
 
     @Override
-    public void postDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
+    public void createPostFromDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
         var session = sessions.getSession(sessionToken)

@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.entity.CommunityMembership;
 import org.morriswa.messageboard.model.entity.CommunityMember;
-import org.morriswa.messageboard.model.CommunityStanding;
+import org.morriswa.messageboard.model.enumerated.CommunityStanding;
 import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

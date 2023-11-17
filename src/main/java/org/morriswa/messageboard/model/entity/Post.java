@@ -2,7 +2,7 @@ package org.morriswa.messageboard.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.morriswa.messageboard.model.PostContentType;
+import org.morriswa.messageboard.model.enumerated.PostContentType;
 
 import java.util.GregorianCalendar;
 import java.util.UUID;

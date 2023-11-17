@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.model.Vote;
+import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
 import org.morriswa.messageboard.model.entity.Post;
 

@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.enumerated;
 
 public enum UserAccountStatus {
     NEW,

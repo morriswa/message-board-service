@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.morriswa.messageboard.model.UserRole;
+import org.morriswa.messageboard.model.enumerated.UserRole;
 
 @Valid @AllArgsConstructor @Getter
 public class CreateUserRequest {

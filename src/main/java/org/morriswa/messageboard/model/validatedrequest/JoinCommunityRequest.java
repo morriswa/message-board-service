@@ -3,7 +3,7 @@ package org.morriswa.messageboard.model.validatedrequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import org.morriswa.messageboard.model.CommunityStanding;
+import org.morriswa.messageboard.model.enumerated.CommunityStanding;
 
 import java.util.UUID;
 

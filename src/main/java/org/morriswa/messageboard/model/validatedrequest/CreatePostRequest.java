@@ -6,9 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
-import org.morriswa.messageboard.model.PostContentType;
+import org.morriswa.messageboard.model.enumerated.PostContentType;
 
-import java.util.GregorianCalendar;
 import java.util.UUID;
 
 @Valid @AllArgsConstructor @Getter

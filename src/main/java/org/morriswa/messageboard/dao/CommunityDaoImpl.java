@@ -3,7 +3,7 @@ package org.morriswa.messageboard.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.model.validatedrequest.CreateCommunityRequest;
 import org.morriswa.messageboard.model.entity.Community;
-import org.morriswa.messageboard.model.CommunityStanding;
+import org.morriswa.messageboard.model.enumerated.CommunityStanding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;

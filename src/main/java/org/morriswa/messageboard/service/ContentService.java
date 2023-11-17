@@ -9,7 +9,7 @@ import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
-import org.morriswa.messageboard.model.Vote;
+import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.model.responsebody.PostResponse;
@@ -40,10 +40,10 @@ public interface ContentService {
 
     void editPostDraft(JwtAuthenticationToken token, UUID sessionToken, Optional<String> caption, Optional<String> description) throws BadRequestException;
 
-    void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException;
+    void addContentToDraft(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException;
 
-    PostDraftResponse getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
+    PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
 
-    void postDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
+    void createPostFromDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
 
 }

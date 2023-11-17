@@ -1,10 +1,9 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.enumerated;
 
 public enum PostContentType {
     PHOTO,
     PHOTO_GALLERY,
     VIDEO,
-    GIF,
-    TEXT,
-    AUDIO
+    AUDIO,
+    TEXT
 }

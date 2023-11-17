@@ -8,7 +8,7 @@ import org.morriswa.messageboard.model.entity.UserUiProfile;
 import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
 import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
 import org.morriswa.messageboard.model.entity.User;
-import org.morriswa.messageboard.model.UserRole;
+import org.morriswa.messageboard.model.enumerated.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DuplicateKeyException;

@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.PostContentType;
-import org.morriswa.messageboard.model.Vote;
+import org.morriswa.messageboard.model.enumerated.PostContentType;
+import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
@@ -36,31 +36,26 @@ public class ContentServiceController {
         this.responseFactory = responseFactory;
     }
 
-    private static List<Parameter> getParameterNames(Method method) {
-        return Arrays.stream(method.getParameters())
-                .filter(parameter -> parameter.getName().startsWith("file")).toList();
-    }
-
     @GetMapping(value = "${content.service.endpoints.post-session.path}")
     public ResponseEntity<?> getSession(
             JwtAuthenticationToken token,
             @PathVariable UUID sessionId) throws BadRequestException, ResourceException {
 
-        var sessionz = contentService.getSession(token, sessionId);
+        var draft = contentService.getPostDraft(token, sessionId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.post-session.messages.get"),
-                sessionz);
+                draft);
     }
 
     @PostMapping(value = "${content.service.endpoints.post-session.path}")
-    public ResponseEntity<?> postDraft(
+    public ResponseEntity<?> createPost(
             JwtAuthenticationToken token,
             @PathVariable UUID sessionId)
             throws BadRequestException, ResourceException {
 
-        contentService.postDraft(token, sessionId);
+        contentService.createPostFromDraft(token, sessionId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -74,7 +69,7 @@ public class ContentServiceController {
             @PathVariable UUID sessionId,
             @RequestParam Optional<String> caption,
             @RequestParam Optional<String> description)
-            throws BadRequestException, ResourceException {
+            throws BadRequestException {
 
         contentService.editPostDraft(token, sessionId, caption, description);
 
@@ -106,7 +101,7 @@ public class ContentServiceController {
             @RequestPart MultipartFile content)
             throws BadRequestException, ValidationException, IOException, ResourceException {
 
-        contentService.addContentToSession(token, sessionId, content);
+        contentService.addContentToDraft(token, sessionId, content);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -115,13 +110,12 @@ public class ContentServiceController {
 
     @Deprecated
     @PostMapping(value = "${content.service.endpoints.create-post.path}")
-    public ResponseEntity<?> createPost(JwtAuthenticationToken token,
+    public ResponseEntity<?> legacyCreateImagePost(JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
                                         @RequestPart("image") MultipartFile file0,
                                         @RequestParam("caption") String caption,
                                         @RequestParam("description") String description,
-                                        @RequestParam("contentType") PostContentType type,
-                                        @RequestParam("count") Optional<Integer> count)
+                                        @RequestParam("contentType") PostContentType type)
             throws BadRequestException, ValidationException, IOException, ResourceException {
 
         contentService.createPost(token, communityId, new CreatePostRequestBody(

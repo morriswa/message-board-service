@@ -3,7 +3,7 @@ package org.morriswa.messageboard.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.morriswa.messageboard.model.UserRole;
+import org.morriswa.messageboard.model.enumerated.UserRole;
 
 import java.util.UUID;
 

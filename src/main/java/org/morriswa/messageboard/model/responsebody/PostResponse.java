@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import org.morriswa.messageboard.model.entity.Post;
-import org.morriswa.messageboard.model.PostContentType;
+import org.morriswa.messageboard.model.enumerated.PostContentType;
 
 import java.net.URL;
 import java.util.GregorianCalendar;
