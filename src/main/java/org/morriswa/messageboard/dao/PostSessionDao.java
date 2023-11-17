@@ -10,4 +10,8 @@ public interface PostSessionDao {
     void create(UUID id, UUID userId, Long communityId, UUID resourceId, Optional<String> caption, Optional<String> description);
 
     PostSession getSession(UUID sessionToken);
+
+    void edit(UUID userId, UUID session, Optional<String> caption, Optional<String> description);
+
+    void clearUserSessions(UUID userId);
 }

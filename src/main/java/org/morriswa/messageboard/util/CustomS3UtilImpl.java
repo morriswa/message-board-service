@@ -41,14 +41,14 @@ public class CustomS3UtilImpl implements CustomS3Util {
     @Override
     public void uploadToS3(UploadImageRequest originalRequest, String destination) throws IOException {
 
-        final UUID newImagePath = UUID.randomUUID();
+        final UUID cachePath = UUID.randomUUID();
 
-        final byte[] stuff = Base64.getDecoder().decode(originalRequest.getBaseEncodedImage());
+//        final byte[] stuff = Base64.getDecoder().decode(originalRequest.getBaseEncodedImage());
 
-        File temp = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath + "." + originalRequest.getImageFormat());
+        File temp = new File(this.INTERNAL_FILE_CACHE_PATH + cachePath + "." + originalRequest.getImageFormat());
 
         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(temp));
-        outputStream.write(stuff);
+        outputStream.write(originalRequest.getBaseEncodedImage());
 
         if (!temp.exists())
             throw new FileSystemException(
@@ -66,9 +66,9 @@ public class CustomS3UtilImpl implements CustomS3Util {
     @Override
     public void uploadToS3(BufferedImage scaledImageToUpload, UploadImageRequest originalRequest, String destination) throws IOException {
 
-        final UUID newImagePath = UUID.randomUUID();
+        final UUID cachePath = UUID.randomUUID();
 
-        File temp = new File(this.INTERNAL_FILE_CACHE_PATH + newImagePath);
+        File temp = new File(this.INTERNAL_FILE_CACHE_PATH + cachePath);
 
         ImageIO.write(scaledImageToUpload, originalRequest.getImageFormat(), temp);
 

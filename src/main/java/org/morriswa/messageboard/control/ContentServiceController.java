@@ -1,6 +1,5 @@
 package org.morriswa.messageboard.control;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
@@ -8,24 +7,20 @@ import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.PostContentType;
 import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
-import org.morriswa.messageboard.model.responsebody.CommentRequestBody;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.function.Function;
 
 @RestController @CrossOrigin @Slf4j
 @RequestMapping("${server.path}")
@@ -46,7 +41,7 @@ public class ContentServiceController {
                 .filter(parameter -> parameter.getName().startsWith("file")).toList();
     }
 
-    @GetMapping(value = "create/{sessionId}")
+    @GetMapping(value = "${content.service.endpoints.post-session.path}")
     public ResponseEntity<?> getSession(
             JwtAuthenticationToken token,
             @PathVariable UUID sessionId) throws BadRequestException, ResourceException {
@@ -55,40 +50,70 @@ public class ContentServiceController {
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                "GOOD",
+                e.getRequiredProperty("content.service.endpoints.post-session.messages.get"),
                 sessionz);
     }
 
-    @PostMapping(value = "community/{communityId}/create")
+    @PostMapping(value = "${content.service.endpoints.post-session.path}")
+    public ResponseEntity<?> postDraft(
+            JwtAuthenticationToken token,
+            @PathVariable UUID sessionId)
+            throws BadRequestException, ResourceException {
+
+        contentService.postDraft(token, sessionId);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.post-session.messages.post")
+        );
+    }
+
+    @PatchMapping(value = "${content.service.endpoints.post-session.path}")
+    public ResponseEntity<?> editPostDraft(
+            JwtAuthenticationToken token,
+            @PathVariable UUID sessionId,
+            @RequestParam Optional<String> caption,
+            @RequestParam Optional<String> description)
+            throws BadRequestException, ResourceException {
+
+        contentService.editPostDraft(token, sessionId, caption, description);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.post-session.messages.patch"));
+    }
+
+    @PostMapping(value = "${content.service.endpoints.create-post-session.path}")
     public ResponseEntity<?> startPostSession(
                                         JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
-                                        @RequestParam("caption") Optional<String> caption,
-                                        @RequestParam("description") Optional<String> description)
+                                        @RequestParam Optional<String> caption,
+                                        @RequestParam Optional<String> description)
             throws BadRequestException, ResourceException {
 
         var id = contentService.startPostCreateSession(token, communityId, caption, description);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                "FINE",
+                e.getRequiredProperty("content.service.endpoints.create-post-session.messages.post"),
                 id);
     }
 
-    @PostMapping(value = "create/{sessionId}/add")
-    public ResponseEntity<?> addPostSession(
+    @PostMapping(value = "${content.service.endpoints.add-content.path}")
+    public ResponseEntity<?> addContent(
             JwtAuthenticationToken token,
             @PathVariable UUID sessionId,
-            @RequestPart("content") MultipartFile file)
+            @RequestPart MultipartFile content)
             throws BadRequestException, ValidationException, IOException, ResourceException {
 
-        contentService.addContentToSession(token, sessionId, file);
+        contentService.addContentToSession(token, sessionId, content);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getProperty("content.service.endpoints.create-post.messages.post"));
+                e.getProperty("content.service.endpoints.add-content.messages.post"));
     }
 
+    @Deprecated
     @PostMapping(value = "${content.service.endpoints.create-post.path}")
     public ResponseEntity<?> createPost(JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
@@ -167,6 +192,6 @@ public class ContentServiceController {
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getRequiredProperty("content.service.endpoints.post-voting.messages.post"));
+                e.getRequiredProperty("content.service.endpoints.comment-voting.messages.post"));
     }
 }

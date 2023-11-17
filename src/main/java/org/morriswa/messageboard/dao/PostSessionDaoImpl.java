@@ -66,4 +66,50 @@ public class PostSessionDaoImpl implements PostSessionDao{
             return new PostSession();
         });
     }
+
+    @Override
+    public void edit(UUID userId, UUID session, Optional<String> caption, Optional<String> description) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("id", session);
+            put("userId", userId);
+        }};
+
+        queryBuilder.append("update post_session set ");
+        if (caption.isPresent()) {
+            queryBuilder.append("caption=:caption ");
+            params.put("caption", caption.get());
+        }
+
+        if (description.isPresent()) {
+            if (caption.isPresent()) queryBuilder.append(", ");
+            queryBuilder.append("description=:description ");
+            params.put("description", description.get());
+        }
+
+        queryBuilder.append("where user_id=:userId and id=:id");
+        final String query = queryBuilder.toString();
+
+        log.info(query);
+
+        try {
+            jdbc.update(query, params);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void clearUserSessions(UUID userId) {
+        final String query = """
+            delete from post_session where user_id=:userId
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+        }};
+
+        jdbc.update(query, params);
+    }
 }

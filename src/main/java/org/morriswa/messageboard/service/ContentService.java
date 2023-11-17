@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ContentService {
 
-    void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... file) throws BadRequestException, ValidationException, IOException, ResourceException;
+    @Deprecated void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... file) throws BadRequestException, ValidationException, IOException, ResourceException;
 
     List<Comment> getFullCommentMapForPost(Long postId);
 
@@ -37,7 +37,11 @@ public interface ContentService {
 
     UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, ResourceException;
 
+    void editPostDraft(JwtAuthenticationToken token, UUID sessionToken, Optional<String> caption, Optional<String> description) throws BadRequestException;
+
     void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException;
 
     PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
+
+    void postDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
 }
