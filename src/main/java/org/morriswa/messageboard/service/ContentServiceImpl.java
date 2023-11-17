@@ -109,7 +109,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws BadRequestException {
+    public int voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -119,7 +119,7 @@ public class ContentServiceImpl implements ContentService {
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
-        posts.vote(userId, postId, vote);
+        return posts.vote(userId, postId, vote);
     }
 
     @Override

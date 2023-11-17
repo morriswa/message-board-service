@@ -119,11 +119,12 @@ public class ContentServiceController {
     public ResponseEntity<?> voteOnPost(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
                                                 @RequestParam Vote vote) throws BadRequestException {
-        contentService.voteOnPost(token, postId, vote);
+        int count = contentService.voteOnPost(token, postId, vote);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getRequiredProperty("content.service.endpoints.post-voting.messages.post"));
+                e.getRequiredProperty("content.service.endpoints.post-voting.messages.post"),
+                count);
     }
 
     @PostMapping("${content.service.endpoints.comment.path}")

@@ -7,6 +7,7 @@ import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.model.enumerated.PostContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -125,8 +126,8 @@ public class PostDaoImpl implements PostDao{
 
     private void createVote(UUID userId, Long postId, Vote vote) {
         final String query = """
-                insert into post_vote (id, user_id, post_id, vote_value)
-                values(DEFAULT, :userId, :postId, :voteValue)
+                insert into post_vote (id, user_id, post_id, vote_value, date_created)
+                values(DEFAULT, :userId, :postId, :voteValue, current_timestamp)
             """;
 
         Map<String, Object> params = new HashMap<>() {{
@@ -140,8 +141,9 @@ public class PostDaoImpl implements PostDao{
 
     private void updateVote(UUID userId, Long postId, Vote vote) {
         final String query = """
-                update post_vote 
-                    set vote_value = :voteValue
+                update post_vote set
+                    vote_value = :voteValue,
+                    date_created = current_timestamp
                 where user_id=:userId and post_id=:postId
             """;
 
@@ -155,26 +157,42 @@ public class PostDaoImpl implements PostDao{
     }
 
     @Override
-    public void vote(UUID userId, Long postId, Vote vote) {
+    public int vote(UUID userId, Long postId, Vote vote) {
+        final String existsQuery = """
+            select 1 from post_vote where user_id=:userId and post_id=:postId
+        """;
+
+        final String countQuery = """
+            select sum(pvt.vote_value) as count from post_vote pvt where pvt.post_id=:postId
+        """;
 
         if (vote.equals(Vote.DELETE))
         {
             deleteVote(userId, postId);
-            return;
+        } else {
+            Map<String, Object> params = new HashMap<>() {{
+                put("userId", userId);
+                put("postId", postId);
+            }};
+
+            boolean userAlreadyVoted = Boolean.TRUE.equals(jdbcTemplate.query(existsQuery, params, ResultSet::next));
+
+            if (userAlreadyVoted) updateVote(userId, postId, vote);
+            else createVote(userId, postId, vote);
         }
 
-        final String query = """
-            select 1 from post_vote where user_id=:userId and post_id=:postId
-        """;
-
-        Map<String, Object> params = new HashMap<>() {{
-            put("userId", userId);
+        Map<String, Object> param = new HashMap<>() {{
             put("postId", postId);
         }};
 
-        boolean userAlreadyVoted = Boolean.TRUE.equals(jdbcTemplate.query(query, params, ResultSet::next));
+        Optional<Integer> newCount = jdbcTemplate.query(countQuery, param, rs -> {
+            if (rs.next())
+                return Optional.of(rs.getInt("count"));
+            return Optional.empty();
+        });
 
-        if (userAlreadyVoted) updateVote(userId, postId, vote);
-        else createVote(userId, postId, vote);
+        Objects.requireNonNull(newCount);
+
+        return newCount.orElse(0);
     }
 }

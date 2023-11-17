@@ -17,5 +17,5 @@ public interface PostDao {
 
     void createNewPost(@Valid CreatePostRequest newCreatePostRequest);
 
-    void vote(UUID userId, Long postId, Vote vote);
+    int vote(UUID userId, Long postId, Vote vote);
 }
