@@ -45,14 +45,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.profileImageStoreImpl = profileImageStoreImpl;
     }
 
-    private void displayNameIsAvailableOrThrow(String displayName) throws ValidationException {
-        if (userProfileDao.existsByDisplayName(displayName))
-            throw new ValidationException(
-                "displayName",
-                displayName,
-                e.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
-    }
-
     private String extractEmailFromJwt(JwtAuthenticationToken token) {
         return String.valueOf(token.getTokenAttributes().get("email"));
     }
@@ -95,8 +87,6 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         validator.validateDisplayNameOrThrow(displayName);
 
-//        displayNameIsAvailableOrThrow(displayName);
-
         var newUser = new CreateUserRequest(
                 token.getName(),
                 extractEmailFromJwt(token),
@@ -111,16 +101,18 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile request) throws BadRequestException, IOException {
+    public void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws BadRequestException, IOException {
 
         var userId = authenticate(token);
 
-        validator.validateBeanOrThrow(request);
+        validator.validateBeanOrThrow(image);
+
+        Objects.requireNonNull(image.getContentType());
 
         profileImageStoreImpl.updateUserProfileImage(userId,
             new UploadImageRequest(
-                request.getBytes(),
-                blobTypeToImageFormat(Objects.requireNonNull(request.getContentType()))));
+                image.getBytes(),
+                blobTypeToImageFormat(image.getContentType())));
     }
 
     @Override
@@ -129,9 +121,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.validator.validateDisplayNameOrThrow(requestedDisplayName);
 
         User user = authenticateAndGetUser(token);
-
-//        if (!user.getDisplayName().equals(requestedDisplayName))
-//            displayNameIsAvailableOrThrow(requestedDisplayName);
 
         // save changes
         this.userProfileDao.updateUserDisplayName(user.getUserId(), requestedDisplayName);

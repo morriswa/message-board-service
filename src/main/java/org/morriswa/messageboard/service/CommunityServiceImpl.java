@@ -61,12 +61,12 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityIcon(JwtAuthenticationToken token, MultipartFile file, Long communityId) throws BadRequestException, ValidationException, IOException {
+    public void updateCommunityIcon(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws BadRequestException, ValidationException, IOException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
-        var uploadImageRequest = new UploadImageRequest(file.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(file.getContentType())));
+        var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
 
         validator.validateImageRequestOrThrow(uploadImageRequest);
 
@@ -74,12 +74,12 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityBanner(JwtAuthenticationToken token, MultipartFile file, Long communityId) throws BadRequestException, ValidationException, IOException {
+    public void updateCommunityBanner(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws BadRequestException, ValidationException, IOException {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
-        var uploadImageRequest = new UploadImageRequest(file.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(file.getContentType())));
+        var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
 
         validator.validateImageRequestOrThrow(uploadImageRequest);
 

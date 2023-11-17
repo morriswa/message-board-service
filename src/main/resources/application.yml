@@ -196,7 +196,9 @@ content:
           post: Started session!
     errors:
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
-      too-many-images: Please do not upload more than 10 images for a single post!
+      too-many-images: Please do not upload more than %d images for a single post!
       wrong-number-of-files: Request count does not match received files.
+      cannot-locate-resource: could not locate resource %s :(
     rules:
       image-scale-factor: 0.5
+      max-allowed-content: 10

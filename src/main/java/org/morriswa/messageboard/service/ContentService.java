@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
@@ -21,11 +20,11 @@ public interface ContentService {
 
     @Deprecated void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... file) throws BadRequestException, ValidationException, IOException, ResourceException;
 
-    List<Comment> getFullCommentMapForPost(Long postId);
+//    @Deprecated List<Comment> getFullCommentMapForPost(Long postId);
 
     List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException, ResourceException;
 
-    List<Comment> getComments(Long postId) throws BadRequestException;
+    List<Comment> getPostComments(Long postId) throws BadRequestException;
 
     void addCommentToPost(JwtAuthenticationToken token, Long postId, String comment) throws BadRequestException;
 

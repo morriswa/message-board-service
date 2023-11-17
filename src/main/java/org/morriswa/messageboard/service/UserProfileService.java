@@ -71,11 +71,11 @@ public interface UserProfileService {
      * Updates a User's profile image
      *
      * @param token to authenticate user with
-     * @param file representing new profile image
+     * @param image representing new profile image
      * @throws BadRequestException if the user cannot be authenticated
      * @throws IOException if the image cannot be processed and uploaded successfully
      */
-    void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile file) throws BadRequestException, IOException;
+    void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws BadRequestException, IOException;
 
     /**
      * Updates a user's display name

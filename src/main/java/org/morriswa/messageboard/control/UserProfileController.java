@@ -57,8 +57,8 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user-profile-image.path}")
     public ResponseEntity<?> updateUserProfileImage(JwtAuthenticationToken jwt,
-                                                    @RequestPart("image") MultipartFile request) throws BadRequestException, IOException {
-        userProfileService.updateUserProfileImage(jwt, request);
+                                                    @RequestPart MultipartFile image) throws BadRequestException, IOException {
+        userProfileService.updateUserProfileImage(jwt, image);
         return responseFactory.getResponse(
             HttpStatus.OK,
             e.getProperty("user-profile.service.endpoints.user-profile-image.messages.post"));

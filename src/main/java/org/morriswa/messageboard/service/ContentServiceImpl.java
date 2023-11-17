@@ -43,8 +43,8 @@ public class ContentServiceImpl implements ContentService {
     private final PostDao posts;
     private final ResourceDao resources;
     private final CommentDao commentRepo;
-
     private final PostSessionDao sessions;
+
     @Autowired
     public ContentServiceImpl(Environment e,
                               ContentServiceValidator validator,
@@ -52,7 +52,9 @@ public class ContentServiceImpl implements ContentService {
                               UserProfileService userProfileService,
                               ImageStore imageStore,
                               PostDao posts,
-                              ResourceDao resources, CommentDao commentRepo, PostSessionDao sessions) {
+                              ResourceDao resources,
+                              CommentDao commentRepo,
+                              PostSessionDao sessions) {
         this.e = e;
         this.validator = validator;
         this.communityService = communityService;
@@ -79,8 +81,6 @@ public class ContentServiceImpl implements ContentService {
                     "content.service.errors.wrong-number-of-files"
             ));
 
-//        resourceRepo.createNewPostResource(newResource);
-
         switch (request.getContentType()) {
             case PHOTO -> {
                 var uploadRequest = new UploadImageRequest(
@@ -100,34 +100,6 @@ public class ContentServiceImpl implements ContentService {
                 newResource.add(newImageTag);
                 resources.createNewPostResource(newResource);
             }
-
-//            case PHOTO_GALLERY -> {
-//                final int imagesToUpload = request.getCount();
-//
-//                if (imagesToUpload>10) throw new BadRequestException(
-//                        e.getRequiredProperty("content.service.errors.too-many-images")
-//                );
-//
-//                var generatedSource = new ArrayList<UUID>();
-//
-//                for (int i = 0; i < imagesToUpload; i++) {
-//                    UUID newResourceUUID = i == 0 ? newResource.getId() : UUID.randomUUID();
-//
-//                    generatedSource.add(newResourceUUID);
-//
-//                    var uploadRequest = new UploadImageRequest(
-//                            files[i].getBytes(),
-//                            blobTypeToImageFormat(Objects.requireNonNull(files[i].getContentType()))
-//                    );
-//
-//                    validator.validateImageRequestOrThrow(uploadRequest);
-//
-//                    imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
-//                }
-//
-//                newResource.setList(generatedSource.subList(1, generatedSource.size()));
-//                resources.createNewPostResource(newResource);
-//            }
 
             default ->
                 throw new BadRequestException(e.getRequiredProperty("content.service.errors.content-type-not-supported"));
@@ -156,11 +128,10 @@ public class ContentServiceImpl implements ContentService {
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
-        final CommentRequest newComment= CommentRequest.buildCommentRequest(
+        final CommentRequest newComment = CommentRequest.buildCommentRequest(
                     userId,
                     postId,
                     comment);
-
 
         validator.validateBeanOrThrow(newComment);
 
@@ -243,19 +214,33 @@ public class ContentServiceImpl implements ContentService {
     public void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
+        Objects.requireNonNull(file.getContentType());
+
         var uploadRequest = new UploadImageRequest(
                 file.getBytes(),
-                blobTypeToImageFormat(Objects.requireNonNull(file.getContentType()))
+                blobTypeToImageFormat(file.getContentType())
         );
 
         validator.validateImageRequestOrThrow(uploadRequest);
 
         var session = sessions.getSession(sessionToken);
 
-        var resource = resources.findResourceByResourceId(session.getResourceId()).orElseThrow();
+        var resource = resources.findResourceByResourceId(session.getResourceId())
+            .orElseThrow(
+                ()->new ResourceException(
+                        String.format(
+                            e.getRequiredProperty("content.service.errors.cannot-locate-resource"),
+                            session.getResourceId()))
+            );
 
-        if (resource.getResources().size() >= 10)
-            throw new RuntimeException();
+        final int maxAllowedResources = Integer.parseInt(
+                e.getRequiredProperty("content.service.rules.max-allowed-content")
+        );
+
+        if (resource.getResources().size() >= maxAllowedResources)
+            throw new ResourceException(
+                    String.format(e.getRequiredProperty("content.service.errors.too-many-images"),
+                            maxAllowedResources));
 
         final UUID newImageTag = UUID.randomUUID();
 
@@ -275,21 +260,30 @@ public class ContentServiceImpl implements ContentService {
 
         var session = sessions.getSession(sessionToken);
 
-        var resource = resources.findResourceByResourceId(session.getResourceId()).orElseThrow();
+        var resource = resources.findResourceByResourceId(session.getResourceId())
+                .orElseThrow(
+                        ()->new ResourceException(
+                                String.format(
+                                        e.getRequiredProperty("content.service.errors.cannot-locate-resource"),
+                                        session.getResourceId()))
+                );
 
-        final PostDraft response = new PostDraft(
+        return new PostDraft(
                 session.getSessionId(),
                 session.getUserId(),
                 session.getCommunityId(),
                 session.getCaption(),
                 session.getDescription(),
-                resource.getResources().size()>1? PostContentType.PHOTO_GALLERY: PostContentType.PHOTO,
-                new ArrayList<URL>(){{
-                        for (UUID resource : resource.getResources())
-                            add(imageStore.retrieveImageResource(resource));
-                    }}
+                getDraftType(resource.getResources().size()),
+                new ArrayList<>() {{
+                    for (UUID resource1 : resource.getResources())
+                        add(imageStore.retrieveImageResource(resource1));
+                }}
         );
-        return response;
+    }
+
+    PostContentType getDraftType(int size) {
+        return size>1? PostContentType.PHOTO_GALLERY: PostContentType.PHOTO;
     }
 
     @Override
@@ -298,16 +292,19 @@ public class ContentServiceImpl implements ContentService {
 
         var session = sessions.getSession(sessionToken);
 
-        var resource = resources.findResourceByResourceId(session.getResourceId()).orElseThrow(
-                //todo
-                ()->new ResourceException("cannot find resource for draft")
-        );
+        var resource = resources.findResourceByResourceId(session.getResourceId())
+            .orElseThrow(
+                ()->new ResourceException(
+                    String.format(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-resource"),
+                        session.getResourceId()))
+            );
 
         var newPost = new CreatePostRequest(userId,
                 session.getCommunityId(),
                 session.getCaption(),
                 session.getDescription(),
-                resource.getResources().size()>1? PostContentType.PHOTO_GALLERY: PostContentType.PHOTO,
+                getDraftType(resource.getResources().size()),
                 session.getResourceId());
 
         validator.validateBeanOrThrow(newPost);
@@ -318,27 +315,8 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<Comment> getComments(Long postId) {
+    public List<Comment> getPostComments(Long postId) {
         return commentRepo.findAllCommentsByPostId(postId);
-    }
-
-    @Override
-    public List<Comment> getFullCommentMapForPost(Long postId) {
-        var retrievedComments = commentRepo.findAllCommentsByPostId(postId);
-//
-//        List<CommentResponse> comments = new ArrayList<>();
-//
-//        List<CommentResponse> subComments = new ArrayList<>();
-//
-//        for (CommentRequest commentRequest : retrievedComments) {
-//            if (commentRequest.getParentCommentId()==null)
-//                comments.add(new CommentResponse(commentRequest));
-//            else subComments.add(new CommentResponse(commentRequest));
-//        }
-//
-//        // TODO map all subComments to Comments
-
-        return retrievedComments;
     }
 
     @Override

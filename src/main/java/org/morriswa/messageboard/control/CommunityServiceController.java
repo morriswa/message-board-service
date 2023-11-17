@@ -65,8 +65,8 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.update-community-banner.path}")
     public ResponseEntity<?> updateCommunityBanner(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId,
-                                             @RequestPart("image") MultipartFile file) throws BadRequestException, IOException, ValidationException {
-        this.community.updateCommunityBanner(jwt, file, communityId);
+                                             @RequestPart MultipartFile image) throws BadRequestException, IOException, ValidationException {
+        this.community.updateCommunityBanner(jwt, image, communityId);
 
         return responseFactory.getResponse(
             HttpStatus.OK,

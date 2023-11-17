@@ -175,7 +175,7 @@ public class ContentServiceController {
 
     @GetMapping("${content.service.endpoints.comment.path}")
     public ResponseEntity<?> getComments(@PathVariable Long postId) throws BadRequestException {
-        var comments = contentService.getComments(postId);
+        var comments = contentService.getPostComments(postId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
