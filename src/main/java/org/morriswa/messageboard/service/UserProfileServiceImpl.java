@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.morriswa.messageboard.util.Functions.blobTypeToMyType;
+import static org.morriswa.messageboard.util.Functions.blobTypeToImageFormat;
 
 @Service @Slf4j
 public class UserProfileServiceImpl implements UserProfileService {
@@ -120,7 +120,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         profileImageStoreImpl.updateUserProfileImage(userId,
             new UploadImageRequest(
                 request.getBytes(),
-                blobTypeToMyType(Objects.requireNonNull(request.getContentType()))));
+                blobTypeToImageFormat(Objects.requireNonNull(request.getContentType()))));
     }
 
     @Override

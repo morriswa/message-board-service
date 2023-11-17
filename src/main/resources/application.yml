@@ -15,8 +15,8 @@ spring:
   banner.location: classpath:banner.txt
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 20MB
+      max-request-size: 30MB
 
 auth0:
   audience: "http://127.0.0.1:8081/v0"
@@ -183,5 +183,6 @@ content:
     errors:
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
       too-many-images: Please do not upload more than 10 images for a single post!
+      wrong-number-of-files: Request count does not match received files.
     rules:
       image-scale-factor: 0.5

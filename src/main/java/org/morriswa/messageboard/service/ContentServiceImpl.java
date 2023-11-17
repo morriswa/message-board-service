@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
+import org.morriswa.messageboard.dao.PostSessionDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.PostContentType;
+import org.morriswa.messageboard.model.PostDraft;
 import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
@@ -28,7 +32,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.morriswa.messageboard.util.Functions.blobTypeToMyType;
+import static org.morriswa.messageboard.util.Functions.blobTypeToImageFormat;
 
 @Service @Slf4j
 public class ContentServiceImpl implements ContentService {
@@ -41,6 +45,7 @@ public class ContentServiceImpl implements ContentService {
     private final ResourceDao resources;
     private final CommentDao commentRepo;
 
+    private final PostSessionDao sessions;
     @Autowired
     public ContentServiceImpl(Environment e,
                               ContentServiceValidator validator,
@@ -48,7 +53,7 @@ public class ContentServiceImpl implements ContentService {
                               UserProfileService userProfileService,
                               ImageStore imageStore,
                               PostDao posts,
-                              ResourceDao resources, CommentDao commentRepo) {
+                              ResourceDao resources, CommentDao commentRepo, PostSessionDao sessions) {
         this.e = e;
         this.validator = validator;
         this.communityService = communityService;
@@ -57,11 +62,12 @@ public class ContentServiceImpl implements ContentService {
         this.posts = posts;
         this.resources = resources;
         this.commentRepo = commentRepo;
+        this.sessions = sessions;
     }
 
 
     @Override
-    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile file) throws BadRequestException, ValidationException, IOException {
+    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... files) throws BadRequestException, ValidationException, IOException {
 
         var userId = userProfileService.authenticate(token);
 
@@ -69,27 +75,35 @@ public class ContentServiceImpl implements ContentService {
 
         var newResource = new Resource();
 
+        if (request.getCount() != files.length)
+            throw new BadRequestException(e.getRequiredProperty(
+                    "content.service.errors.wrong-number-of-files"
+            ));
+
 //        resourceRepo.createNewPostResource(newResource);
 
         switch (request.getContentType()) {
             case PHOTO -> {
                 var uploadRequest = new UploadImageRequest(
-                        file.getBytes(),
-                        blobTypeToMyType(Objects.requireNonNull(file.getContentType()))
+                        files[0].getBytes(),
+                        blobTypeToImageFormat(Objects.requireNonNull(files[0].getContentType()))
                 );
 
                 validator.validateImageRequestOrThrow(uploadRequest);
 
+                final UUID newImageTag = UUID.randomUUID();
+
                 imageStore.uploadIndividualImage(
-                        newResource.getResourceId(),
+                        newImageTag,
                         uploadRequest
                 );
 
+                newResource.add(newImageTag);
                 resources.createNewPostResource(newResource);
             }
 
 //            case PHOTO_GALLERY -> {
-//                int imagesToUpload = (int) request.getContent().get("count");
+//                final int imagesToUpload = request.getCount();
 //
 //                if (imagesToUpload>10) throw new BadRequestException(
 //                        e.getRequiredProperty("content.service.errors.too-many-images")
@@ -98,13 +112,13 @@ public class ContentServiceImpl implements ContentService {
 //                var generatedSource = new ArrayList<UUID>();
 //
 //                for (int i = 0; i < imagesToUpload; i++) {
-//                    UUID newResourceUUID = i == 0 ? newResource.getResourceId() : UUID.randomUUID();
+//                    UUID newResourceUUID = i == 0 ? newResource.getId() : UUID.randomUUID();
 //
 //                    generatedSource.add(newResourceUUID);
 //
 //                    var uploadRequest = new UploadImageRequest(
-//                            (String) request.getContent().get("baseEncodedImage" + i),
-//                            (String) request.getContent().get("imageFormat" + i)
+//                            files[i].getBytes(),
+//                            blobTypeToImageFormat(Objects.requireNonNull(files[i].getContentType()))
 //                    );
 //
 //                    validator.validateImageRequestOrThrow(uploadRequest);
@@ -112,7 +126,7 @@ public class ContentServiceImpl implements ContentService {
 //                    imageStore.uploadIndividualImage(newResourceUUID, uploadRequest);
 //                }
 //
-//                newResource.setList(generatedSource);
+//                newResource.setList(generatedSource.subList(1, generatedSource.size()));
 //                resources.createNewPostResource(newResource);
 //            }
 
@@ -125,7 +139,7 @@ public class ContentServiceImpl implements ContentService {
                 request.getCaption(),
                 request.getDescription(),
                 request.getContentType(),
-                newResource.getResourceId());
+                newResource.getId());
 
         validator.validateBeanOrThrow(newPost);
 
@@ -202,6 +216,74 @@ public class ContentServiceImpl implements ContentService {
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
         commentRepo.vote(userId, postId, commentId, vote);
+    }
+
+    @Override
+    public UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, JsonProcessingException {
+        var userId = userProfileService.authenticate(token);
+
+        var newResource = new Resource();
+
+        resources.createNewPostResource(newResource);
+
+        var id = UUID.randomUUID();
+
+        sessions.create(id, userId, communityId, newResource.getId(), caption, description);
+
+        return id;
+    }
+
+    @Override
+    public void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException {
+        var userId = userProfileService.authenticate(token);
+
+        var uploadRequest = new UploadImageRequest(
+                file.getBytes(),
+                blobTypeToImageFormat(Objects.requireNonNull(file.getContentType()))
+        );
+
+        validator.validateImageRequestOrThrow(uploadRequest);
+
+        var session = sessions.getSession(sessionToken);
+
+        var resource = resources.findResourceByResourceId(session.getResourceId()).orElseThrow();
+
+        if (resource.getList().size() >= 10)
+            throw new RuntimeException();
+
+        final UUID newImageTag = UUID.randomUUID();
+
+        imageStore.uploadIndividualImage(
+                newImageTag,
+                uploadRequest
+        );
+
+        resource.add(newImageTag);
+
+        resources.updateResource(resource);
+    }
+
+    @Override
+    public PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException {
+        var userId = userProfileService.authenticate(token);
+
+        var session = sessions.getSession(sessionToken);
+
+        var resource = resources.findResourceByResourceId(session.getResourceId()).orElseThrow();
+
+        final PostDraft response = new PostDraft(
+                session.getSessionId(),
+                session.getUserId(),
+                session.getCommunityId(),
+                session.getCaption(),
+                session.getDescription(),
+                resource.getResources().size()>1? PostContentType.PHOTO_GALLERY: PostContentType.PHOTO,
+                new ArrayList<URL>(){{
+                        for (UUID resource : resource.getList())
+                            add(imageStore.retrieveImageResource(resource));
+                    }}
+        );
+        return response;
     }
 
     @Override

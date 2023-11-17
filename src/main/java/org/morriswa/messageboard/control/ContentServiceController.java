@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.control;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
@@ -19,7 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.*;
+import java.util.function.Function;
 
 @RestController @CrossOrigin @Slf4j
 @RequestMapping("${server.path}")
@@ -35,22 +40,70 @@ public class ContentServiceController {
         this.responseFactory = responseFactory;
     }
 
+    private static List<Parameter> getParameterNames(Method method) {
+        return Arrays.stream(method.getParameters())
+                .filter(parameter -> parameter.getName().startsWith("file")).toList();
+    }
+
+    @GetMapping(value = "create/{sessionId}")
+    public ResponseEntity<?> getSession(
+            JwtAuthenticationToken token,
+            @PathVariable UUID sessionId) throws BadRequestException {
+
+        var sessionz = contentService.getSession(token, sessionId);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                "GOOD",
+                sessionz);
+    }
+
+    @PostMapping(value = "community/{communityId}/create")
+    public ResponseEntity<?> startPostSession(
+                                        JwtAuthenticationToken token,
+                                        @PathVariable Long communityId,
+                                        @RequestParam("caption") Optional<String> caption,
+                                        @RequestParam("description") Optional<String> description)
+            throws BadRequestException, JsonProcessingException {
+
+        var id = contentService.startPostCreateSession(token, communityId, caption, description);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                "FINE",
+                id);
+    }
+
+    @PostMapping(value = "create/{sessionId}/add")
+    public ResponseEntity<?> addPostSession(
+            JwtAuthenticationToken token,
+            @PathVariable UUID sessionId,
+            @RequestPart("content") MultipartFile file)
+            throws BadRequestException, ValidationException, IOException {
+
+        contentService.addContentToSession(token, sessionId, file);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getProperty("content.service.endpoints.create-post.messages.post"));
+    }
+
     @PostMapping(value = "${content.service.endpoints.create-post.path}")
     public ResponseEntity<?> createPost(JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
-                                        @RequestPart("image") MultipartFile file,
+                                        @RequestPart("image") MultipartFile file0,
                                         @RequestParam("caption") String caption,
                                         @RequestParam("description") String description,
-                                        @RequestParam("contentType") PostContentType type)
+                                        @RequestParam("contentType") PostContentType type,
+                                        @RequestParam("count") Optional<Integer> count)
             throws BadRequestException, ValidationException, IOException {
-
-        log.info("Attempting to upload type: {}", file.getContentType());
 
         contentService.createPost(token, communityId, new CreatePostRequestBody(
                 caption,
                 description,
-                type
-        ), file);
+                type,
+                1
+        ), file0);
         return responseFactory.getResponse(
                 HttpStatus.OK,
                 e.getProperty("content.service.endpoints.create-post.messages.post"));

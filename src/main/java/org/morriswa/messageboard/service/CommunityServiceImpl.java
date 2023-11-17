@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 
-import static org.morriswa.messageboard.util.Functions.blobTypeToMyType;
+import static org.morriswa.messageboard.util.Functions.blobTypeToImageFormat;
 
 @Service @Slf4j
 public class CommunityServiceImpl implements CommunityService {
@@ -66,7 +66,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
-        var uploadImageRequest = new UploadImageRequest(file.getBytes(),blobTypeToMyType(Objects.requireNonNull(file.getContentType())));
+        var uploadImageRequest = new UploadImageRequest(file.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(file.getContentType())));
 
         validator.validateImageRequestOrThrow(uploadImageRequest);
 
@@ -79,7 +79,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
 
-        var uploadImageRequest = new UploadImageRequest(file.getBytes(),blobTypeToMyType(Objects.requireNonNull(file.getContentType())));
+        var uploadImageRequest = new UploadImageRequest(file.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(file.getContentType())));
 
         validator.validateImageRequestOrThrow(uploadImageRequest);
 

@@ -17,17 +17,22 @@ create table user_post (
     resource_id uuid not null unique
 );
 
-create table post_resource (
-    id uuid unique not null,
-    id1 uuid unique,
-    id2 uuid unique,
-    id3 uuid unique,
-    id4 uuid unique,
-    id5 uuid unique,
-    id6 uuid unique,
-    id7 uuid unique,
-    id8 uuid unique,
-    id9 uuid unique
+-- create table post_resource (
+--     id uuid unique not null,
+--     id1 uuid unique,
+--     id2 uuid unique,
+--     id3 uuid unique,
+--     id4 uuid unique,
+--     id5 uuid unique,
+--     id6 uuid unique,
+--     id7 uuid unique,
+--     id8 uuid unique,
+--     id9 uuid unique
+-- );
+
+create table post_resource(
+  id uuid primary key,
+  data varchar(500)
 );
 
 create table community (
@@ -74,4 +79,13 @@ create table comment_vote (
     post_id bigint not null,
     comment_id bigint not null,
     vote_value int not null
+);
+
+create table post_session (
+    id uuid primary key,
+    user_id uuid not null,
+    community_id bigint not null,
+    resource_id uuid unique not null,
+    caption varchar(100),
+    description varchar(10000)
 );

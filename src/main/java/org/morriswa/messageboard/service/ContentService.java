@@ -2,9 +2,13 @@ package org.morriswa.messageboard.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.PostDraft;
 import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
@@ -14,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ContentService {
 
-    void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile file) throws BadRequestException, ValidationException, IOException;
+    void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... file) throws BadRequestException, ValidationException, IOException;
 
     List<Comment> getFullCommentMapForPost(Long postId);
 
@@ -29,4 +33,10 @@ public interface ContentService {
     void voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws BadRequestException;
 
     void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws BadRequestException;
+
+    UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, JsonProcessingException;
+
+    void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException;
+
+    PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException;
 }

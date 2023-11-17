@@ -10,61 +10,23 @@ import java.util.UUID;
 
 @Getter @AllArgsConstructor
 public class Resource {
-    private UUID resourceId;
-    private UUID resourceId1;
-    private UUID resourceId2;
-    private UUID resourceId3;
-    private UUID resourceId4;
-    private UUID resourceId5;
-    private UUID resourceId6;
-    private UUID resourceId7;
-    private UUID resourceId8;
-    private UUID resourceId9;
+    private UUID id;
+    private List<UUID> resources;
 
     public List<UUID> getList() {
-        var response = new ArrayList<UUID>();
-        for (UUID resource : Arrays.asList(
-                resourceId,
-                resourceId1,
-                resourceId2,
-                resourceId3,
-                resourceId4,
-                resourceId5,
-                resourceId6,
-                resourceId7,
-                resourceId8,
-                resourceId9)) {
-            if (resource != null) response.add(resource);
-        }
-        return response;
+        return resources;
     }
 
     public void setList(List<UUID> resources) {
-        if (resources.size()>10) throw new RuntimeException("should never have > 10 vals");
-
-        Class<Resource> resourceClass = Resource.class;
-
-        try {
-            for (int i = 0;i < 10; i++) {
-                var field = i==0?resourceClass.getDeclaredField("resourceId")
-                        :resourceClass.getDeclaredField("resourceId"+i);
-                field.setAccessible(true);
-                field.set(this, null);
-            }
-
-            for (int i = 0;i < resources.size(); i++) {
-
-                var field = i==0?resourceClass.getDeclaredField("resourceId")
-                        :resourceClass.getDeclaredField("resourceId"+i);
-                field.setAccessible(true);
-                field.set(this, resources.get(i));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        this.resources = resources;
     }
 
     public Resource() {
-        this.resourceId = UUID.randomUUID();
+        this.id = UUID.randomUUID();
+        this.resources = new ArrayList<>(10);
+    }
+
+    public void add(UUID uuid) {
+        this.resources.add(uuid);
     }
 }

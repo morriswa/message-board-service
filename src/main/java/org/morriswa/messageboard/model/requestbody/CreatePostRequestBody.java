@@ -9,4 +9,5 @@ public class CreatePostRequestBody {
     private String caption;
     private String description;
     private PostContentType contentType;
+    private int count;
 }
