@@ -10,7 +10,7 @@ import java.net.URL;
 
 @Getter
 public class CommunityResponse extends Community {
-    private AllCommunityResourceURLs resourceUrls;
+    private final AllCommunityResourceURLs resourceUrls;
 
     @Data @AllArgsConstructor @NoArgsConstructor
     public static class AllCommunityResourceURLs {

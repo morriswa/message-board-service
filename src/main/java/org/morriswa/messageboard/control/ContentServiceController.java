@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.enumerated.PostContentType;
 import org.morriswa.messageboard.model.enumerated.Vote;
-import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.*;
 
 @RestController @CrossOrigin @Slf4j
@@ -86,7 +82,7 @@ public class ContentServiceController {
                                         @RequestParam Optional<String> description)
             throws BadRequestException, ResourceException {
 
-        var id = contentService.startPostCreateSession(token, communityId, caption, description);
+        var id = contentService.createPostDraft(token, communityId, caption, description);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -106,27 +102,6 @@ public class ContentServiceController {
         return responseFactory.getResponse(
                 HttpStatus.OK,
                 e.getProperty("content.service.endpoints.add-content.messages.post"));
-    }
-
-    @Deprecated
-    @PostMapping(value = "${content.service.endpoints.create-post.path}")
-    public ResponseEntity<?> legacyCreateImagePost(JwtAuthenticationToken token,
-                                        @PathVariable Long communityId,
-                                        @RequestPart("image") MultipartFile file0,
-                                        @RequestParam("caption") String caption,
-                                        @RequestParam("description") String description,
-                                        @RequestParam("contentType") PostContentType type)
-            throws BadRequestException, ValidationException, IOException, ResourceException {
-
-        contentService.createPost(token, communityId, new CreatePostRequestBody(
-                caption,
-                description,
-                type,
-                1
-        ), file0);
-        return responseFactory.getResponse(
-                HttpStatus.OK,
-                e.getProperty("content.service.endpoints.create-post.messages.post"));
     }
 
     @GetMapping("${content.service.endpoints.community-feed.path}")
@@ -156,7 +131,7 @@ public class ContentServiceController {
                                                 @PathVariable Long postId,
                                                 @RequestBody String comment) throws BadRequestException {
 
-        contentService.addCommentToPost(token, postId, comment);
+        contentService.leaveComment(token, postId, comment);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -169,7 +144,7 @@ public class ContentServiceController {
                                                 @PathVariable Long parentId,
                                                 @RequestBody String comment) throws BadRequestException {
 
-        contentService.addCommentToPost(token, postId, parentId, comment);
+        contentService.leaveComment(token, postId, parentId, comment);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -178,7 +153,7 @@ public class ContentServiceController {
 
     @GetMapping("${content.service.endpoints.comment.path}")
     public ResponseEntity<?> getComments(@PathVariable Long postId) throws BadRequestException {
-        var comments = contentService.getPostComments(postId);
+        var comments = contentService.getComments(postId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -189,7 +164,7 @@ public class ContentServiceController {
     @GetMapping("${content.service.endpoints.sub-comment.path}")
     public ResponseEntity<?> getSubComments(@PathVariable Long postId,
                                             @PathVariable Long parentId) throws BadRequestException {
-        var comments = contentService.getPostComments(postId, parentId);
+        var comments = contentService.getComments(postId, parentId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,

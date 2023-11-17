@@ -66,59 +66,8 @@ public class ContentServiceImpl implements ContentService {
         this.sessions = sessions;
     }
 
-
     @Override
-    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... files) throws BadRequestException, ValidationException, IOException, ResourceException {
-
-        var userId = userProfileService.authenticate(token);
-
-        communityService.verifyUserCanPostInCommunityOrThrow(userId, communityId);
-
-        var newResource = new Resource();
-
-        if (request.getCount() != files.length)
-            throw new BadRequestException(e.getRequiredProperty(
-                    "content.service.errors.wrong-number-of-files"
-            ));
-
-        switch (request.getContentType()) {
-            case PHOTO -> {
-                var uploadRequest = new UploadImageRequest(
-                        files[0].getBytes(),
-                        blobTypeToImageFormat(Objects.requireNonNull(files[0].getContentType()))
-                );
-
-                validator.validateImageRequestOrThrow(uploadRequest);
-
-                final UUID newImageTag = UUID.randomUUID();
-
-                imageStore.uploadIndividualImage(
-                        newImageTag,
-                        uploadRequest
-                );
-
-                newResource.add(newImageTag);
-                resources.createNewPostResource(newResource);
-            }
-
-            default ->
-                throw new BadRequestException(e.getRequiredProperty("content.service.errors.content-type-not-supported"));
-        }
-
-        var newPost = new CreatePostRequest(userId,
-                communityId,
-                request.getCaption(),
-                request.getDescription(),
-                request.getContentType(),
-                newResource.getId());
-
-        validator.validateBeanOrThrow(newPost);
-
-        posts.createNewPost(newPost);
-    }
-
-    @Override
-    public void addCommentToPost(JwtAuthenticationToken token, Long postId, String comment) throws BadRequestException {
+    public void leaveComment(JwtAuthenticationToken token, Long postId, String comment) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -139,7 +88,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void addCommentToPost(JwtAuthenticationToken token, Long postId, Long parentCommentId, String comment) throws BadRequestException {
+    public void leaveComment(JwtAuthenticationToken token, Long postId, Long parentCommentId, String comment) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -189,7 +138,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, ResourceException {
+    public UUID createPostDraft(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
         var newResource = new Resource();
@@ -324,12 +273,12 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<Comment> getPostComments(Long postId) {
+    public List<Comment> getComments(Long postId) {
         return commentRepo.findComments(postId);
     }
 
     @Override
-    public List<Comment> getPostComments(Long postId, Long parentId) {
+    public List<Comment> getComments(Long postId, Long parentId) {
         return commentRepo.findComments(postId, parentId);
     }
 
