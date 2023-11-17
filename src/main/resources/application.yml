@@ -204,6 +204,7 @@ content:
       too-many-images: Please do not upload more than %d images for a single post!
       wrong-number-of-files: Request count does not match received files.
       cannot-locate-resource: could not locate resource %s :(
+      cannot-locate-session: could not locate post creation session :(
     rules:
       image-scale-factor: 0.5
       max-allowed-content: 10

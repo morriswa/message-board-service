@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.PostDraft;
+import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
 import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
@@ -42,7 +42,7 @@ public interface ContentService {
 
     void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException;
 
-    PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
+    PostDraftResponse getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
 
     void postDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
 

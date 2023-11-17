@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.model.PostSession;
+import org.morriswa.messageboard.model.entity.PostSession;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -9,7 +9,7 @@ public interface PostSessionDao {
 
     void create(UUID id, UUID userId, Long communityId, UUID resourceId, Optional<String> caption, Optional<String> description);
 
-    PostSession getSession(UUID sessionToken);
+    Optional<PostSession> getSession(UUID sessionToken);
 
     void edit(UUID userId, UUID session, Optional<String> caption, Optional<String> description);
 

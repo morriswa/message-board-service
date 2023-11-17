@@ -9,7 +9,7 @@ import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.PostContentType;
-import org.morriswa.messageboard.model.PostDraft;
+import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
 import org.morriswa.messageboard.model.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
@@ -223,7 +223,9 @@ public class ContentServiceImpl implements ContentService {
 
         validator.validateImageRequestOrThrow(uploadRequest);
 
-        var session = sessions.getSession(sessionToken);
+        var session = sessions.getSession(sessionToken)
+                .orElseThrow(()->new BadRequestException(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-session")));
 
         var resource = resources.findResourceByResourceId(session.getResourceId())
             .orElseThrow(
@@ -255,10 +257,12 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
+    public PostDraftResponse getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
         userProfileService.authenticate(token);
 
-        var session = sessions.getSession(sessionToken);
+        var session = sessions.getSession(sessionToken)
+                .orElseThrow(()->new BadRequestException(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-session")));
 
         var resource = resources.findResourceByResourceId(session.getResourceId())
                 .orElseThrow(
@@ -268,7 +272,7 @@ public class ContentServiceImpl implements ContentService {
                                         session.getResourceId()))
                 );
 
-        return new PostDraft(
+        return new PostDraftResponse(
                 session.getSessionId(),
                 session.getUserId(),
                 session.getCommunityId(),
@@ -290,7 +294,9 @@ public class ContentServiceImpl implements ContentService {
     public void postDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
-        var session = sessions.getSession(sessionToken);
+        var session = sessions.getSession(sessionToken)
+                .orElseThrow(()->new BadRequestException(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-session")));;
 
         var resource = resources.findResourceByResourceId(session.getResourceId())
             .orElseThrow(

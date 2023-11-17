@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
 import java.util.*;
 
+import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
+
 @Component
 public class CommentDaoImpl implements CommentDao{
     private final NamedParameterJdbcTemplate jdbc;
@@ -43,7 +45,8 @@ public class CommentDaoImpl implements CommentDao{
                         rs.getLong("post_id"),
                         rs.getLong("parent_id"),
                         rs.getString("body"),
-                        rs.getInt("count")
+                        rs.getInt("count"),
+                        timestampToGregorian(rs.getTimestamp("date_created"))
                     )
                 );
             }
@@ -77,7 +80,8 @@ public class CommentDaoImpl implements CommentDao{
                                 rs.getLong("post_id"),
                                 rs.getLong("parent_id"),
                                 rs.getString("body"),
-                                rs.getInt("count")
+                                rs.getInt("count"),
+                                timestampToGregorian(rs.getTimestamp("date_created"))
                         )
                 );
             }

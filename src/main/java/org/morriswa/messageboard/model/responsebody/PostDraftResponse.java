@@ -1,15 +1,15 @@
-package org.morriswa.messageboard.model;
+package org.morriswa.messageboard.model.responsebody;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.morriswa.messageboard.model.PostContentType;
 
 import java.net.URL;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor @Getter
-public class PostDraft {
+public class PostDraftResponse {
     private final UUID draftId;
     private final UUID userId;
     private final Long communityId;

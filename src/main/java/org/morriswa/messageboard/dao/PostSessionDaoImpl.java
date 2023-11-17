@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.PostSession;
+import org.morriswa.messageboard.model.entity.PostSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -42,7 +42,7 @@ public class PostSessionDaoImpl implements PostSessionDao{
     }
 
     @Override
-    public PostSession getSession(UUID sessionToken) {
+    public Optional<PostSession> getSession(UUID sessionToken) {
         final String query = """
             select * from post_session where id=:id
         """;
@@ -53,17 +53,16 @@ public class PostSessionDaoImpl implements PostSessionDao{
 
         return jdbc.query(query, params, rs -> {
             if (rs.next()) {
-                return new PostSession(
+                return Optional.of(new PostSession(
                         rs.getObject("id", UUID.class),
                         rs.getObject("user_id", UUID.class),
                         rs.getLong("community_id"),
                         rs.getObject("resource_id", UUID.class),
                         rs.getString("caption"),
-                        rs.getString("description")
-                );
+                        rs.getString("description")));
             }
 
-            return new PostSession();
+            return Optional.empty();
         });
     }
 
