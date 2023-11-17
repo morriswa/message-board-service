@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.PostDraft;
 import org.morriswa.messageboard.model.Vote;
@@ -18,11 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ContentService {
 
-    void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... file) throws BadRequestException, ValidationException, IOException;
+    void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... file) throws BadRequestException, ValidationException, IOException, ResourceException;
 
     List<Comment> getFullCommentMapForPost(Long postId);
 
-    List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException;
+    List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException, ResourceException;
 
     List<Comment> getComments(Long postId) throws BadRequestException;
 
@@ -34,9 +35,9 @@ public interface ContentService {
 
     void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws BadRequestException;
 
-    UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, JsonProcessingException;
+    UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, ResourceException;
 
-    void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException;
+    void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException;
 
-    PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException;
+    PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
 }

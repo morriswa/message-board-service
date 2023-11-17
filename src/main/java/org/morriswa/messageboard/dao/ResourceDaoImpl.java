@@ -1,8 +1,10 @@
 package org.morriswa.messageboard.dao;
 
+import com.amazonaws.services.apigateway.model.Op;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.model.entity.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -23,64 +25,85 @@ public class ResourceDaoImpl implements ResourceDao{
 
 
     @Override
-    public Optional<Resource> findResourceByResourceId(UUID resourceId) {
+    public Optional<Resource> findResourceByResourceId(UUID resourceId) throws ResourceException {
         final String query = "select * from post_resource where id=:id";
 
         Map<String, Object> params = new HashMap<>(){{
            put("id", resourceId);
         }};
 
-        return jdbc.query(query, params, rs -> {
+        Map<String, Object> rawResult = jdbc.query(query, params, rs -> {
+            Map<String, Object> result = new HashMap<>();
+
             if (rs.next()) {
-                final String data = rs.getString("data");
-
-                final List<String> format;
-                try {
-                    format = om.readValue(data, ArrayList.class);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-
-                final List<UUID> resources = new ArrayList<>(10);
-                format.forEach(rawString->{
-                    resources.add(UUID.fromString(rawString));
-                });
-
-                final Resource resource = new Resource(rs.getObject("id", UUID.class), resources);
-                return Optional.of(resource);
+                result.put("id",rs.getObject("id", UUID.class));
+                result.put("data",rs.getString("data"));
             }
 
-            return Optional.empty();
+            return result;
         });
+
+        if (rawResult == null || !rawResult.containsKey("id"))
+            return Optional.empty();
+
+        final String data = (String) rawResult.getOrDefault("data", "[]");
+
+        final List<?> format;
+        try {
+            format = om.readValue(data, ArrayList.class);
+        } catch (JsonProcessingException e) {
+            throw new ResourceException(e.getMessage());
+        }
+
+        final List<UUID> resources = new ArrayList<>(10);
+        format.forEach(rawString->{
+            resources.add(UUID.fromString((String) rawString));
+        });
+
+        return Optional.of(new Resource((UUID) rawResult.get("id"), resources));
     }
 
     @Override
-    public void createNewPostResource(Resource newResource) throws JsonProcessingException {
+    public void createNewPostResource(Resource resource) throws ResourceException {
         final String query =
                 """
                     insert into post_resource(id, data)
                     values(:id, :data)
                 """;
 
+        final String data;
+        try {
+            data =  om.writeValueAsString(resource.getResources());
+        } catch (JsonProcessingException jpe) {
+            throw new ResourceException(jpe.getMessage());
+        }
+
         Map<String, Object> params = new HashMap<>(){{
-            put("id", newResource.getId());
-            put("data", om.writeValueAsString(newResource.getResources()));
+            put("id", resource.getId());
+            put("data", data);
         }};
 
         jdbc.update(query, params);
     }
 
     @Override
-    public void updateResource(Resource resource) throws JsonProcessingException {
+    public void updateResource(Resource resource) throws ResourceException {
         final String query = """
             update post_resource
                 set data=:data
              where id=:id
         """;
 
+        final String data;
+        try {
+            data =  om.writeValueAsString(resource.getResources());
+        } catch (JsonProcessingException jpe) {
+            throw new ResourceException(jpe.getMessage());
+        }
+
         Map<String, Object> params = new HashMap<>(){{
             put("id", resource.getId());
-            put("data", om.writeValueAsString(resource.getResources()));
+            put("data",data);
         }};
 
         jdbc.update(query,params);

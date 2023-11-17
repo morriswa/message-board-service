@@ -1,8 +1,6 @@
 package org.morriswa.messageboard;
 
-import org.checkerframework.checker.units.qual.A;
-import org.morriswa.messageboard.config.JwtTestUtils;
-import org.morriswa.messageboard.config.TestSecurityConfig;
+import org.morriswa.messageboard.config.TestConfig;
 import org.morriswa.messageboard.dao.*;
 import org.morriswa.messageboard.util.HttpResponseFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringBootTest(classes = {TestSecurityConfig.class})
+@SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class MessageboardTest {

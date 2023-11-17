@@ -9,6 +9,7 @@ import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.PostSessionDao;
 import org.morriswa.messageboard.dao.ResourceDao;
+import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.PostContentType;
 import org.morriswa.messageboard.model.PostDraft;
@@ -67,7 +68,7 @@ public class ContentServiceImpl implements ContentService {
 
 
     @Override
-    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... files) throws BadRequestException, ValidationException, IOException {
+    public void createPost(JwtAuthenticationToken token, Long communityId, CreatePostRequestBody request, MultipartFile... files) throws BadRequestException, ValidationException, IOException, ResourceException {
 
         var userId = userProfileService.authenticate(token);
 
@@ -219,7 +220,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, JsonProcessingException {
+    public UUID startPostCreateSession(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
         var newResource = new Resource();
@@ -234,7 +235,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException {
+    public void addContentToSession(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
         var uploadRequest = new UploadImageRequest(
@@ -264,7 +265,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException {
+    public PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
         var session = sessions.getSession(sessionToken);
@@ -311,7 +312,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException {
+    public List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException, ResourceException {
 
         var response = new ArrayList<PostResponse>();
 

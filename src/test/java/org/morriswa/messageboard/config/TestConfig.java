@@ -11,12 +11,12 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import java.util.Properties;
 
 @TestConfiguration @Slf4j
-public class TestSecurityConfig {
+public class TestConfig {
 
     private final JwtTestUtils utils;
 
     @Autowired
-    public TestSecurityConfig(JwtTestUtils utils) {
+    public TestConfig(JwtTestUtils utils) {
         this.utils = utils;
     }
 

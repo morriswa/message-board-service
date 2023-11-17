@@ -3,6 +3,7 @@ package org.morriswa.messageboard.control;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.PostContentType;
 import org.morriswa.messageboard.model.Vote;
@@ -48,7 +49,7 @@ public class ContentServiceController {
     @GetMapping(value = "create/{sessionId}")
     public ResponseEntity<?> getSession(
             JwtAuthenticationToken token,
-            @PathVariable UUID sessionId) throws BadRequestException {
+            @PathVariable UUID sessionId) throws BadRequestException, ResourceException {
 
         var sessionz = contentService.getSession(token, sessionId);
 
@@ -64,7 +65,7 @@ public class ContentServiceController {
                                         @PathVariable Long communityId,
                                         @RequestParam("caption") Optional<String> caption,
                                         @RequestParam("description") Optional<String> description)
-            throws BadRequestException, JsonProcessingException {
+            throws BadRequestException, ResourceException {
 
         var id = contentService.startPostCreateSession(token, communityId, caption, description);
 
@@ -79,7 +80,7 @@ public class ContentServiceController {
             JwtAuthenticationToken token,
             @PathVariable UUID sessionId,
             @RequestPart("content") MultipartFile file)
-            throws BadRequestException, ValidationException, IOException {
+            throws BadRequestException, ValidationException, IOException, ResourceException {
 
         contentService.addContentToSession(token, sessionId, file);
 
@@ -96,7 +97,7 @@ public class ContentServiceController {
                                         @RequestParam("description") String description,
                                         @RequestParam("contentType") PostContentType type,
                                         @RequestParam("count") Optional<Integer> count)
-            throws BadRequestException, ValidationException, IOException {
+            throws BadRequestException, ValidationException, IOException, ResourceException {
 
         contentService.createPost(token, communityId, new CreatePostRequestBody(
                 caption,
@@ -110,7 +111,7 @@ public class ContentServiceController {
     }
 
     @GetMapping("${content.service.endpoints.community-feed.path}")
-    public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws BadRequestException {
+    public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws BadRequestException, ResourceException {
 
         var feed = contentService.getFeedForCommunity(communityId);
 
