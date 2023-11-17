@@ -32,7 +32,7 @@ public class MessageboardTest {
 
     @MockBean protected PostDao postDao;
 
-    @MockBean protected PostSessionDao postSessionDao;
+    @MockBean protected PostDraftDao postDraftDao;
 
     @MockBean protected ResourceDao resourceDao;
 

@@ -3,7 +3,7 @@ package org.morriswa.messageboard.service;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
-import org.morriswa.messageboard.dao.PostSessionDao;
+import org.morriswa.messageboard.dao.PostDraftDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
@@ -14,7 +14,6 @@ import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.model.entity.Resource;
-import org.morriswa.messageboard.model.requestbody.CreatePostRequestBody;
 import org.morriswa.messageboard.model.responsebody.PostResponse;
 import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
 import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
@@ -42,8 +41,8 @@ public class ContentServiceImpl implements ContentService {
     private final ImageStore imageStore;
     private final PostDao posts;
     private final ResourceDao resources;
-    private final CommentDao commentRepo;
-    private final PostSessionDao sessions;
+    private final CommentDao comments;
+    private final PostDraftDao drafts;
 
     @Autowired
     public ContentServiceImpl(Environment e,
@@ -53,8 +52,8 @@ public class ContentServiceImpl implements ContentService {
                               ImageStore imageStore,
                               PostDao posts,
                               ResourceDao resources,
-                              CommentDao commentRepo,
-                              PostSessionDao sessions) {
+                              CommentDao comments,
+                              PostDraftDao drafts) {
         this.e = e;
         this.validator = validator;
         this.communityService = communityService;
@@ -62,8 +61,8 @@ public class ContentServiceImpl implements ContentService {
         this.imageStore = imageStore;
         this.posts = posts;
         this.resources = resources;
-        this.commentRepo = commentRepo;
-        this.sessions = sessions;
+        this.comments = comments;
+        this.drafts = drafts;
     }
 
     @Override
@@ -84,7 +83,7 @@ public class ContentServiceImpl implements ContentService {
 
         validator.validateBeanOrThrow(newComment);
 
-        commentRepo.createNewComment(newComment);
+        comments.createNewComment(newComment);
     }
 
     @Override
@@ -106,7 +105,7 @@ public class ContentServiceImpl implements ContentService {
 
         validator.validateBeanOrThrow(newComment);
 
-        commentRepo.createNewComment(newComment);
+        comments.createNewComment(newComment);
     }
 
     @Override
@@ -134,7 +133,7 @@ public class ContentServiceImpl implements ContentService {
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
-        commentRepo.vote(userId, postId, commentId, vote);
+        comments.vote(userId, postId, commentId, vote);
     }
 
     @Override
@@ -147,20 +146,20 @@ public class ContentServiceImpl implements ContentService {
 
         var id = UUID.randomUUID();
 
-        sessions.create(id, userId, communityId, newResource.getId(), caption, description);
+        drafts.create(id, userId, communityId, newResource.getId(), caption, description);
 
         return id;
     }
 
     @Override
-    public void editPostDraft(JwtAuthenticationToken token, UUID sessionToken, Optional<String> caption, Optional<String> description) throws BadRequestException {
+    public void editPostDraft(JwtAuthenticationToken token, UUID draftId, Optional<String> caption, Optional<String> description) throws BadRequestException {
         var userId = userProfileService.authenticate(token);
 
-        sessions.edit(userId, sessionToken, caption, description);
+        drafts.edit(userId, draftId, caption, description);
     }
 
     @Override
-    public void addContentToDraft(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException {
+    public void addContentToDraft(JwtAuthenticationToken token, UUID draftId, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
         Objects.requireNonNull(file.getContentType());
@@ -172,7 +171,7 @@ public class ContentServiceImpl implements ContentService {
 
         validator.validateImageRequestOrThrow(uploadRequest);
 
-        var session = sessions.getSession(sessionToken)
+        var session = drafts.getDraft(draftId)
                 .orElseThrow(()->new BadRequestException(
                         e.getRequiredProperty("content.service.errors.cannot-locate-session")));
 
@@ -206,10 +205,10 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
+    public PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID draftId) throws BadRequestException, ResourceException {
         userProfileService.authenticate(token);
 
-        var session = sessions.getSession(sessionToken)
+        var session = drafts.getDraft(draftId)
                 .orElseThrow(()->new BadRequestException(
                         e.getRequiredProperty("content.service.errors.cannot-locate-session")));
 
@@ -243,10 +242,10 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void createPostFromDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException {
+    public void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws BadRequestException, ResourceException {
         var userId = userProfileService.authenticate(token);
 
-        var session = sessions.getSession(sessionToken)
+        var session = drafts.getDraft(draftId)
                 .orElseThrow(()->new BadRequestException(
                         e.getRequiredProperty("content.service.errors.cannot-locate-session")));;
 
@@ -269,17 +268,17 @@ public class ContentServiceImpl implements ContentService {
 
         posts.createNewPost(newPost);
 
-        sessions.clearUserSessions(userId);
+        drafts.clearUsersDrafts(userId);
     }
 
     @Override
     public List<Comment> getComments(Long postId) {
-        return commentRepo.findComments(postId);
+        return comments.findComments(postId);
     }
 
     @Override
     public List<Comment> getComments(Long postId, Long parentId) {
-        return commentRepo.findComments(postId, parentId);
+        return comments.findComments(postId, parentId);
     }
 
     @Override

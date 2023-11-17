@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.entity.PostSession;
+import org.morriswa.messageboard.model.entity.PostDraft;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,11 +12,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component @Slf4j
-public class PostSessionDaoImpl implements PostSessionDao{
+public class PostDraftDaoImpl implements PostDraftDao {
     private final NamedParameterJdbcTemplate jdbc;
 
     @Autowired
-    public PostSessionDaoImpl(NamedParameterJdbcTemplate jdbc) {
+    public PostDraftDaoImpl(NamedParameterJdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
@@ -42,18 +42,18 @@ public class PostSessionDaoImpl implements PostSessionDao{
     }
 
     @Override
-    public Optional<PostSession> getSession(UUID sessionToken) {
+    public Optional<PostDraft> getDraft(UUID draftId) {
         final String query = """
             select * from post_session where id=:id
         """;
 
         Map<String, Object> params = new HashMap<>(){{
-            put("id", sessionToken);
+            put("id", draftId);
         }};
 
         return jdbc.query(query, params, rs -> {
             if (rs.next()) {
-                return Optional.of(new PostSession(
+                return Optional.of(new PostDraft(
                         rs.getObject("id", UUID.class),
                         rs.getObject("user_id", UUID.class),
                         rs.getLong("community_id"),
@@ -67,11 +67,11 @@ public class PostSessionDaoImpl implements PostSessionDao{
     }
 
     @Override
-    public void edit(UUID userId, UUID session, Optional<String> caption, Optional<String> description) {
+    public void edit(UUID userId, UUID draftId, Optional<String> caption, Optional<String> description) {
         StringBuilder queryBuilder = new StringBuilder();
 
         Map<String, Object> params = new HashMap<>(){{
-            put("id", session);
+            put("id", draftId);
             put("userId", userId);
         }};
 
@@ -100,7 +100,7 @@ public class PostSessionDaoImpl implements PostSessionDao{
     }
 
     @Override
-    public void clearUserSessions(UUID userId) {
+    public void clearUsersDrafts(UUID userId) {
         final String query = """
             delete from post_session where user_id=:userId
         """;

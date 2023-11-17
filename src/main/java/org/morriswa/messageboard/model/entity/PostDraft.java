@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Getter
-public class PostSession {
+public class PostDraft {
     private final UUID sessionId;
     private final UUID userId;
     private final Long communityId;

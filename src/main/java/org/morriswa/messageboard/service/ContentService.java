@@ -33,12 +33,12 @@ public interface ContentService {
 
     UUID createPostDraft(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, ResourceException;
 
-    void editPostDraft(JwtAuthenticationToken token, UUID sessionToken, Optional<String> caption, Optional<String> description) throws BadRequestException;
+    void editPostDraft(JwtAuthenticationToken token, UUID draftId, Optional<String> caption, Optional<String> description) throws BadRequestException;
 
-    void addContentToDraft(JwtAuthenticationToken token, UUID sessionToken, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException;
+    void addContentToDraft(JwtAuthenticationToken token, UUID draftId, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException;
 
-    PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
+    PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID draftId) throws BadRequestException, ResourceException;
 
-    void createPostFromDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
+    void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws BadRequestException, ResourceException;
 
 }

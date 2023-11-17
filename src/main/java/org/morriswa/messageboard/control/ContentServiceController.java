@@ -32,49 +32,49 @@ public class ContentServiceController {
         this.responseFactory = responseFactory;
     }
 
-    @GetMapping(value = "${content.service.endpoints.post-session.path}")
+    @GetMapping(value = "${content.service.endpoints.draft.path}")
     public ResponseEntity<?> getSession(
             JwtAuthenticationToken token,
-            @PathVariable UUID sessionId) throws BadRequestException, ResourceException {
+            @PathVariable UUID draftId) throws BadRequestException, ResourceException {
 
-        var draft = contentService.getPostDraft(token, sessionId);
+        var draft = contentService.getPostDraft(token, draftId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getRequiredProperty("content.service.endpoints.post-session.messages.get"),
+                e.getRequiredProperty("content.service.endpoints.draft.messages.get"),
                 draft);
     }
 
-    @PostMapping(value = "${content.service.endpoints.post-session.path}")
+    @PostMapping(value = "${content.service.endpoints.draft.path}")
     public ResponseEntity<?> createPost(
             JwtAuthenticationToken token,
-            @PathVariable UUID sessionId)
+            @PathVariable UUID draftId)
             throws BadRequestException, ResourceException {
 
-        contentService.createPostFromDraft(token, sessionId);
+        contentService.createPostFromDraft(token, draftId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getRequiredProperty("content.service.endpoints.post-session.messages.post")
+                e.getRequiredProperty("content.service.endpoints.draft.messages.post")
         );
     }
 
-    @PatchMapping(value = "${content.service.endpoints.post-session.path}")
+    @PatchMapping(value = "${content.service.endpoints.draft.path}")
     public ResponseEntity<?> editPostDraft(
             JwtAuthenticationToken token,
-            @PathVariable UUID sessionId,
+            @PathVariable UUID draftId,
             @RequestParam Optional<String> caption,
             @RequestParam Optional<String> description)
             throws BadRequestException {
 
-        contentService.editPostDraft(token, sessionId, caption, description);
+        contentService.editPostDraft(token, draftId, caption, description);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getRequiredProperty("content.service.endpoints.post-session.messages.patch"));
+                e.getRequiredProperty("content.service.endpoints.draft.messages.patch"));
     }
 
-    @PostMapping(value = "${content.service.endpoints.create-post-session.path}")
+    @PostMapping(value = "${content.service.endpoints.create-draft.path}")
     public ResponseEntity<?> startPostSession(
                                         JwtAuthenticationToken token,
                                         @PathVariable Long communityId,
@@ -86,18 +86,18 @@ public class ContentServiceController {
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getRequiredProperty("content.service.endpoints.create-post-session.messages.post"),
+                e.getRequiredProperty("content.service.endpoints.create-draft.messages.post"),
                 id);
     }
 
     @PostMapping(value = "${content.service.endpoints.add-content.path}")
     public ResponseEntity<?> addContent(
             JwtAuthenticationToken token,
-            @PathVariable UUID sessionId,
+            @PathVariable UUID draftId,
             @RequestPart MultipartFile content)
             throws BadRequestException, ValidationException, IOException, ResourceException {
 
-        contentService.addContentToDraft(token, sessionId, content);
+        contentService.addContentToDraft(token, draftId, content);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,

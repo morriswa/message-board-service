@@ -151,7 +151,7 @@ community:
       user-cannot-post: You are not authorized to post to this community!
       user-cannot-edit: "User %s was denied edit access to community #%s"
       bad-community-ref-length: "Bad L"
-      bad-community-ref: Please only include lowercase letters, numbers, and hyphens! 
+      bad-community-ref: Please only include lowercase letters, numbers, and hyphens!
         Additionally, your ref should not start or end with a hyphen, or start with a number. Thanks!
       bad-community-display-name-length: "Bad Display  Name L"
       ref-already-taken: "bad kitty that name is already taken"
@@ -185,20 +185,20 @@ content:
         path: post/{postId}/comment/{commentId}/vote
         messages:
           post: Successfully voted
-      post-session:
-        path: create/{sessionId}
+      draft:
+        path: draft/{draftId}
         messages:
           get: FINE!
           post: FINE!
           patch: FINE!
       add-content:
-        path: create/{sessionId}/add
+        path: draft/{draftId}/add
         messages:
           post: FINE!
-      create-post-session:
-        path: community/{communityId}/create
+      create-draft:
+        path: community/{communityId}/draft
         messages:
-          post: Started session!
+          post: Draft session created!
     errors:
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
       too-many-images: Please do not upload more than %d images for a single post!
