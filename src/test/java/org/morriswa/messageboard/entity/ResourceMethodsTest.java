@@ -18,10 +18,10 @@ public class ResourceMethodsTest extends MessageboardTest {
         }};
 
         var resource = new Resource();
-        resource.setList(list);
+        resource.setResources(list);
 
         int i = 0;
-        for (UUID uuid: resource.getList()) {
+        for (UUID uuid: resource.getResources()) {
 
             assertEquals(uuid, list.get(i));
             i++;
@@ -37,10 +37,10 @@ public class ResourceMethodsTest extends MessageboardTest {
         }};
 
         var resource = new Resource();
-        resource.setList(list);
+        resource.setResources(list);
 
         int i = 0;
-        for (UUID uuid: resource.getList()) {
+        for (UUID uuid: resource.getResources()) {
             assertEquals(uuid, list.get(i));
             i++;
         }
@@ -53,10 +53,10 @@ public class ResourceMethodsTest extends MessageboardTest {
         }};
 
         var resource = new Resource();
-        resource.setList(list);
+        resource.setResources(list);
 
         int i = 0;
-        for (UUID uuid: resource.getList()) {
+        for (UUID uuid: resource.getResources()) {
             assertEquals(uuid, list.get(i));
             i++;
         }

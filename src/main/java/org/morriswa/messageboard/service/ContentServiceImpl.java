@@ -248,7 +248,7 @@ public class ContentServiceImpl implements ContentService {
 
         var resource = resources.findResourceByResourceId(session.getResourceId()).orElseThrow();
 
-        if (resource.getList().size() >= 10)
+        if (resource.getResources().size() >= 10)
             throw new RuntimeException();
 
         final UUID newImageTag = UUID.randomUUID();
@@ -279,7 +279,7 @@ public class ContentServiceImpl implements ContentService {
                 session.getDescription(),
                 resource.getResources().size()>1? PostContentType.PHOTO_GALLERY: PostContentType.PHOTO,
                 new ArrayList<URL>(){{
-                        for (UUID resource : resource.getList())
+                        for (UUID resource : resource.getResources())
                             add(imageStore.retrieveImageResource(resource));
                     }}
         );
@@ -323,7 +323,7 @@ public class ContentServiceImpl implements ContentService {
                     .orElseThrow();
 
             var resourceUrls = new ArrayList<URL>(){{
-                for (UUID resource : resourceEntity.getList())
+                for (UUID resource : resourceEntity.getResources())
                     add(imageStore.retrieveImageResource(resource));
             }};
 

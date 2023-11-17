@@ -64,7 +64,7 @@ public class ResourceDaoImpl implements ResourceDao{
 
         Map<String, Object> params = new HashMap<>(){{
             put("id", newResource.getId());
-            put("data", om.writeValueAsString(newResource.getList()));
+            put("data", om.writeValueAsString(newResource.getResources()));
         }};
 
         jdbc.update(query, params);
@@ -80,7 +80,7 @@ public class ResourceDaoImpl implements ResourceDao{
 
         Map<String, Object> params = new HashMap<>(){{
             put("id", resource.getId());
-            put("data", om.writeValueAsString(resource.getList()));
+            put("data", om.writeValueAsString(resource.getResources()));
         }};
 
         jdbc.update(query,params);
