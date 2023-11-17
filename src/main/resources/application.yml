@@ -170,8 +170,13 @@ content:
       comment:
         path: post/{postId}/comment
         messages:
-          get: Successfully retrieved level one comments for post
+          get: Successfully comments for post
           post: Successfully left comment on requested post
+      sub-comment:
+        path: post/{postId}/comment/{parentId}
+        messages:
+          get: Successfully retrieved sub comments
+          post: Successfully replied to requested comment
       post-voting:
         path: post/{postId}/vote
         messages:

@@ -20,7 +20,7 @@ public class CommentDaoImpl implements CommentDao{
     }
 
     @Override
-    public List<Comment> findAllCommentsByPostId(Long postId) {
+    public List<Comment> findComments(Long postId) {
         final String query = """
             select
                 *,
@@ -53,10 +53,44 @@ public class CommentDaoImpl implements CommentDao{
     }
 
     @Override
+    public List<Comment> findComments(Long postId, Long parentId) {
+        final String query = """
+            select
+                *,
+                (select sum(cvt.vote_value) from comment_vote cvt where cvt.comment_id=post_comment.id) AS count
+                from post_comment where post_id = :postId and parent_id = :parentId;
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("postId", postId);
+            put("parentId", parentId);
+        }};
+
+        return jdbc.query(query, params, rs -> {
+            List<Comment> comments = new ArrayList<>();
+
+            while (rs.next()) {
+                comments.add(
+                        new Comment(
+                                rs.getLong("id"),
+                                rs.getObject("user_id", UUID.class),
+                                rs.getLong("post_id"),
+                                rs.getLong("parent_id"),
+                                rs.getString("body"),
+                                rs.getInt("count")
+                        )
+                );
+            }
+
+            return comments;
+        });
+    }
+
+    @Override
     public void createNewComment(CommentRequest newCommentRequest) {
         final String query = """
-            insert into post_comment (id, user_id, post_id, parent_id, body)
-            values(default, :userId, :postId, :parentId, :body)
+            insert into post_comment (id, user_id, post_id, parent_id, body, date_created)
+            values(default, :userId, :postId, :parentId, :body, current_timestamp)
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -85,8 +119,8 @@ public class CommentDaoImpl implements CommentDao{
 
     private void createVote(UUID userId, Long postId, Long commentId, Vote vote) {
         final String query = """
-                insert into comment_vote (id, user_id, post_id, comment_id, vote_value)
-                values(DEFAULT, :userId, :postId, :commentId, :voteValue)
+                insert into comment_vote (id, user_id, post_id, comment_id, vote_value, date_created)
+                values(DEFAULT, :userId, :postId, :commentId, :voteValue, current_timestamp)
             """;
 
         Map<String, Object> params = new HashMap<>() {{
@@ -101,8 +135,9 @@ public class CommentDaoImpl implements CommentDao{
 
     private void updateVote(UUID userId, Long postId, Long commentId, Vote vote) {
         final String query = """
-                update comment_vote
-                    set vote_value = :voteValue
+                update comment_vote set
+                    vote_value = :voteValue,
+                    date_created = current_timestamp
                 where user_id=:userId and post_id=:postId and comment_id=:commentId
             """;
 

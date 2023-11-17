@@ -17,19 +17,6 @@ create table user_post (
     resource_id uuid not null unique
 );
 
--- create table post_resource (
---     id uuid unique not null,
---     id1 uuid unique,
---     id2 uuid unique,
---     id3 uuid unique,
---     id4 uuid unique,
---     id5 uuid unique,
---     id6 uuid unique,
---     id7 uuid unique,
---     id8 uuid unique,
---     id9 uuid unique
--- );
-
 create table post_resource(
   id uuid primary key,
   data varchar(500)
@@ -62,15 +49,17 @@ create table post_comment (
     id bigserial primary key,
     user_id uuid not null,
     post_id bigint not null,
-    parent_id bigint,
-    body varchar(1000)
+    parent_id bigint not null,
+    body varchar(1000),
+    date_created timestamp with time zone not null
 );
 
 create table post_vote (
     id bigserial primary key,
     user_id uuid not null,
     post_id bigint not null,
-    vote_value int not null
+    vote_value int not null,
+    date_created timestamp with time zone not null
 );
 
 create table comment_vote (
@@ -78,7 +67,8 @@ create table comment_vote (
     user_id uuid not null,
     post_id bigint not null,
     comment_id bigint not null,
-    vote_value int not null
+    vote_value int not null,
+    date_created timestamp with time zone not null
 );
 
 create table post_session (

@@ -24,7 +24,9 @@ public interface ContentService {
 
     List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException, ResourceException;
 
-    List<Comment> getPostComments(Long postId) throws BadRequestException;
+    List<Comment> getPostComments(Long postId);
+
+    List<Comment> getPostComments(Long postId, Long parentId);
 
     void addCommentToPost(JwtAuthenticationToken token, Long postId, String comment) throws BadRequestException;
 
@@ -43,4 +45,5 @@ public interface ContentService {
     PostDraft getSession(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
 
     void postDraft(JwtAuthenticationToken token, UUID sessionToken) throws BadRequestException, ResourceException;
+
 }

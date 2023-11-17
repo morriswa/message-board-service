@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CommentDao {
-    List<Comment> findAllCommentsByPostId(Long postId);
+    List<Comment> findComments(Long postId);
+
+    List<Comment> findComments(Long postId, Long parentId);
 
     void createNewComment(CommentRequest newCommentRequest);
 
     void vote(UUID userId, Long postId, Long commentId, Vote vote);
+
 }

@@ -316,7 +316,12 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public List<Comment> getPostComments(Long postId) {
-        return commentRepo.findAllCommentsByPostId(postId);
+        return commentRepo.findComments(postId);
+    }
+
+    @Override
+    public List<Comment> getPostComments(Long postId, Long parentId) {
+        return commentRepo.findComments(postId, parentId);
     }
 
     @Override

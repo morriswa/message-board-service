@@ -160,17 +160,26 @@ public class ContentServiceController {
     @PostMapping("${content.service.endpoints.comment.path}")
     public ResponseEntity<?> leaveCommentOnPost(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
-                                                @RequestParam Optional<Long> parentId,
                                                 @RequestBody String comment) throws BadRequestException {
-        if (parentId.isPresent()) {
-            contentService.addCommentToPost(token, postId, parentId.get(), comment);
-        }
 
         contentService.addCommentToPost(token, postId, comment);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.comment.messages.post"));
+    }
+
+    @PostMapping("${content.service.endpoints.sub-comment.path}")
+    public ResponseEntity<?> leaveCommentOnPost(JwtAuthenticationToken token,
+                                                @PathVariable Long postId,
+                                                @PathVariable Long parentId,
+                                                @RequestBody String comment) throws BadRequestException {
+
+        contentService.addCommentToPost(token, postId, parentId, comment);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.sub-comment.messages.post"));
     }
 
     @GetMapping("${content.service.endpoints.comment.path}")
@@ -180,6 +189,17 @@ public class ContentServiceController {
         return responseFactory.getResponse(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.comment.messages.get"),
+                comments);
+    }
+
+    @GetMapping("${content.service.endpoints.sub-comment.path}")
+    public ResponseEntity<?> getSubComments(@PathVariable Long postId,
+                                            @PathVariable Long parentId) throws BadRequestException {
+        var comments = contentService.getPostComments(postId, parentId);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.sub-comment.messages.get"),
                 comments);
     }
 
