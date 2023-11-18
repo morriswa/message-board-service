@@ -2,7 +2,7 @@
   <configuration default="false" name="drop_messageboard_tables.sql" type="DatabaseScript" editBeforeRun="true" nameIsGenerated="true">
     <script-file value="$PROJECT_DIR$/queries/drop_messageboard_tables.sql" />
     <script-mode>FILE</script-mode>
-    <data-source id="96f87dbe-3ed1-4f0c-bffe-1d25adaad050" />
+    <data-source id="9b1586e0-6923-467b-a994-226f3970b653" />
     <method v="2" />
   </configuration>
 </component>

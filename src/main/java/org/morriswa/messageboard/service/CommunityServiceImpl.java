@@ -2,6 +2,7 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.model.entity.CommunityMembership;
 import org.morriswa.messageboard.model.entity.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
@@ -50,7 +51,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws BadRequestException {
+    public void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var newCommunity = new CreateCommunityRequest(request.getCommunityRef(), request.getCommunityName(), userId);
@@ -61,7 +62,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityIcon(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws BadRequestException, ValidationException, IOException {
+    public void updateCommunityIcon(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws Exception{
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
@@ -74,7 +75,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityBanner(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws BadRequestException, ValidationException, IOException {
+    public void updateCommunityBanner(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         verifyUserCanEditCommunityOrThrow(userId, communityId);
@@ -87,7 +88,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public CommunityResponse getAllCommunityInfo(String communityLocator) throws BadRequestException {
+    public CommunityResponse getAllCommunityInfo(String communityLocator) throws Exception {
 
         Community community = communityDao
                 .findCommunity(communityLocator)
@@ -103,7 +104,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public CommunityResponse getAllCommunityInfo(Long communityId) throws BadRequestException {
+    public CommunityResponse getAllCommunityInfo(Long communityId) throws Exception {
 
         var community = communityDao
                 .findCommunity(communityId)
@@ -119,7 +120,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void joinCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
+    public void joinCommunity(JwtAuthenticationToken token, Long communityId) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         if (communityMemberDao.relationshipExists(userId,communityId))
@@ -133,14 +134,14 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws BadRequestException {
+    public void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         communityMemberDao.deleteRelationship(userId, communityId);
     }
 
     @Override
-    public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
+    public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws Exception {
         if (!communityDao.verifyUserCanPostInCommunity(userId, communityId))
             throw new BadRequestException(
                     e.getRequiredProperty("community.service.errors.user-cannot-post")
@@ -148,7 +149,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<CommunityResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws BadRequestException {
+    public List<CommunityResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws Exception {
 
         var userId = userProfileService.authenticate(token);
 
@@ -161,7 +162,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws BadRequestException {
+    public void verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws Exception {
         if (!communityDao.verifyUserCanEditCommunity(userId, communityId))
             throw new BadRequestException(String.format(
                     e.getRequiredProperty("community.service.errors.user-cannot-edit"),
@@ -174,7 +175,7 @@ public class CommunityServiceImpl implements CommunityService {
     public void updateCommunityAttributes(JwtAuthenticationToken token,
                                           Long communityId,
                                           Optional<String> communityRef,
-                                          Optional<String> communityDisplayName) throws BadRequestException, ValidationException {
+                                          Optional<String> communityDisplayName) throws Exception{
 
         var userId = userProfileService.authenticate(token);
 
@@ -208,7 +209,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws BadRequestException {
+    public CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws Exception {
         var userId = userProfileService.authenticate(jwt);
 
         return communityMemberDao.retrieveRelationship(userId, communityId);

@@ -2,6 +2,7 @@ package org.morriswa.messageboard.control;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.enumerated.Vote;
@@ -35,7 +36,7 @@ public class ContentServiceController {
     @GetMapping(value = "${content.service.endpoints.draft.path}")
     public ResponseEntity<?> getSession(
             JwtAuthenticationToken token,
-            @PathVariable UUID draftId) throws BadRequestException, ResourceException {
+            @PathVariable UUID draftId) throws Exception {
 
         var draft = contentService.getPostDraft(token, draftId);
 
@@ -49,7 +50,7 @@ public class ContentServiceController {
     public ResponseEntity<?> createPost(
             JwtAuthenticationToken token,
             @PathVariable UUID draftId)
-            throws BadRequestException, ResourceException {
+            throws Exception {
 
         contentService.createPostFromDraft(token, draftId);
 
@@ -65,7 +66,7 @@ public class ContentServiceController {
             @PathVariable UUID draftId,
             @RequestParam Optional<String> caption,
             @RequestParam Optional<String> description)
-            throws BadRequestException {
+            throws Exception {
 
         contentService.editPostDraft(token, draftId, caption, description);
 
@@ -80,7 +81,7 @@ public class ContentServiceController {
                                         @PathVariable Long communityId,
                                         @RequestParam Optional<String> caption,
                                         @RequestParam Optional<String> description)
-            throws BadRequestException, ResourceException {
+            throws Exception {
 
         var id = contentService.createPostDraft(token, communityId, caption, description);
 
@@ -95,7 +96,7 @@ public class ContentServiceController {
             JwtAuthenticationToken token,
             @PathVariable UUID draftId,
             @RequestPart MultipartFile content)
-            throws BadRequestException, ValidationException, IOException, ResourceException {
+            throws Exception {
 
         contentService.addContentToDraft(token, draftId, content);
 
@@ -105,7 +106,7 @@ public class ContentServiceController {
     }
 
     @GetMapping("${content.service.endpoints.community-feed.path}")
-    public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws BadRequestException, ResourceException {
+    public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws Exception {
 
         var feed = contentService.getFeedForCommunity(communityId);
 
@@ -118,7 +119,7 @@ public class ContentServiceController {
     @PostMapping("${content.service.endpoints.post-voting.path}")
     public ResponseEntity<?> voteOnPost(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
-                                                @RequestParam Vote vote) throws BadRequestException {
+                                                @RequestParam Vote vote) throws Exception {
         int count = contentService.voteOnPost(token, postId, vote);
 
         return responseFactory.getResponse(
@@ -130,7 +131,7 @@ public class ContentServiceController {
     @PostMapping("${content.service.endpoints.comment.path}")
     public ResponseEntity<?> leaveCommentOnPost(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
-                                                @RequestBody String comment) throws BadRequestException {
+                                                @RequestBody String comment) throws Exception {
 
         contentService.leaveComment(token, postId, comment);
 
@@ -143,7 +144,7 @@ public class ContentServiceController {
     public ResponseEntity<?> leaveCommentOnPost(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
                                                 @PathVariable Long parentId,
-                                                @RequestBody String comment) throws BadRequestException {
+                                                @RequestBody String comment) throws Exception {
 
         contentService.leaveComment(token, postId, parentId, comment);
 
@@ -177,7 +178,7 @@ public class ContentServiceController {
     public ResponseEntity<?> voteOnComment(JwtAuthenticationToken token,
                                         @PathVariable Long postId,
                                         @PathVariable Long commentId,
-                                        @RequestParam Vote vote) throws BadRequestException {
+                                        @RequestParam Vote vote) throws Exception {
         contentService.voteOnComment(token, postId, commentId, vote);
 
         return responseFactory.getResponse(

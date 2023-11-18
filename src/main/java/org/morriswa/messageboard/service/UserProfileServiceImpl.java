@@ -2,6 +2,7 @@ package org.morriswa.messageboard.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
@@ -50,9 +51,9 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException {
+    public UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws NoRegisteredUserException {
         var user = userProfileDao.getUser(token.getName())
-                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+                .orElseThrow(()->new NoRegisteredUserException(e.getProperty("user-profile.service.errors.missing-user")));
 
         var profileImage = profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
 
@@ -60,21 +61,21 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public User authenticateAndGetUser(JwtAuthenticationToken token) throws BadRequestException {
+    public User authenticateAndGetUser(JwtAuthenticationToken token) throws NoRegisteredUserException {
         return userProfileDao.getUser(token.getName())
-                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+                .orElseThrow(()->new NoRegisteredUserException(e.getProperty("user-profile.service.errors.missing-user")));
     }
 
     @Override
-    public UUID authenticate(JwtAuthenticationToken token) throws BadRequestException {
+    public UUID authenticate(JwtAuthenticationToken token) throws NoRegisteredUserException {
         return userProfileDao.getUserId(token.getName())
-                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+                .orElseThrow(()->new NoRegisteredUserException(e.getProperty("user-profile.service.errors.missing-user")));
     }
 
     @Override
-    public UserProfile getUserProfile(UUID userId) throws BadRequestException {
+    public UserProfile getUserProfile(UUID userId) throws NoRegisteredUserException {
         var user = userProfileDao.getUser(userId)
-                .orElseThrow(()->new BadRequestException(e.getProperty("user-profile.service.errors.missing-user")));
+                .orElseThrow(()->new NoRegisteredUserException(e.getProperty("user-profile.service.errors.missing-user")));
 
         var profileImage =
                 profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
@@ -101,7 +102,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws BadRequestException, IOException {
+    public void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws NoRegisteredUserException, IOException {
 
         var userId = authenticate(token);
 
@@ -116,7 +117,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws BadRequestException, ValidationException {
+    public void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws NoRegisteredUserException, ValidationException {
         // ensure display name follows basic rules
         this.validator.validateDisplayNameOrThrow(requestedDisplayName);
 
@@ -127,14 +128,14 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public UserUiProfile getUserUiProfile(JwtAuthenticationToken jwt) throws BadRequestException {
+    public UserUiProfile getUserUiProfile(JwtAuthenticationToken jwt) throws NoRegisteredUserException {
         var userId = authenticate(jwt);
 
         return userProfileDao.getUIProfile(userId);
     }
 
     @Override
-    public void updateUserUiProfile(JwtAuthenticationToken jwt, UpdateUIProfileRequest request) throws BadRequestException {
+    public void updateUserUiProfile(JwtAuthenticationToken jwt, UpdateUIProfileRequest request) throws NoRegisteredUserException {
         var userId = authenticate(jwt);
 
         userProfileDao.setUIProfile(userId, request);

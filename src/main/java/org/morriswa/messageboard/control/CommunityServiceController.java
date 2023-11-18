@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.service.CommunityService;
@@ -32,7 +33,7 @@ public class CommunityServiceController {
 
     @PostMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> createCommunity(JwtAuthenticationToken jwt,
-                                             @RequestBody CreateCommunityRequestBody request) throws BadRequestException {
+                                             @RequestBody CreateCommunityRequestBody request) throws Exception {
         this.community.createNewCommunity(jwt, request);
 
         return responseFactory.getResponse(
@@ -41,7 +42,7 @@ public class CommunityServiceController {
     }
 
     @GetMapping("${community.service.endpoints.community.path}")
-    public ResponseEntity<?> getAllCommunityInformation(@RequestParam String communityLocator) throws BadRequestException {
+    public ResponseEntity<?> getAllCommunityInformation(@RequestParam String communityLocator) throws Exception {
         var response = this.community.getAllCommunityInfo(communityLocator);
 
         return responseFactory.getResponse(
@@ -54,7 +55,7 @@ public class CommunityServiceController {
     public ResponseEntity<?> updateCommunityInformation(JwtAuthenticationToken token,
                                                         @RequestParam Long communityId,
                                                         @RequestParam Optional<String> communityRef,
-                                                        @RequestParam Optional<String> communityDisplayName) throws BadRequestException, ValidationException {
+                                                        @RequestParam Optional<String> communityDisplayName) throws Exception {
         community.updateCommunityAttributes(token, communityId, communityRef, communityDisplayName);
 
         return responseFactory.getResponse(
@@ -65,7 +66,7 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.update-community-banner.path}")
     public ResponseEntity<?> updateCommunityBanner(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId,
-                                             @RequestPart MultipartFile image) throws BadRequestException, IOException, ValidationException {
+                                             @RequestPart MultipartFile image) throws Exception {
         this.community.updateCommunityBanner(jwt, image, communityId);
 
         return responseFactory.getResponse(
@@ -76,7 +77,7 @@ public class CommunityServiceController {
     @PostMapping("${community.service.endpoints.update-community-icon.path}")
     public ResponseEntity<?> updateCommunityIcon(JwtAuthenticationToken jwt,
                                                  @PathVariable Long communityId,
-                                                 @RequestPart("image") MultipartFile file) throws BadRequestException, IOException, ValidationException {
+                                                 @RequestPart("image") MultipartFile file) throws Exception {
         this.community.updateCommunityIcon(jwt, file, communityId);
 
         return responseFactory.getResponse(
@@ -86,7 +87,7 @@ public class CommunityServiceController {
 
     @GetMapping("${community.service.endpoints.community-membership.path}")
     public ResponseEntity<?> getCommunityMembershipInfo(JwtAuthenticationToken jwt,
-                                           @PathVariable Long communityId) throws BadRequestException {
+                                           @PathVariable Long communityId) throws Exception {
         var membership = this.community.getCommunityMembershipInfo(jwt, communityId);
 
         return responseFactory.getResponse(
@@ -97,7 +98,7 @@ public class CommunityServiceController {
 
     @PostMapping("${community.service.endpoints.community-membership.path}")
     public ResponseEntity<?> joinCommunity(JwtAuthenticationToken jwt,
-                                             @PathVariable Long communityId) throws BadRequestException {
+                                             @PathVariable Long communityId) throws Exception {
         this.community.joinCommunity(jwt, communityId);
 
         return responseFactory.getResponse(
@@ -107,7 +108,7 @@ public class CommunityServiceController {
 
     @DeleteMapping("${community.service.endpoints.community-membership.path}")
     public ResponseEntity<?> leaveCommunity(JwtAuthenticationToken jwt,
-                                                 @PathVariable Long communityId) throws BadRequestException {
+                                                 @PathVariable Long communityId) throws Exception {
         this.community.leaveCommunity(jwt, communityId);
 
         return responseFactory.getResponse(
@@ -116,7 +117,7 @@ public class CommunityServiceController {
     }
 
     @GetMapping("${community.service.endpoints.get-users-communities.path}")
-    public ResponseEntity<?> getUsersCommunities(JwtAuthenticationToken jwtAuthenticationToken) throws BadRequestException {
+    public ResponseEntity<?> getUsersCommunities(JwtAuthenticationToken jwtAuthenticationToken) throws Exception {
         var communities = this.community.getAllUsersCommunities(jwtAuthenticationToken);
 
         return responseFactory.getResponse(

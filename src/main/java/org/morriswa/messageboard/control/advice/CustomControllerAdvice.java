@@ -3,6 +3,7 @@ package org.morriswa.messageboard.control.advice;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,8 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler({ // catch...
             ConstraintViolationException.class, // Poorly formatted Objects and
-            BadRequestException.class // Bad Requests
+            BadRequestException.class, // Bad Requests,
+            NoRegisteredUserException.class // silly users
     }) // in this controller...
     public ResponseEntity<?> badRequest(Exception e, WebRequest r) {
         // and assume user fault [400]

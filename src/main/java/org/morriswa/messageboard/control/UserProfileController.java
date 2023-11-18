@@ -2,6 +2,7 @@ package org.morriswa.messageboard.control;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.entity.UserUiProfile;
 import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
@@ -36,7 +37,7 @@ public class UserProfileController {
     }
 
     @GetMapping("${user-profile.service.endpoints.user.path}")
-    public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws BadRequestException {
+    public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws Exception {
         UserProfile user = userProfileService.authenticateAndGetUserProfile(jwt);
         return responseFactory.getResponse(
             HttpStatus.OK,
@@ -46,7 +47,7 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
-                                           @RequestParam String displayName) throws BadRequestException, ValidationException, JsonProcessingException {
+                                           @RequestParam String displayName) throws Exception {
         var newUserDisplayName = userProfileService.createNewUser(jwt, displayName);
         return responseFactory.getResponse(
             HttpStatus.OK,
@@ -57,7 +58,7 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user-profile-image.path}")
     public ResponseEntity<?> updateUserProfileImage(JwtAuthenticationToken jwt,
-                                                    @RequestPart MultipartFile image) throws BadRequestException, IOException {
+                                                    @RequestPart MultipartFile image) throws Exception {
         userProfileService.updateUserProfileImage(jwt, image);
         return responseFactory.getResponse(
             HttpStatus.OK,
@@ -66,7 +67,7 @@ public class UserProfileController {
 
     @PatchMapping("${user-profile.service.endpoints.user-profile-displayname.path}")
     public ResponseEntity<?> updateUserDisplayName(JwtAuthenticationToken jwt,
-                                                    @RequestParam String displayName) throws BadRequestException, ValidationException {
+                                                    @RequestParam String displayName) throws Exception {
         userProfileService.updateUserProfileDisplayName(jwt, displayName);
         return responseFactory.getResponse(
             HttpStatus.OK,
@@ -74,7 +75,7 @@ public class UserProfileController {
     }
 
     @GetMapping("${user-profile.service.endpoints.user-ui.path}")
-    public ResponseEntity<?> getUIProfile(JwtAuthenticationToken jwt) throws BadRequestException {
+    public ResponseEntity<?> getUIProfile(JwtAuthenticationToken jwt) throws Exception {
         UserUiProfile profile = userProfileService.getUserUiProfile(jwt);
 
         return responseFactory.getResponse(
@@ -85,7 +86,7 @@ public class UserProfileController {
 
     @PatchMapping("${user-profile.service.endpoints.user-ui.path}")
     public ResponseEntity<?> updateUIProfile(JwtAuthenticationToken jwt,
-                                             @RequestBody UpdateUIProfileRequest request) throws BadRequestException {
+                                             @RequestBody UpdateUIProfileRequest request) throws Exception {
         userProfileService.updateUserUiProfile(jwt, request);
 
         return responseFactory.getResponse(

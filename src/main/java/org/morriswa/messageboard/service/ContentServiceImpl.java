@@ -6,6 +6,7 @@ import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.PostDraftDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.enumerated.PostContentType;
@@ -66,7 +67,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void leaveComment(JwtAuthenticationToken token, Long postId, String comment) throws BadRequestException {
+    public void leaveComment(JwtAuthenticationToken token, Long postId, String comment) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -87,7 +88,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void leaveComment(JwtAuthenticationToken token, Long postId, Long parentCommentId, String comment) throws BadRequestException {
+    public void leaveComment(JwtAuthenticationToken token, Long postId, Long parentCommentId, String comment) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -109,7 +110,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public int voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws BadRequestException {
+    public int voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -123,7 +124,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws BadRequestException {
+    public void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -137,7 +138,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public UUID createPostDraft(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws BadRequestException, ResourceException {
+    public UUID createPostDraft(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var newResource = new Resource();
@@ -152,14 +153,14 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void editPostDraft(JwtAuthenticationToken token, UUID draftId, Optional<String> caption, Optional<String> description) throws BadRequestException {
+    public void editPostDraft(JwtAuthenticationToken token, UUID draftId, Optional<String> caption, Optional<String> description) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         drafts.edit(userId, draftId, caption, description);
     }
 
     @Override
-    public void addContentToDraft(JwtAuthenticationToken token, UUID draftId, MultipartFile file) throws BadRequestException, IOException, ValidationException, ResourceException {
+    public void addContentToDraft(JwtAuthenticationToken token, UUID draftId, MultipartFile file) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         Objects.requireNonNull(file.getContentType());
@@ -205,7 +206,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID draftId) throws BadRequestException, ResourceException {
+    public PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID draftId) throws Exception {
         userProfileService.authenticate(token);
 
         var session = drafts.getDraft(draftId)
@@ -242,7 +243,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws BadRequestException, ResourceException {
+    public void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var session = drafts.getDraft(draftId)
@@ -282,7 +283,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<PostResponse> getFeedForCommunity(Long communityId) throws BadRequestException, ResourceException {
+    public List<PostResponse> getFeedForCommunity(Long communityId) throws Exception {
 
         var response = new ArrayList<PostResponse>();
 

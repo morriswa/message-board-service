@@ -1,12 +1,10 @@
 package org.morriswa.messageboard.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.entity.User;
 import org.morriswa.messageboard.model.entity.UserUiProfile;
 import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.model.entity.User;
-import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.responsebody.UserProfile;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +25,7 @@ public interface UserProfileService {
      * @return a full User Profile Response
      * @throws BadRequestException if the user cannot be found or authenticated
      */
-    UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws BadRequestException;
+    UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws Exception;
 
     /**
      * Authenticates an Oauth2 user with provided token
@@ -36,7 +34,7 @@ public interface UserProfileService {
      * @return a User Response
      * @throws BadRequestException if the user cannot be found or authenticated
      */
-    User authenticateAndGetUser(JwtAuthenticationToken token) throws BadRequestException;
+    User authenticateAndGetUser(JwtAuthenticationToken token) throws Exception;
 
     /**
      * Authenticates an Oauth2 user with provided token
@@ -45,7 +43,7 @@ public interface UserProfileService {
      * @return a UUID representing the user
      * @throws BadRequestException if the user cannot be found or authenticated
      */
-    UUID authenticate(JwtAuthenticationToken token) throws BadRequestException;
+    UUID authenticate(JwtAuthenticationToken token) throws Exception;
 
     /**
      * <h1>NOT MEANT FOR AUTHENTICATING A USER</h1>
@@ -55,7 +53,7 @@ public interface UserProfileService {
      * @return a full User Profile Response
      * @throws BadRequestException if the user cannot be found
      */
-    UserProfile getUserProfile(UUID userId) throws BadRequestException;
+    UserProfile getUserProfile(UUID userId) throws Exception;
 
     /**
      * Creates a new Messageboard User
@@ -65,7 +63,7 @@ public interface UserProfileService {
      * @return the display name that the user was registered with
      * @throws ValidationException if the displayName is poorly formatted or already taken
      */
-    String createNewUser(JwtAuthenticationToken token, String displayName) throws BadRequestException, ValidationException, JsonProcessingException;
+    String createNewUser(JwtAuthenticationToken token, String displayName) throws Exception;
 
     /**
      * Updates a User's profile image
@@ -75,7 +73,7 @@ public interface UserProfileService {
      * @throws BadRequestException if the user cannot be authenticated
      * @throws IOException if the image cannot be processed and uploaded successfully
      */
-    void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws BadRequestException, IOException;
+    void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws Exception;
 
     /**
      * Updates a user's display name
@@ -85,9 +83,9 @@ public interface UserProfileService {
      * @throws BadRequestException
      * @throws ValidationException
      */
-    void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws BadRequestException, ValidationException;
+    void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws Exception;
 
-    UserUiProfile getUserUiProfile(JwtAuthenticationToken jwt) throws BadRequestException;
+    UserUiProfile getUserUiProfile(JwtAuthenticationToken jwt) throws Exception;
 
-    void updateUserUiProfile(JwtAuthenticationToken jwt, UpdateUIProfileRequest request) throws BadRequestException;
+    void updateUserUiProfile(JwtAuthenticationToken jwt, UpdateUIProfileRequest request) throws Exception;
 }
