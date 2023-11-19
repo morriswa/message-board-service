@@ -15,6 +15,12 @@ public interface PostDao {
 
     List<Post> findAllPostsByCommunityId(Long communityId);
 
+    List<Post> getMostRecent();
+
+    List<Post> getMostRecent(int endSlice);
+
+    List<Post> getMostRecent(int startSlice, int endSlice);
+
     void createNewPost(@Valid CreatePostRequest newCreatePostRequest);
 
     int vote(UUID userId, Long postId, Vote vote);

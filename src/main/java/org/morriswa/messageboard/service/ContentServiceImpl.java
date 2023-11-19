@@ -6,16 +6,15 @@ import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.PostDraftDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ResourceException;
-import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.enumerated.PostContentType;
-import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
-import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.entity.Post;
 import org.morriswa.messageboard.model.entity.Resource;
-import org.morriswa.messageboard.model.responsebody.PostResponse;
+import org.morriswa.messageboard.model.enumerated.PostContentType;
+import org.morriswa.messageboard.model.enumerated.Vote;
+import org.morriswa.messageboard.model.responsebody.PostCommunityResponse;
+import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
+import org.morriswa.messageboard.model.responsebody.PostUserResponse;
 import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
 import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
@@ -27,7 +26,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -283,9 +281,9 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<PostResponse> getFeedForCommunity(Long communityId) throws Exception {
+    public List<PostUserResponse> getFeedForCommunity(Long communityId) throws Exception {
 
-        var response = new ArrayList<PostResponse>();
+        var response = new ArrayList<PostUserResponse>();
 
         var allCommunityPosts = posts.findAllPostsByCommunityId(communityId);
 
@@ -299,11 +297,33 @@ public class ContentServiceImpl implements ContentService {
                     add(imageStore.retrieveImageResource(resource));
             }};
 
-            response.add(new PostResponse(post, user, resourceUrls));
+            response.add(new PostUserResponse(post, user, resourceUrls));
         }
 
         return response.stream().sorted(
-                Comparator.comparing(PostResponse::getDateCreated).reversed()
+                Comparator.comparing(PostUserResponse::getDateCreated).reversed()
         ).toList();
+    }
+
+    @Override
+    public List<PostCommunityResponse> getRecentPosts() throws Exception {
+        var recentPosts = posts.getMostRecent();
+
+        var response = new ArrayList<PostCommunityResponse>(10);
+
+        for (Post post : recentPosts) {
+            var community = communityService.getAllCommunityInfo(post.getCommunityId());
+            var resourceEntity = resources.findResourceByResourceId(post.getResourceId())
+                    .orElseThrow();
+
+            var resourceUrls = new ArrayList<URL>(){{
+                for (UUID resource : resourceEntity.getResources())
+                    add(imageStore.retrieveImageResource(resource));
+            }};
+
+            response.add(new PostCommunityResponse(post, community, resourceUrls));
+        }
+
+        return response;
     }
 }

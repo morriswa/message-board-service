@@ -1,10 +1,8 @@
 package org.morriswa.messageboard.validation;
 
 import jakarta.validation.*;
-import org.springframework.stereotype.Component;
 
-@Component
-public class BasicBeanValidator {
+public abstract class BasicBeanValidator {
     protected final Validator validator;
 
     public BasicBeanValidator() {

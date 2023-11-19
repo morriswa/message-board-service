@@ -159,6 +159,10 @@ community:
 content:
   service:
     endpoints:
+      recent-post-feed:
+        path: feed
+        messages:
+          get: Successfully retrieved post feed
       create-post:
         path: community/{communityId}/post
         messages:

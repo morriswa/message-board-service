@@ -116,6 +116,17 @@ public class ContentServiceController {
                 feed);
     }
 
+    @GetMapping("${content.service.endpoints.recent-post-feed.path}")
+    public ResponseEntity<?> getRecentPosts() throws Exception {
+
+        var feed = contentService.getRecentPosts();
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getProperty("content.service.endpoints.recent-post-feed.messages.get"),
+                feed);
+    }
+
     @PostMapping("${content.service.endpoints.post-voting.path}")
     public ResponseEntity<?> voteOnPost(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,

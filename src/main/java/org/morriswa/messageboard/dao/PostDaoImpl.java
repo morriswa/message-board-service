@@ -92,6 +92,83 @@ public class PostDaoImpl implements PostDao{
     }
 
     @Override
+    public List<Post> getMostRecent() {
+        return this.getMostRecent(10);
+    }
+
+    @Override
+    public List<Post> getMostRecent(int endSlice) {
+        final String query = """
+            select
+                *,
+                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=user_post.id) AS vote_count
+                from user_post order by date_created desc limit :endSlice
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("endSlice", endSlice);
+        }};
+
+        return jdbcTemplate.query(query, params, rs -> {
+            List<Post> createPostRequests = new ArrayList<>();
+
+            while (rs.next()) {
+                createPostRequests.add(new Post(
+                        rs.getLong("id"),
+                        rs.getObject("user_id", UUID.class),
+                        rs.getLong("community_id"),
+                        rs.getString("caption"),
+                        rs.getString("description"),
+                        PostContentType.valueOf(rs.getString("content_type")),
+                        timestampToGregorian(rs.getTimestamp("date_created")),
+                        rs.getObject("resource_id", UUID.class),
+                        rs.getInt("vote_count")
+                ));
+            }
+//            log.info("located {} posts in community {}", posts.size(), communityId);
+
+            return createPostRequests;
+        });
+    }
+
+    @Override
+    public List<Post> getMostRecent(int startSlice, int endSlice) {
+        final String query = """
+            select
+                *,
+                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=user_post.id) AS vote_count
+                from user_post order by date_created desc limit :selects offset :startSlice
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("startSlice", startSlice);
+            put("selects", endSlice - startSlice);
+        }};
+
+        return jdbcTemplate.query(query, params, rs -> {
+            List<Post> createPostRequests = new ArrayList<>();
+
+            while (rs.next()) {
+                createPostRequests.add(new Post(
+                        rs.getLong("id"),
+                        rs.getObject("user_id", UUID.class),
+                        rs.getLong("community_id"),
+                        rs.getString("caption"),
+                        rs.getString("description"),
+                        PostContentType.valueOf(rs.getString("content_type")),
+                        timestampToGregorian(rs.getTimestamp("date_created")),
+                        rs.getObject("resource_id", UUID.class),
+                        rs.getInt("vote_count")
+                ));
+            }
+//            log.info("located {} posts in community {}", posts.size(), communityId);
+
+            return createPostRequests;
+        });
+    }
+
+
+    @Override
     public void createNewPost(@Valid CreatePostRequest newCreatePostRequest) {
         final String query =
             """
