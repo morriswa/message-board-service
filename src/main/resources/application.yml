@@ -34,6 +34,9 @@ testing:
   email: test@email.com
 
 common:
+  public: >
+    /health
+    /feed
   cache: ./localfilecache/
   stores:
     prefix: developer-content
@@ -159,10 +162,6 @@ community:
 content:
   service:
     endpoints:
-      recent-post-feed:
-        path: feed
-        messages:
-          get: Successfully retrieved post feed
       create-post:
         path: community/{communityId}/post
         messages:
@@ -212,3 +211,11 @@ content:
     rules:
       image-scale-factor: 0.5
       max-allowed-content: 10
+
+public-content:
+  service:
+    endpoints:
+      recent-post-feed:
+        path: feed
+        messages:
+          get: Successfully retrieved post feed

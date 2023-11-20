@@ -42,6 +42,8 @@ public class WebSecurityConfig
     private final Environment e;
     private final HttpResponseFactoryImpl responseFactory;
     private final AudienceValidator audienceValidator;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Autowired
     public WebSecurityConfig(Environment e, HttpResponseFactoryImpl responseFactory, AudienceValidator audienceValidator) {
@@ -75,10 +77,17 @@ public class WebSecurityConfig
         configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration(
                 String.format("/%s**", e.getRequiredProperty("server.path")),
                 configuration);
+
+        final String[] publicPaths = e.getRequiredProperty("common.public").split("\\s");
+        for (String path : publicPaths)
+            source.registerCorsConfiguration(
+                    path,
+                    configuration);
         return source;
     }
 
@@ -117,17 +126,16 @@ public class WebSecurityConfig
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
-        final ObjectMapper objectMapper = new ObjectMapper();
 
         final String path = e.getRequiredProperty("server.path");
-        final String healthPath = e.getRequiredProperty("common.service.endpoints.health.path");
+        final String[] publicPaths = e.getRequiredProperty("common.public").split("\\s");
 
         http    // All http requests will...
                 // Be stateless
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                 // Will allow any request on /health endpoint
-                        .requestMatchers("/"+healthPath).permitAll()
+                        .requestMatchers(publicPaths).permitAll()
                 // Will require authentication and proper permissions for secured routes
                         .requestMatchers("/" + path + "**").access(getConfiguredAuthorizationManager())
                 // Will deny all other unauthenticated requests
