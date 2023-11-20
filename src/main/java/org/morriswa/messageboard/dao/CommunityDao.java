@@ -9,6 +9,8 @@ import java.util.UUID;
 
 public interface CommunityDao {
 
+    List<Community> searchForCommunities(String searchText);
+
     Optional<Community> findCommunity(String communityDisplayName);
 
     Optional<Community> findCommunity(Long communityId);

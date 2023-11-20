@@ -162,6 +162,17 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
+    public List<CommunityResponse> searchForCommunities(String searchText) {
+
+        var communities = communityDao.searchForCommunities(searchText);
+
+        return new ArrayList<>() {{
+            for (var community : communities)
+                add(new CommunityResponse(community, resources.getAllCommunityResources(community.getCommunityId())));
+        }};
+    }
+
+    @Override
     public void verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws Exception {
         if (!communityDao.verifyUserCanEditCommunity(userId, communityId))
             throw new BadRequestException(String.format(

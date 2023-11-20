@@ -138,6 +138,10 @@ community:
         path: communities
         messages:
           get: "Successfully retrieved all of users' communities"
+      search-communities:
+        path: communities/search
+        messages:
+          get: Successfully retrieved search results
     rules:
       banner-scale-factor: 0.5
       display-name:

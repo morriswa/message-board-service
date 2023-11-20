@@ -32,6 +32,8 @@ public interface CommunityService {
 
     List<CommunityResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws Exception;
 
+    List<CommunityResponse> searchForCommunities(String searchText);
+
     void updateCommunityAttributes(JwtAuthenticationToken token, Long communityId, Optional<String> communityRef, Optional<String> communityDisplayName) throws Exception;
 
     CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws Exception;

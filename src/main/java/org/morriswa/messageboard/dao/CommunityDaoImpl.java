@@ -218,6 +218,49 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
+    public List<Community> searchForCommunities(String searchText) {
+        final String query = """            
+            select
+                *,
+                (select count(cme.id) from community_member cme where community.id=cme.community_id) AS count
+
+            from community
+            where to_tsvector(display_name) @@ to_tsquery(:search)
+            limit 5
+        """;
+
+        StringBuilder fullSearchQuery = new StringBuilder();
+        for (String word : searchText.split("\\s"))
+            fullSearchQuery.append(String.format(" %s &", word));
+
+        fullSearchQuery.delete(fullSearchQuery.length() - 1, fullSearchQuery.length());
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("search", fullSearchQuery.toString());
+        }};
+
+        try {
+            return jdbc.query(query, params, rs -> {
+                List<Community> communities = new ArrayList<>();
+
+                while (rs.next()) {
+                    communities.add(new Community(
+                            rs.getLong("id"),
+                            rs.getString("community_ref"),
+                            rs.getString("display_name"),
+                            rs.getObject("owner", UUID.class),
+                            timestampToGregorian(rs.getTimestamp("date_created")),
+                            rs.getInt("count")));
+                }
+
+                return communities;
+            });
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
     public Optional<Community> findCommunity(String communityLocator) {
         final String query = """            
             select

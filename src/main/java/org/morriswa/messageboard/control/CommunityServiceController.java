@@ -1,8 +1,5 @@
 package org.morriswa.messageboard.control;
 
-import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.NoRegisteredUserException;
-import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
@@ -14,7 +11,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Optional;
 
 @RestController @CrossOrigin
@@ -126,6 +122,15 @@ public class CommunityServiceController {
             communities);
     }
 
+    @GetMapping("${community.service.endpoints.search-communities.path}")
+    public ResponseEntity<?> getUsersCommunities(@RequestParam String searchText) {
+        var communities = this.community.searchForCommunities(searchText);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("community.service.endpoints.search-communities.messages.get"),
+                communities);
+    }
 
 
 }
