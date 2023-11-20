@@ -73,22 +73,30 @@ public class WebSecurityConfig
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
-        configuration.setAllowedHeaders(List.of("*"));
+        CorsConfiguration secureRoutesCors = new CorsConfiguration(){{
+            setAllowedOrigins(List.of("*"));
+            setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
+            setAllowedHeaders(List.of("*"));
+        }};
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration(
-                String.format("/%s**", e.getRequiredProperty("server.path")),
-                configuration);
+        CorsConfiguration publicRoutesCors = new CorsConfiguration(){{
+            setAllowedOrigins(List.of("*"));
+            setAllowedMethods(List.of("GET"));
+            setAllowedHeaders(List.of("*"));
+        }};
 
-        final String[] publicPaths = e.getRequiredProperty("common.public").split("\\s");
-        for (String path : publicPaths)
-            source.registerCorsConfiguration(
-                    path,
-                    configuration);
-        return source;
+        UrlBasedCorsConfigurationSource sources = new UrlBasedCorsConfigurationSource();
+        {
+            sources.registerCorsConfiguration(
+                    String.format("/%s**", e.getRequiredProperty("server.path")),
+                    secureRoutesCors);
+
+            final String[] publicPaths = e.getRequiredProperty("common.public").split("\\s");
+            for (String path : publicPaths)
+                sources.registerCorsConfiguration(path, publicRoutesCors);
+        }
+
+        return sources;
     }
 
     /**
