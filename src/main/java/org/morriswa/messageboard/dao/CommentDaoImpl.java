@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
@@ -21,6 +22,26 @@ public class CommentDaoImpl implements CommentDao{
         this.jdbc = jdbc;
     }
 
+    private List<Comment> extractComments(ResultSet rs) throws SQLException {
+        List<Comment> comments = new ArrayList<>();
+
+        while (rs.next()) {
+            comments.add(
+                    new Comment(
+                            rs.getLong("id"),
+                            rs.getObject("user_id", UUID.class),
+                            rs.getLong("post_id"),
+                            rs.getLong("parent_id"),
+                            rs.getString("body"),
+                            rs.getInt("count"),
+                            timestampToGregorian(rs.getTimestamp("date_created"))
+                    )
+            );
+        }
+
+        return comments;
+    }
+    
     @Override
     public List<Comment> findComments(Long postId) {
         final String query = """
@@ -34,25 +55,7 @@ public class CommentDaoImpl implements CommentDao{
             put("postId", postId);
         }};
 
-        return jdbc.query(query, params, rs -> {
-            List<Comment> comments = new ArrayList<>();
-
-            while (rs.next()) {
-                comments.add(
-                    new Comment(
-                        rs.getLong("id"),
-                        rs.getObject("user_id", UUID.class),
-                        rs.getLong("post_id"),
-                        rs.getLong("parent_id"),
-                        rs.getString("body"),
-                        rs.getInt("count"),
-                        timestampToGregorian(rs.getTimestamp("date_created"))
-                    )
-                );
-            }
-
-            return comments;
-        });
+        return jdbc.query(query, params, this::extractComments);
     }
 
     @Override
@@ -69,25 +72,7 @@ public class CommentDaoImpl implements CommentDao{
             put("parentId", parentId);
         }};
 
-        return jdbc.query(query, params, rs -> {
-            List<Comment> comments = new ArrayList<>();
-
-            while (rs.next()) {
-                comments.add(
-                        new Comment(
-                                rs.getLong("id"),
-                                rs.getObject("user_id", UUID.class),
-                                rs.getLong("post_id"),
-                                rs.getLong("parent_id"),
-                                rs.getString("body"),
-                                rs.getInt("count"),
-                                timestampToGregorian(rs.getTimestamp("date_created"))
-                        )
-                );
-            }
-
-            return comments;
-        });
+        return jdbc.query(query, params, this::extractComments);
     }
 
     @Override
@@ -107,75 +92,55 @@ public class CommentDaoImpl implements CommentDao{
         jdbc.update(query, params);
     }
 
-    private void deleteVote(UUID userId, Long postId, Long commentId) {
-        final String query = """
+    @Override
+    public void vote(UUID userId, Long postId, Long commentId, Vote vote) {
+        final String existsQuery = """
+                select 1 from comment_vote where user_id=:userId and post_id=:postId and comment_id=:commentId
+            """;
+
+        final String deleteQuery = """
                 delete from comment_vote where user_id=:userId and post_id=:postId and comment_id=:commentId
             """;
 
-        Map<String, Object> params = new HashMap<>(){{
-            put("userId", userId);
-            put("postId", postId);
-            put("commentId", commentId);
-        }};
-
-        jdbc.update(query, params);
-    }
-
-    private void createVote(UUID userId, Long postId, Long commentId, Vote vote) {
-        final String query = """
-                insert into comment_vote (id, user_id, post_id, comment_id, vote_value, date_created)
-                values(DEFAULT, :userId, :postId, :commentId, :voteValue, current_timestamp)
-            """;
-
-        Map<String, Object> params = new HashMap<>() {{
-            put("userId", userId);
-            put("postId", postId);
-            put("commentId", commentId);
-            put("voteValue", vote.weight);
-        }};
-
-        jdbc.update(query, params);
-    }
-
-    private void updateVote(UUID userId, Long postId, Long commentId, Vote vote) {
-        final String query = """
+        final String updateQuery = """
                 update comment_vote set
                     vote_value = :voteValue,
                     date_created = current_timestamp
                 where user_id=:userId and post_id=:postId and comment_id=:commentId
             """;
 
-        Map<String, Object> params = new HashMap<>() {{
+        final String createQuery = """
+                    insert into comment_vote (id, user_id, post_id, comment_id, vote_value, date_created)
+                    values(DEFAULT, :userId, :postId, :commentId, :voteValue, current_timestamp)
+                """;
+        Map<String, Object> params = new HashMap<>(){{
+            put("userId", userId);
+            put("postId", postId);
+            put("commentId", commentId);
+        }};
+
+        Map<String, Object> voteParams = new HashMap<>() {{
             put("userId", userId);
             put("postId", postId);
             put("commentId", commentId);
             put("voteValue", vote.weight);
         }};
-
-        jdbc.update(query, params);
-    }
-
-    @Override
-    public void vote(UUID userId, Long postId, Long commentId, Vote vote) {
+        
         if (vote.equals(Vote.DELETE))
         {
-            deleteVote(userId, postId, commentId);
+            jdbc.update(deleteQuery, params);
             return;
         }
 
-        final String query = """
-            select 1 from comment_vote where user_id=:userId and post_id=:postId and comment_id=:commentId
-        """;
+        final boolean userAlreadyVoted = Boolean.TRUE.equals(jdbc.query(existsQuery, params, ResultSet::next));
 
-        Map<String, Object> params = new HashMap<>() {{
-            put("userId", userId);
-            put("postId", postId);
-            put("commentId", commentId);
-        }};
+        if (userAlreadyVoted) {
+            jdbc.update(updateQuery, voteParams);
+        }
+        else {
+            jdbc.update(createQuery, voteParams);
+        }
 
-        boolean userAlreadyVoted = Boolean.TRUE.equals(jdbc.query(query, params, ResultSet::next));
-
-        if (userAlreadyVoted) updateVote(userId, postId, commentId, vote);
-        else createVote(userId, postId, commentId, vote);
     }
+
 }

@@ -188,50 +188,6 @@ public class PostDaoImpl implements PostDao{
         jdbcTemplate.update(query, params);
     }
 
-    private void deleteVote(UUID userId, Long postId) {
-        final String query = """
-                delete from post_vote where user_id=:userId and post_id=:postId
-            """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("userId", userId);
-            put("postId", postId);
-        }};
-
-        jdbcTemplate.update(query, params);
-    }
-
-    private void createVote(UUID userId, Long postId, Vote vote) {
-        final String query = """
-                insert into post_vote (id, user_id, post_id, vote_value, date_created)
-                values(DEFAULT, :userId, :postId, :voteValue, current_timestamp)
-            """;
-
-        Map<String, Object> params = new HashMap<>() {{
-            put("userId", userId);
-            put("postId", postId);
-            put("voteValue", vote.weight);
-        }};
-
-        jdbcTemplate.update(query, params);
-    }
-
-    private void updateVote(UUID userId, Long postId, Vote vote) {
-        final String query = """
-                update post_vote set
-                    vote_value = :voteValue,
-                    date_created = current_timestamp
-                where user_id=:userId and post_id=:postId
-            """;
-
-        Map<String, Object> params = new HashMap<>() {{
-            put("userId", userId);
-            put("postId", postId);
-            put("voteValue", vote.weight);
-        }};
-
-        jdbcTemplate.update(query, params);
-    }
 
     @Override
     public int vote(UUID userId, Long postId, Vote vote) {
@@ -243,26 +199,48 @@ public class PostDaoImpl implements PostDao{
             select sum(pvt.vote_value) as count from post_vote pvt where pvt.post_id=:postId
         """;
 
-        if (vote.equals(Vote.DELETE))
-        {
-            deleteVote(userId, postId);
-        } else {
-            Map<String, Object> params = new HashMap<>() {{
-                put("userId", userId);
-                put("postId", postId);
-            }};
+        final String updateQuery = """
+                update post_vote set
+                    vote_value = :voteValue,
+                    date_created = current_timestamp
+                where user_id=:userId and post_id=:postId
+            """;
 
-            boolean userAlreadyVoted = Boolean.TRUE.equals(jdbcTemplate.query(existsQuery, params, ResultSet::next));
+        final String createQuery = """
+                insert into post_vote (id, user_id, post_id, vote_value, date_created)
+                values(DEFAULT, :userId, :postId, :voteValue, current_timestamp)
+            """;
 
-            if (userAlreadyVoted) updateVote(userId, postId, vote);
-            else createVote(userId, postId, vote);
-        }
+        final String deleteQuery = """
+                delete from post_vote where user_id=:userId and post_id=:postId
+            """;
 
-        Map<String, Object> param = new HashMap<>() {{
+        final Map<String, Object> params = new HashMap<>() {{
+            put("userId", userId);
             put("postId", postId);
         }};
 
-        Optional<Integer> newCount = jdbcTemplate.query(countQuery, param, rs -> {
+        final Map<String, Object> voteParams = new HashMap<>() {{
+            put("userId", userId);
+            put("postId", postId);
+            put("voteValue", vote.weight);
+        }};
+
+        final Map<String, Object> countParams = new HashMap<>() {{
+            put("postId", postId);
+        }};
+
+        if (vote.equals(Vote.DELETE))
+        {
+            jdbcTemplate.update(deleteQuery, params);
+        } else {
+            boolean userAlreadyVoted = Boolean.TRUE.equals(jdbcTemplate.query(existsQuery, params, ResultSet::next));
+
+            if (userAlreadyVoted) jdbcTemplate.update(updateQuery, voteParams);
+            else jdbcTemplate.update(createQuery, voteParams);
+        }
+
+        Optional<Integer> newCount = jdbcTemplate.query(countQuery, countParams, rs -> {
             if (rs.next())
                 return Optional.of(rs.getInt("count"));
             return Optional.empty();
