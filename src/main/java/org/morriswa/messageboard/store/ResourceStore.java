@@ -7,7 +7,7 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 
-public interface ImageStore {
+public interface ResourceStore {
     void uploadIndividualImage(UUID resourceID, @Valid UploadImageRequest request) throws IOException;
     URL retrieveImageResource(UUID resourceId);
 }

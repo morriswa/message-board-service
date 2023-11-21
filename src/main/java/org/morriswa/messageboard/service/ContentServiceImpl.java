@@ -18,7 +18,7 @@ import org.morriswa.messageboard.model.responsebody.PostUserResponse;
 import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
 import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.store.ImageStore;
+import org.morriswa.messageboard.store.ResourceStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -37,7 +37,7 @@ public class ContentServiceImpl implements ContentService {
     private final ContentServiceValidator validator;
     private final CommunityService communityService;
     private final UserProfileService userProfileService;
-    private final ImageStore imageStore;
+    private final ResourceStore resourceStore;
     private final PostDao posts;
     private final ResourceDao resources;
     private final CommentDao comments;
@@ -48,7 +48,7 @@ public class ContentServiceImpl implements ContentService {
                               ContentServiceValidator validator,
                               CommunityService communityService,
                               UserProfileService userProfileService,
-                              ImageStore imageStore,
+                              ResourceStore resourceStore,
                               PostDao posts,
                               ResourceDao resources,
                               CommentDao comments,
@@ -57,7 +57,7 @@ public class ContentServiceImpl implements ContentService {
         this.validator = validator;
         this.communityService = communityService;
         this.userProfileService = userProfileService;
-        this.imageStore = imageStore;
+        this.resourceStore = resourceStore;
         this.posts = posts;
         this.resources = resources;
         this.comments = comments;
@@ -193,7 +193,7 @@ public class ContentServiceImpl implements ContentService {
 
         final UUID newImageTag = UUID.randomUUID();
 
-        imageStore.uploadIndividualImage(
+        resourceStore.uploadIndividualImage(
                 newImageTag,
                 uploadRequest
         );
@@ -228,7 +228,7 @@ public class ContentServiceImpl implements ContentService {
                 getDraftType(resource.getResources().size()),
                 new ArrayList<>() {{
                     for (UUID resource1 : resource.getResources())
-                        add(imageStore.retrieveImageResource(resource1));
+                        add(resourceStore.retrieveImageResource(resource1));
                 }}
         );
     }
@@ -294,7 +294,7 @@ public class ContentServiceImpl implements ContentService {
 
             var resourceUrls = new ArrayList<URL>(){{
                 for (UUID resource : resourceEntity.getResources())
-                    add(imageStore.retrieveImageResource(resource));
+                    add(resourceStore.retrieveImageResource(resource));
             }};
 
             response.add(new PostUserResponse(post, user, resourceUrls));
@@ -318,7 +318,7 @@ public class ContentServiceImpl implements ContentService {
 
             var resourceUrls = new ArrayList<URL>(){{
                 for (UUID resource : resourceEntity.getResources())
-                    add(imageStore.retrieveImageResource(resource));
+                    add(resourceStore.retrieveImageResource(resource));
             }};
 
             response.add(new PostCommunityResponse(post, community, resourceUrls));

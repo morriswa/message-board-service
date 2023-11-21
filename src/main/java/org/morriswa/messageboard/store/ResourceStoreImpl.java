@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
 @Component @Slf4j
-public class ImageStoreImpl implements ImageStore {
+public class ResourceStoreImpl implements ResourceStore {
 
     private final int SIGNED_URL_EXPIRATION_MINUTES;
     private final float IMAGE_SCALE_FACTOR;
@@ -24,9 +24,9 @@ public class ImageStoreImpl implements ImageStore {
     private final CustomS3Util s3Store;
 
     @Autowired
-    public ImageStoreImpl(Environment e,
-                          ImageScaleUtil iss,
-                          CustomS3Util s3Store){
+    public ResourceStoreImpl(Environment e,
+                             ImageScaleUtil iss,
+                             CustomS3Util s3Store){
         this.POST_RESOURCE_IMAGE_STORE =
                 e.getRequiredProperty("common.stores.prefix")+
                 e.getRequiredProperty("common.stores.post-resources");

@@ -43,9 +43,7 @@ public class CustomS3UtilImpl implements CustomS3Util {
 
         final UUID cachePath = UUID.randomUUID();
 
-//        final byte[] stuff = Base64.getDecoder().decode(originalRequest.getBaseEncodedImage());
-
-        File temp = new File(this.INTERNAL_FILE_CACHE_PATH + cachePath + "." + originalRequest.getImageFormat());
+        File temp = new File(this.INTERNAL_FILE_CACHE_PATH + cachePath);
 
         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(temp));
         outputStream.write(originalRequest.getBaseEncodedImage());
@@ -56,7 +54,8 @@ public class CustomS3UtilImpl implements CustomS3Util {
 
         s3.putObject(new PutObjectRequest(ACTIVE_BUCKET,
                 destination,
-                temp).withCannedAcl(CannedAccessControlList.Private));
+                temp));
+//                .withCannedAcl(CannedAccessControlList.Private));
 
         if (!temp.delete())
             throw new FileSystemException(
@@ -78,7 +77,8 @@ public class CustomS3UtilImpl implements CustomS3Util {
 
         s3.putObject(new PutObjectRequest(ACTIVE_BUCKET,
                 destination,
-                temp).withCannedAcl(CannedAccessControlList.Private));
+                temp));
+//                .withCannedAcl(CannedAccessControlList.Private));
 
         if (!temp.delete())
             throw new FileSystemException(

@@ -49,7 +49,7 @@ common:
     default-community-icon: "static-content/DEFAULT_COMMUNITY_ICON_0"
   service:
     rules:
-      square-icon-image-dimension: 128
+      square-icon-image-dimension: 512
       signed-url-expiration-minutes: 60
     endpoints:
       health:
@@ -210,7 +210,6 @@ content:
     errors:
       content-type-not-supported: Sorry! The content you attempted to upload is not yet supported by this application
       too-many-images: Please do not upload more than %d images for a single post!
-      wrong-number-of-files: Request count does not match received files.
       cannot-locate-resource: could not locate resource %s :(
       cannot-locate-session: could not locate post creation session :(
     rules:
