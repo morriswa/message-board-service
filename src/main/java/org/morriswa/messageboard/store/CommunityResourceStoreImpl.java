@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.stores;
+package org.morriswa.messageboard.store;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,7 @@ import java.io.IOException;
 @Component @Slf4j
 public class CommunityResourceStoreImpl implements CommunityResourceStore {
 
+    private final String DEFAULT_COMMUNITY_ICON;
     private final float BANNER_SCALE_FACTOR;
     private final int ICON_SIZE;
     private final int SIGNED_URL_EXPIRATION_MINUTES;
@@ -37,6 +38,8 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
                 e.getRequiredProperty("common.service.rules.square-icon-image-dimension"));
         this.BANNER_SCALE_FACTOR = Float.parseFloat(
                 e.getRequiredProperty("community.service.rules.banner-scale-factor"));
+        this.DEFAULT_COMMUNITY_ICON =
+                e.getRequiredProperty("common.static-content.default-community-icon");
         this.iss = iss1;
         this.s3Store = s3Store;
     }
@@ -65,9 +68,12 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
         } else response.setBanner(null);
 
         if (s3Store.doesObjectExist(COMMUNITY_ICON_PATH+communityId)) {
-            var bannerUrl = s3Store.getSignedObjectUrl(COMMUNITY_ICON_PATH+communityId, SIGNED_URL_EXPIRATION_MINUTES);
-            response.setIcon(bannerUrl);
-        } else response.setIcon(null);
+            var iconUrl = s3Store.getSignedObjectUrl(COMMUNITY_ICON_PATH+communityId, SIGNED_URL_EXPIRATION_MINUTES);
+            response.setIcon(iconUrl);
+        } else {
+            var iconUrl = s3Store.getSignedObjectUrl(DEFAULT_COMMUNITY_ICON, SIGNED_URL_EXPIRATION_MINUTES);
+            response.setIcon(iconUrl);
+        }
 
         return response;
     }

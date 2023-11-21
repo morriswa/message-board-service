@@ -2,18 +2,16 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
-import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.model.entity.CommunityMembership;
 import org.morriswa.messageboard.model.entity.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
 import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
 import org.morriswa.messageboard.model.responsebody.CommunityResponse;
 import org.morriswa.messageboard.model.validatedrequest.CreateCommunityRequest;
 import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
-import org.morriswa.messageboard.stores.CommunityResourceStore;
+import org.morriswa.messageboard.store.CommunityResourceStore;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -21,7 +19,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.blobTypeToImageFormat;

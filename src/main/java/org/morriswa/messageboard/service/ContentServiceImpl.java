@@ -18,7 +18,7 @@ import org.morriswa.messageboard.model.responsebody.PostUserResponse;
 import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
 import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.stores.ImageStore;
+import org.morriswa.messageboard.store.ImageStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;

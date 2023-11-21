@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.stores;
+package org.morriswa.messageboard.store;
 
 import java.io.IOException;
 import java.net.URL;

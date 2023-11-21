@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.stores;
+package org.morriswa.messageboard.store;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

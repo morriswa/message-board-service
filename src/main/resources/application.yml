@@ -46,6 +46,7 @@ common:
     post-resources: "/post/resources/"
   static-content:
     default-profile-image: "static-content/DEFAULT_USER_PROFILE_0"
+    default-community-icon: "static-content/DEFAULT_COMMUNITY_ICON_0"
   service:
     rules:
       square-icon-image-dimension: 128
