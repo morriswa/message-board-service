@@ -85,7 +85,6 @@ public class PostDaoImpl implements PostDao{
                         rs.getInt("count")
                 ));
             }
-//            log.info("located {} posts in community {}", posts.size(), communityId);
 
             return createPostRequests;
         });
@@ -125,7 +124,6 @@ public class PostDaoImpl implements PostDao{
                         rs.getInt("vote_count")
                 ));
             }
-//            log.info("located {} posts in community {}", posts.size(), communityId);
 
             return createPostRequests;
         });
@@ -161,7 +159,6 @@ public class PostDaoImpl implements PostDao{
                         rs.getInt("vote_count")
                 ));
             }
-//            log.info("located {} posts in community {}", posts.size(), communityId);
 
             return createPostRequests;
         });

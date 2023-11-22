@@ -18,7 +18,7 @@ import org.morriswa.messageboard.model.responsebody.PostUserResponse;
 import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
 import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
 import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.store.ResourceStore;
+import org.morriswa.messageboard.store.ContentStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -33,22 +33,28 @@ import static org.morriswa.messageboard.util.Functions.blobTypeToImageFormat;
 
 @Service @Slf4j
 public class ContentServiceImpl implements ContentService {
+    // application context
     private final Environment e;
+    // required validators
     private final ContentServiceValidator validator;
+    // required services
     private final CommunityService communityService;
     private final UserProfileService userProfileService;
-    private final ResourceStore resourceStore;
+    // required database
     private final PostDao posts;
     private final ResourceDao resources;
     private final CommentDao comments;
     private final PostDraftDao drafts;
+    // required s3 stores
+    private final ContentStore content;
+
 
     @Autowired
     public ContentServiceImpl(Environment e,
                               ContentServiceValidator validator,
                               CommunityService communityService,
                               UserProfileService userProfileService,
-                              ResourceStore resourceStore,
+                              ContentStore content,
                               PostDao posts,
                               ResourceDao resources,
                               CommentDao comments,
@@ -57,7 +63,7 @@ public class ContentServiceImpl implements ContentService {
         this.validator = validator;
         this.communityService = communityService;
         this.userProfileService = userProfileService;
-        this.resourceStore = resourceStore;
+        this.content = content;
         this.posts = posts;
         this.resources = resources;
         this.comments = comments;
@@ -193,7 +199,7 @@ public class ContentServiceImpl implements ContentService {
 
         final UUID newImageTag = UUID.randomUUID();
 
-        resourceStore.uploadIndividualImage(
+        content.uploadIndividualImage(
                 newImageTag,
                 uploadRequest
         );
@@ -228,7 +234,7 @@ public class ContentServiceImpl implements ContentService {
                 getDraftType(resource.getResources().size()),
                 new ArrayList<>() {{
                     for (UUID resource1 : resource.getResources())
-                        add(resourceStore.retrieveImageResource(resource1));
+                        add(content.retrieveImageResource(resource1));
                 }}
         );
     }
@@ -294,7 +300,7 @@ public class ContentServiceImpl implements ContentService {
 
             var resourceUrls = new ArrayList<URL>(){{
                 for (UUID resource : resourceEntity.getResources())
-                    add(resourceStore.retrieveImageResource(resource));
+                    add(content.retrieveImageResource(resource));
             }};
 
             response.add(new PostUserResponse(post, user, resourceUrls));
@@ -318,7 +324,7 @@ public class ContentServiceImpl implements ContentService {
 
             var resourceUrls = new ArrayList<URL>(){{
                 for (UUID resource : resourceEntity.getResources())
-                    add(resourceStore.retrieveImageResource(resource));
+                    add(content.retrieveImageResource(resource));
             }};
 
             response.add(new PostCommunityResponse(post, community, resourceUrls));

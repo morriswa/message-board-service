@@ -90,8 +90,6 @@ public class PostDraftDaoImpl implements PostDraftDao {
         queryBuilder.append("where user_id=:userId and id=:id");
         final String query = queryBuilder.toString();
 
-        log.info(query);
-
         try {
             jdbc.update(query, params);
         } catch (Exception e) {
