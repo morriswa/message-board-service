@@ -224,3 +224,8 @@ content:
     rules:
       image-scale-factor: 0.5
       max-allowed-content: 10
+      caption:
+        min-length: 10
+        max-length: 200
+      description:
+        max-length: 10000

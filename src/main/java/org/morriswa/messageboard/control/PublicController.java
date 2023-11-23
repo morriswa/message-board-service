@@ -66,6 +66,14 @@ public class PublicController {
                     e.getRequiredProperty("community.service.rules.display-name.max-length"));
             put("COMMUNITY_NAME_MIN",
                     e.getRequiredProperty("community.service.rules.display-name.min-length"));
+
+            put("POST_CAPTION_MAX",
+                    e.getRequiredProperty("content.service.rules.caption.max-length"));
+            put("POST_CAPTION_MIN",
+                    e.getRequiredProperty("content.service.rules.caption.min-length"));
+
+            put("POST_DESCRIPTION_MAX",
+                    e.getRequiredProperty("content.service.rules.description.max-length"));
         }};
 
         return responseFactory.getResponse(
