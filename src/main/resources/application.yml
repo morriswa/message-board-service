@@ -37,6 +37,7 @@ common:
   public: >
     /health
     /feed
+    /preferences
   cache: ./localfilecache/
   stores:
     prefix: developer-content
@@ -60,6 +61,14 @@ common:
         path: error
         messages:
           get: "Oh no! That page was not found :("
+      preferences:
+        path: preferences
+        messages:
+          get: Got application preferences!!
+      recent-post-feed:
+        path: feed
+        messages:
+          get: Successfully retrieved post feed
     errors:
       bad-datasource-config: "DATASOURCE COULD NOT BE CONFIGURED, PLEASE CHECK CONFIG <3"
       validation-exception-thrown: A validation exception has occurred!
@@ -215,11 +224,3 @@ content:
     rules:
       image-scale-factor: 0.5
       max-allowed-content: 10
-
-public-content:
-  service:
-    endpoints:
-      recent-post-feed:
-        path: feed
-        messages:
-          get: Successfully retrieved post feed
