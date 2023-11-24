@@ -87,7 +87,7 @@ public class ContentServiceImpl implements ContentService {
                     postId,
                     comment);
 
-        validator.validateBeanOrThrow(newComment);
+        validator.validate(newComment);
 
         comments.createNewComment(newComment);
     }
@@ -175,7 +175,7 @@ public class ContentServiceImpl implements ContentService {
                 blobTypeToImageFormat(file.getContentType())
         );
 
-        validator.validateImageRequestOrThrow(uploadRequest);
+        validator.validate(uploadRequest);
 
         var session = drafts.getDraft(draftId)
                 .orElseThrow(()->new BadRequestException(

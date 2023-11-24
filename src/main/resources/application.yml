@@ -225,6 +225,8 @@ content:
       too-many-images: Please do not upload more than %d images for a single post!
       cannot-locate-resource: could not locate resource %s :(
       cannot-locate-session: could not locate post creation session :(
+      null-comment: No null comments!!!
+      bad-comment-length: Comments may not be more than %d characters!
     rules:
       image-scale-factor: 0.5
       max-allowed-content: 10

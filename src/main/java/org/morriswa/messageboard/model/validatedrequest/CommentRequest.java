@@ -23,7 +23,6 @@ public class CommentRequest {
     private final Long parentCommentId;
 
     @NotBlank
-    @Length(min = 10, max = 5000)
     private final String commentBody;
 
     public static CommentRequest buildSubCommentRequest(UUID userId, Long postId, Long parentCommentId, String commentBody) {
