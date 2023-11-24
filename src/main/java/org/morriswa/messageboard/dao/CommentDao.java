@@ -14,6 +14,6 @@ public interface CommentDao {
 
     void createNewComment(CommentRequest newCommentRequest);
 
-    void vote(UUID userId, Long postId, Long commentId, Vote vote);
+    int vote(UUID userId, Long postId, Long commentId, Vote vote);
 
 }

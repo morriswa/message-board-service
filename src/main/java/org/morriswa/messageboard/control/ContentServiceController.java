@@ -2,10 +2,8 @@ package org.morriswa.messageboard.control;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.NoRegisteredUserException;
-import org.morriswa.messageboard.exception.ResourceException;
-import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.enumerated.Vote;
+import org.morriswa.messageboard.model.responsebody.PostDetailsResponse;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +14,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController @CrossOrigin @Slf4j
 @RequestMapping("${server.path}")
@@ -116,6 +114,18 @@ public class ContentServiceController {
                 feed);
     }
 
+    @GetMapping("${content.service.endpoints.post-details.path}")
+    public ResponseEntity<?> getPostDetails(JwtAuthenticationToken token,
+                                        @PathVariable Long postId) throws Exception {
+        PostDetailsResponse post = contentService.retrievePostDetails(token, postId);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.post-details.messages.get"),
+                post);
+    }
+
+
     @PostMapping("${content.service.endpoints.post-voting.path}")
     public ResponseEntity<?> voteOnPost(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
@@ -179,10 +189,11 @@ public class ContentServiceController {
                                         @PathVariable Long postId,
                                         @PathVariable Long commentId,
                                         @RequestParam Vote vote) throws Exception {
-        contentService.voteOnComment(token, postId, commentId, vote);
+        int count = contentService.voteOnComment(token, postId, commentId, vote);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
-                e.getRequiredProperty("content.service.endpoints.comment-voting.messages.post"));
+                e.getRequiredProperty("content.service.endpoints.comment-voting.messages.post"),
+                count);
     }
 }

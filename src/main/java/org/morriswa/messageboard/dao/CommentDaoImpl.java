@@ -93,7 +93,7 @@ public class CommentDaoImpl implements CommentDao{
     }
 
     @Override
-    public void vote(UUID userId, Long postId, Long commentId, Vote vote) {
+    public int vote(UUID userId, Long postId, Long commentId, Vote vote) {
         final String existsQuery = """
                 select 1 from comment_vote where user_id=:userId and post_id=:postId and comment_id=:commentId
             """;
@@ -113,6 +113,11 @@ public class CommentDaoImpl implements CommentDao{
                     insert into comment_vote (id, user_id, post_id, comment_id, vote_value, date_created)
                     values(DEFAULT, :userId, :postId, :commentId, :voteValue, current_timestamp)
                 """;
+
+        final String countQuery = """
+                select sum(vote_value) as count from comment_vote where post_id=:postId and comment_id=:commentId
+                """;
+
         Map<String, Object> params = new HashMap<>(){{
             put("userId", userId);
             put("postId", postId);
@@ -129,18 +134,23 @@ public class CommentDaoImpl implements CommentDao{
         if (vote.equals(Vote.DELETE))
         {
             jdbc.update(deleteQuery, params);
-            return;
+        } else {
+            final boolean userAlreadyVoted = Boolean.TRUE.equals(jdbc.query(existsQuery, params, ResultSet::next));
+
+            if (userAlreadyVoted) {
+                jdbc.update(updateQuery, voteParams);
+            }
+            else {
+                jdbc.update(createQuery, voteParams);
+            }
         }
 
-        final boolean userAlreadyVoted = Boolean.TRUE.equals(jdbc.query(existsQuery, params, ResultSet::next));
-
-        if (userAlreadyVoted) {
-            jdbc.update(updateQuery, voteParams);
-        }
-        else {
-            jdbc.update(createQuery, voteParams);
-        }
-
+        return jdbc.query(countQuery, params, rs -> {
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+            return 0;
+        });
     }
 
 }

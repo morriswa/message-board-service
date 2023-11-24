@@ -184,6 +184,10 @@ content:
         path: community/{communityId}/feed
         messages:
           get: Good!
+      post-details:
+        path: post/{postId}
+        messages:
+          get: Successfully got post details
       comment:
         path: post/{postId}/comment
         messages:

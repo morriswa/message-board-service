@@ -13,6 +13,7 @@ import org.morriswa.messageboard.model.entity.Resource;
 import org.morriswa.messageboard.model.enumerated.PostContentType;
 import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.responsebody.PostCommunityResponse;
+import org.morriswa.messageboard.model.responsebody.PostDetailsResponse;
 import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
 import org.morriswa.messageboard.model.responsebody.PostUserResponse;
 import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
@@ -128,7 +129,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws Exception {
+    public int voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var post = posts.findPostByPostId(postId)
@@ -138,7 +139,7 @@ public class ContentServiceImpl implements ContentService {
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
 
-        comments.vote(userId, postId, commentId, vote);
+        return comments.vote(userId, postId, commentId, vote);
     }
 
     @Override
@@ -274,6 +275,27 @@ public class ContentServiceImpl implements ContentService {
         posts.createNewPost(newPost);
 
         drafts.clearUsersDrafts(userId);
+    }
+
+    @Override
+    public PostDetailsResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception {
+        var post = posts.findPostByPostId(postId)
+                .orElseThrow(()->new BadRequestException("TODO Bad!"));
+
+        var user = userProfileService.getUserProfile(post.getUserId());
+
+        var resourceEntity = resources.findResourceByResourceId(post.getResourceId())
+                .orElseThrow();
+        var resourceUrls = new ArrayList<URL>(){{
+            for (UUID resource : resourceEntity.getResources())
+                add(content.retrieveImageResource(resource));
+        }};
+
+        var postResponseWithUserData = new PostUserResponse(post, user, resourceUrls);
+
+        var comments = getComments(post.getPostId());
+
+        return new PostDetailsResponse(postResponseWithUserData, comments);
     }
 
     @Override

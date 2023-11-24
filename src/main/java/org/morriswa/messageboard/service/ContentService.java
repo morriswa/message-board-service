@@ -3,6 +3,7 @@ package org.morriswa.messageboard.service;
 import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.responsebody.PostCommunityResponse;
+import org.morriswa.messageboard.model.responsebody.PostDetailsResponse;
 import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
 import org.morriswa.messageboard.model.responsebody.PostUserResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -28,7 +29,7 @@ public interface ContentService {
 
     int voteOnPost(JwtAuthenticationToken token, Long postId, Vote vote) throws Exception;
 
-    void voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws Exception;
+    int voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws Exception;
 
     UUID createPostDraft(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws Exception;
 
@@ -40,4 +41,5 @@ public interface ContentService {
 
     void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws Exception;
 
+    PostDetailsResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception;
 }
