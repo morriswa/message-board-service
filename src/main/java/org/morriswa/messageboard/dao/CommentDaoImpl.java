@@ -57,7 +57,8 @@ public class CommentDaoImpl implements CommentDao{
                 (select sum(cvt.vote_value) from comment_vote cvt where cvt.comment_id=pc.id) AS count
             from post_comment pc
                 join user_profile up on pc.user_id = up.id
-            where post_id = :postId and parent_id = -1;
+            where post_id = :postId and parent_id = -1
+            order by pc.date_created desc
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -81,7 +82,8 @@ public class CommentDaoImpl implements CommentDao{
                 (select sum(cvt.vote_value) from comment_vote cvt where cvt.comment_id=pc.id) AS count
             from post_comment pc
                 join user_profile up on up.id=pc.user_id
-            where post_id = :postId and parent_id = :parentId;
+            where post_id = :postId and parent_id = :parentId
+            order by pc.date_created desc
         """;
 
         Map<String, Object> params = new HashMap<>(){{
