@@ -8,6 +8,6 @@ import java.util.List;
 
 @Getter @AllArgsConstructor
 public class PostDetailsResponse {
-    private final PostResponse post;
+    private final PostUserResponse post;
     private final List<Comment> comments;
 }

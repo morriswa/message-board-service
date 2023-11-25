@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.model.responsebody.CommunityResponse;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController @CrossOrigin
@@ -39,7 +41,7 @@ public class CommunityServiceController {
 
     @GetMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> getAllCommunityInformation(@RequestParam String communityLocator) throws Exception {
-        var response = this.community.getAllCommunityInfo(communityLocator);
+        CommunityResponse response = this.community.getAllCommunityInfo(communityLocator);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -114,7 +116,7 @@ public class CommunityServiceController {
 
     @GetMapping("${community.service.endpoints.get-users-communities.path}")
     public ResponseEntity<?> getUsersCommunities(JwtAuthenticationToken jwtAuthenticationToken) throws Exception {
-        var communities = this.community.getAllUsersCommunities(jwtAuthenticationToken);
+        List<CommunityResponse> communities = this.community.getAllUsersCommunities(jwtAuthenticationToken);
 
         return responseFactory.getResponse(
             HttpStatus.OK,
@@ -123,8 +125,8 @@ public class CommunityServiceController {
     }
 
     @GetMapping("${community.service.endpoints.search-communities.path}")
-    public ResponseEntity<?> getUsersCommunities(@RequestParam String searchText) {
-        var communities = this.community.searchForCommunities(searchText);
+    public ResponseEntity<?> findCommunities(@RequestParam String searchText) {
+        List<CommunityResponse> communities = this.community.searchForCommunities(searchText);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,

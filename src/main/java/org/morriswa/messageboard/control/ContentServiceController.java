@@ -2,8 +2,11 @@ package org.morriswa.messageboard.control;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.model.entity.Comment;
 import org.morriswa.messageboard.model.enumerated.Vote;
 import org.morriswa.messageboard.model.responsebody.PostDetailsResponse;
+import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
+import org.morriswa.messageboard.model.responsebody.PostUserResponse;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,7 +40,7 @@ public class ContentServiceController {
             JwtAuthenticationToken token,
             @PathVariable UUID draftId) throws Exception {
 
-        var draft = contentService.getPostDraft(token, draftId);
+        PostDraftResponse draft = contentService.getPostDraft(token, draftId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -81,7 +85,7 @@ public class ContentServiceController {
                                         @RequestParam Optional<String> description)
             throws Exception {
 
-        var id = contentService.createPostDraft(token, communityId, caption, description);
+        UUID id = contentService.createPostDraft(token, communityId, caption, description);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -106,7 +110,7 @@ public class ContentServiceController {
     @GetMapping("${content.service.endpoints.community-feed.path}")
     public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws Exception {
 
-        var feed = contentService.getFeedForCommunity(communityId);
+        List<PostUserResponse> feed = contentService.getFeedForCommunity(communityId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
@@ -151,7 +155,7 @@ public class ContentServiceController {
     }
 
     @PostMapping("${content.service.endpoints.sub-comment.path}")
-    public ResponseEntity<?> leaveCommentOnPost(JwtAuthenticationToken token,
+    public ResponseEntity<?> leaveSubComment(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
                                                 @PathVariable Long parentId,
                                                 @RequestBody String comment) throws Exception {
@@ -165,7 +169,7 @@ public class ContentServiceController {
 
     @GetMapping("${content.service.endpoints.comment.path}")
     public ResponseEntity<?> getComments(@PathVariable Long postId) throws BadRequestException {
-        var comments = contentService.getComments(postId);
+        List<Comment> comments = contentService.getComments(postId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,
