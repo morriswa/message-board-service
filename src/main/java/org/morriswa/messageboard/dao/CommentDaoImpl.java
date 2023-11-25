@@ -30,6 +30,7 @@ public class CommentDaoImpl implements CommentDao{
                     new Comment(
                             rs.getLong("id"),
                             rs.getObject("user_id", UUID.class),
+                            rs.getString("display_name"),
                             rs.getLong("post_id"),
                             rs.getLong("parent_id"),
                             rs.getString("body"),
@@ -46,9 +47,17 @@ public class CommentDaoImpl implements CommentDao{
     public List<Comment> findComments(Long postId) {
         final String query = """
             select
-                *,
-                (select sum(cvt.vote_value) from comment_vote cvt where cvt.comment_id=post_comment.id) AS count
-                from post_comment where post_id = :postId and parent_id = -1;
+                pc.id id,
+                pc.user_id user_id,
+                up.display_name display_name,
+                pc.post_id post_id,
+                pc.parent_id parent_id,
+                pc.body body,
+                pc.date_created date_created,
+                (select sum(cvt.vote_value) from comment_vote cvt where cvt.comment_id=pc.id) AS count
+            from post_comment pc
+                join user_profile up on pc.user_id = up.id
+            where post_id = :postId and parent_id = -1;
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -62,9 +71,17 @@ public class CommentDaoImpl implements CommentDao{
     public List<Comment> findComments(Long postId, Long parentId) {
         final String query = """
             select
-                *,
-                (select sum(cvt.vote_value) from comment_vote cvt where cvt.comment_id=post_comment.id) AS count
-                from post_comment where post_id = :postId and parent_id = :parentId;
+                pc.id id,
+                pc.user_id user_id,
+                up.display_name display_name,
+                pc.post_id post_id,
+                pc.parent_id parent_id,
+                pc.body body,
+                pc.date_created date_created,
+                (select sum(cvt.vote_value) from comment_vote cvt where cvt.comment_id=pc.id) AS count
+            from post_comment pc
+                join user_profile up on up.id=pc.user_id
+            where post_id = :postId and parent_id = :parentId;
         """;
 
         Map<String, Object> params = new HashMap<>(){{

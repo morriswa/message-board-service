@@ -28,9 +28,19 @@ public class PostDaoImpl implements PostDao{
     public Optional<Post> findPostByPostId(Long postId) {
         final String query = """
             select
-                *,
-                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=:postId) AS count
-                from user_post where id=:postId
+                posts.id id,
+                posts.user_id user_id,
+                users.display_name display_name,
+                posts.community_id community_id,
+                posts.caption caption,
+                posts.description description,
+                posts.content_type content_type,
+                posts.date_created date_created,
+                posts.resource_id resource_id,
+                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id) AS count
+            from user_post posts
+                join user_profile users on posts.user_id = users.id
+            where posts.id=:postId
         """;
         Map<String, Object> params = new HashMap<>(){{
             put("postId", postId);
@@ -41,6 +51,7 @@ public class PostDaoImpl implements PostDao{
                 return Optional.of(new Post(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
+                        rs.getString("display_name"),
                         rs.getLong("community_id"),
                         rs.getString("caption"),
                         rs.getString("description"),
@@ -59,9 +70,19 @@ public class PostDaoImpl implements PostDao{
     public List<Post> findAllPostsByCommunityId(Long communityId) {
         final String query = """
             select
-                *,
-                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=user_post.id) AS count
-                from user_post where community_id=:communityId
+                posts.id id,
+                posts.user_id user_id,
+                users.display_name display_name,
+                posts.community_id community_id,
+                posts.caption caption,
+                posts.description description,
+                posts.content_type content_type,
+                posts.date_created date_created,
+                posts.resource_id resource_id,
+                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id) AS count
+            from user_post posts
+                join user_profile users on posts.user_id = users.id
+            where community_id=:communityId
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -75,6 +96,7 @@ public class PostDaoImpl implements PostDao{
                 createPostRequests.add(new Post(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
+                        rs.getString("display_name"),
                         rs.getLong("community_id"),
                         rs.getString("caption"),
                         rs.getString("description"),
@@ -97,10 +119,20 @@ public class PostDaoImpl implements PostDao{
     @Override
     public List<Post> getMostRecent(int endSlice) {
         final String query = """
-            select
-                *,
-                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=user_post.id) AS vote_count
-                from user_post order by date_created desc limit :endSlice
+             select
+                posts.id id,
+                posts.user_id user_id,
+                users.display_name display_name,
+                posts.community_id community_id,
+                posts.caption caption,
+                posts.description description,
+                posts.content_type content_type,
+                posts.date_created date_created,
+                posts.resource_id resource_id,
+                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id) AS vote_count
+            from user_post posts
+                join user_profile users on posts.user_id = users.id
+            order by posts.date_created desc limit :endSlice
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -114,6 +146,7 @@ public class PostDaoImpl implements PostDao{
                 createPostRequests.add(new Post(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
+                        rs.getString("display_name"),
                         rs.getLong("community_id"),
                         rs.getString("caption"),
                         rs.getString("description"),
@@ -132,9 +165,19 @@ public class PostDaoImpl implements PostDao{
     public List<Post> getMostRecent(int startSlice, int endSlice) {
         final String query = """
             select
-                *,
-                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=user_post.id) AS vote_count
-                from user_post order by date_created desc limit :selects offset :startSlice
+                posts.id id,
+                posts.user_id user_id,
+                users.display_name display_name,
+                posts.community_id community_id,
+                posts.caption caption,
+                posts.description description,
+                posts.content_type content_type,
+                posts.date_created date_created,
+                posts.resource_id resource_id,
+                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id) AS vote_count
+            from user_post posts
+                join user_profile users on posts.user_id = users.id
+            order by posts.date_created desc limit :selects offset :startSlice
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -149,6 +192,7 @@ public class PostDaoImpl implements PostDao{
                 createPostRequests.add(new Post(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
+                        rs.getString("display_name"),
                         rs.getLong("community_id"),
                         rs.getString("caption"),
                         rs.getString("description"),

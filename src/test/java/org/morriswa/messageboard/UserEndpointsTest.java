@@ -190,7 +190,7 @@ public class UserEndpointsTest extends MessageboardTest {
 
         final String newDisplayName = "newDisplayName";
 
-        when(userProfileDao.getUser(any(String.class))).thenReturn(Optional.of(getExampleUser()));
+        when(userProfileDao.getUserId(any(String.class))).thenReturn(Optional.of(getExampleUser().getUserId()));
 
         doThrow(new ValidationException("displayName",newDisplayName,
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")))

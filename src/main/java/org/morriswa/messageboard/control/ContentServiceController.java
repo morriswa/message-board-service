@@ -6,7 +6,7 @@ import org.morriswa.messageboard.model.Comment;
 import org.morriswa.messageboard.enumerated.Vote;
 import org.morriswa.messageboard.model.PostCommentResponse;
 import org.morriswa.messageboard.model.PostDraftResponse;
-import org.morriswa.messageboard.model.PostUserResponse;
+import org.morriswa.messageboard.model.PostResponse;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +110,7 @@ public class ContentServiceController {
     @GetMapping("${content.service.endpoints.community-feed.path}")
     public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws Exception {
 
-        List<PostUserResponse> feed = contentService.getFeedForCommunity(communityId);
+        List<PostResponse> feed = contentService.getFeedForCommunity(communityId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,

@@ -7,15 +7,9 @@ import org.morriswa.messageboard.dao.PostDraftDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
-import org.morriswa.messageboard.model.Comment;
-import org.morriswa.messageboard.model.Post;
-import org.morriswa.messageboard.model.Resource;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.enumerated.PostContentType;
 import org.morriswa.messageboard.enumerated.Vote;
-import org.morriswa.messageboard.model.PostCommunityResponse;
-import org.morriswa.messageboard.model.PostCommentResponse;
-import org.morriswa.messageboard.model.PostDraftResponse;
-import org.morriswa.messageboard.model.PostUserResponse;
 import org.morriswa.messageboard.validation.request.CommentRequest;
 import org.morriswa.messageboard.validation.request.CreatePostRequest;
 import org.morriswa.messageboard.validation.request.UploadImageRequest;
@@ -282,8 +276,6 @@ public class ContentServiceImpl implements ContentService {
         var post = posts.findPostByPostId(postId)
                 .orElseThrow(()->new BadRequestException("TODO Bad!"));
 
-        var user = userProfileService.getUserProfile(post.getUserId());
-
         var resourceEntity = resources.findResourceByResourceId(post.getResourceId())
                 .orElseThrow();
         var resourceUrls = new ArrayList<URL>(){{
@@ -293,7 +285,7 @@ public class ContentServiceImpl implements ContentService {
 
         var comments = getComments(post.getPostId());
 
-        return new PostCommentResponse(post, user, resourceUrls, comments);
+        return new PostCommentResponse(post, resourceUrls, comments);
     }
 
     @Override
@@ -307,14 +299,13 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<PostUserResponse> getFeedForCommunity(Long communityId) throws Exception {
+    public List<PostResponse> getFeedForCommunity(Long communityId) throws Exception {
 
-        var response = new ArrayList<PostUserResponse>();
+        var response = new ArrayList<PostResponse>();
 
         var allCommunityPosts = posts.findAllPostsByCommunityId(communityId);
 
         for (Post post : allCommunityPosts) {
-            var user = userProfileService.getUserProfile(post.getUserId());
             var resourceEntity = resources.findResourceByResourceId(post.getResourceId())
                     .orElseThrow();
 
@@ -323,11 +314,11 @@ public class ContentServiceImpl implements ContentService {
                     add(content.retrieveImageResource(resource));
             }};
 
-            response.add(new PostUserResponse(post, user, resourceUrls));
+            response.add(new PostResponse(post, resourceUrls));
         }
 
         return response.stream().sorted(
-                Comparator.comparing(PostUserResponse::getDateCreated).reversed()
+                Comparator.comparing(PostResponse::getDateCreated).reversed()
         ).toList();
     }
 

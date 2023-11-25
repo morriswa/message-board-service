@@ -21,8 +21,7 @@ public class PostCommunityResponse extends PostResponse {
     }
 
     public PostCommunityResponse(Post post, CommunityResponse community, ArrayList<URL> resourceUrls) {
-        super(post.getPostId(), post.getVote(), post.getCaption(), post.getDescription(),
-                post.getContentType(), post.getDateCreated(), resourceUrls);
+        super(post, resourceUrls);
         this.communityInfo = new CommunityInfo(
                 community.getCommunityId(),
                 community.getCommunityLocator(),

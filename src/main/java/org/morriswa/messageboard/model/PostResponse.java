@@ -1,20 +1,19 @@
 package org.morriswa.messageboard.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.morriswa.messageboard.enumerated.PostContentType;
 
 import java.net.URL;
-import java.util.GregorianCalendar;
 import java.util.List;
 
-@Getter @AllArgsConstructor
-public abstract class PostResponse {
-    private final Long postId;
-    private final int vote;
-    private final String caption;
-    private final String description;
-    private final PostContentType contentType;
-    private final GregorianCalendar dateCreated;
+@Getter
+public class PostResponse extends Post{
     private final List<URL> resources;
+
+    public PostResponse(Post post,
+                        List<URL> resources) {
+        super(post.getPostId(), post.getUserId(), post.getDisplayName(),
+                post.getCommunityId(), post.getCaption(), post.getDescription(),
+                post.getContentType(), post.getDateCreated(), post.getResourceId(), post.getVote());
+        this.resources = resources;
+    }
 }

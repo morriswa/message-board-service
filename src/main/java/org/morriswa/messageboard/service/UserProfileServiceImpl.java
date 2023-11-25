@@ -120,10 +120,10 @@ public class UserProfileServiceImpl implements UserProfileService {
         // ensure display name follows basic rules
         this.validator.validateDisplayNameOrThrow(requestedDisplayName);
 
-        User user = authenticateAndGetUser(token);
+        UUID user = authenticate(token);
 
         // save changes
-        this.userProfileDao.updateUserDisplayName(user.getUserId(), requestedDisplayName);
+        this.userProfileDao.updateUserDisplayName(user, requestedDisplayName);
     }
 
     @Override

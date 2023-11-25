@@ -10,6 +10,7 @@ import java.util.UUID;
 public class Comment {
     private final Long commentId;
     private final UUID userId;
+    private final String displayName;
     private final Long postId;
     private final Long parentId;
     private final String body;

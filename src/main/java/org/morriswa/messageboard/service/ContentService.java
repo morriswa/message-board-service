@@ -1,11 +1,7 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.messageboard.model.Comment;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.enumerated.Vote;
-import org.morriswa.messageboard.model.PostCommunityResponse;
-import org.morriswa.messageboard.model.PostCommentResponse;
-import org.morriswa.messageboard.model.PostDraftResponse;
-import org.morriswa.messageboard.model.PostUserResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,7 +11,7 @@ import java.util.UUID;
 
 public interface ContentService {
 
-    List<PostUserResponse> getFeedForCommunity(Long communityId) throws Exception;
+    List<PostResponse> getFeedForCommunity(Long communityId) throws Exception;
 
     List<PostCommunityResponse> getRecentPosts() throws Exception;
 

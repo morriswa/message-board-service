@@ -6,11 +6,11 @@ import java.net.URL;
 import java.util.List;
 
 @Getter
-public class PostCommentResponse extends PostUserResponse {
+public class PostCommentResponse extends PostResponse {
     private final List<Comment> comments;
 
-    public PostCommentResponse(Post post, UserProfileResponse user, List<URL> resources, List<Comment> comments) {
-        super(post, user, resources);
+    public PostCommentResponse(Post post, List<URL> resources, List<Comment> comments) {
+        super(post, resources);
         this.comments = comments;
     }
 }
