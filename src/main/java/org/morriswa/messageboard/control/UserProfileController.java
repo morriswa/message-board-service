@@ -1,12 +1,8 @@
 package org.morriswa.messageboard.control;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.NoRegisteredUserException;
-import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.entity.UserUiProfile;
-import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.responsebody.UserProfile;
+import org.morriswa.messageboard.model.UserUiProfile;
+import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
+import org.morriswa.messageboard.model.UserProfileResponse;
 import org.morriswa.messageboard.service.UserProfileService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 
 @RestController @CrossOrigin
@@ -38,7 +32,7 @@ public class UserProfileController {
 
     @GetMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws Exception {
-        UserProfile user = userProfileService.authenticateAndGetUserProfile(jwt);
+        UserProfileResponse user = userProfileService.authenticateAndGetUserProfile(jwt);
         return responseFactory.getResponse(
             HttpStatus.OK,
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.get"),

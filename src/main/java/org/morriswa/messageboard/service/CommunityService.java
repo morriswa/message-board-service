@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.messageboard.model.entity.CommunityMembership;
-import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
-import org.morriswa.messageboard.model.responsebody.CommunityResponse;
+import org.morriswa.messageboard.model.CommunityMembership;
+import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.model.CommunityResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
 

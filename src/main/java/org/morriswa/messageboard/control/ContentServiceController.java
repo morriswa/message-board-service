@@ -2,11 +2,11 @@ package org.morriswa.messageboard.control;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.entity.Comment;
-import org.morriswa.messageboard.model.enumerated.Vote;
-import org.morriswa.messageboard.model.responsebody.PostDetailsResponse;
-import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
-import org.morriswa.messageboard.model.responsebody.PostUserResponse;
+import org.morriswa.messageboard.model.Comment;
+import org.morriswa.messageboard.enumerated.Vote;
+import org.morriswa.messageboard.model.PostCommentResponse;
+import org.morriswa.messageboard.model.PostDraftResponse;
+import org.morriswa.messageboard.model.PostUserResponse;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +121,7 @@ public class ContentServiceController {
     @GetMapping("${content.service.endpoints.post-details.path}")
     public ResponseEntity<?> getPostDetails(JwtAuthenticationToken token,
                                         @PathVariable Long postId) throws Exception {
-        PostDetailsResponse post = contentService.retrievePostDetails(token, postId);
+        PostCommentResponse post = contentService.retrievePostDetails(token, postId);
 
         return responseFactory.getResponse(
                 HttpStatus.OK,

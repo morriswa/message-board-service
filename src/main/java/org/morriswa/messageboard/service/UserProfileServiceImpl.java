@@ -3,15 +3,15 @@ package org.morriswa.messageboard.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.NoRegisteredUserException;
-import org.morriswa.messageboard.model.entity.User;
+import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.dao.UserProfileDao;
-import org.morriswa.messageboard.model.entity.UserUiProfile;
-import org.morriswa.messageboard.model.enumerated.UserRole;
-import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.model.responsebody.UserProfile;
-import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
+import org.morriswa.messageboard.model.UserUiProfile;
+import org.morriswa.messageboard.enumerated.UserRole;
+import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
+import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.UserProfileResponse;
+import org.morriswa.messageboard.validation.request.CreateUserRequest;
 import org.morriswa.messageboard.store.ProfileImageStoreImpl;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,13 +50,13 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws NoRegisteredUserException {
+    public UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws NoRegisteredUserException {
         var user = userProfileDao.getUser(token.getName())
                 .orElseThrow(()->new NoRegisteredUserException(e.getProperty("user-profile.service.errors.missing-user")));
 
         var profileImage = profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
 
-        return new UserProfile(user, profileImage);
+        return new UserProfileResponse(user, profileImage);
     }
 
     @Override
@@ -72,14 +72,14 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public UserProfile getUserProfile(UUID userId) throws NoRegisteredUserException {
+    public UserProfileResponse getUserProfile(UUID userId) throws NoRegisteredUserException {
         var user = userProfileDao.getUser(userId)
                 .orElseThrow(()->new NoRegisteredUserException(e.getProperty("user-profile.service.errors.missing-user")));
 
         var profileImage =
                 profileImageStoreImpl.getSignedUserProfileImage(user.getUserId());
 
-        return new UserProfile(user, profileImage);
+        return new UserProfileResponse(user, profileImage);
     }
 
     @Override

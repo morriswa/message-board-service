@@ -1,11 +1,11 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.messageboard.model.entity.Comment;
-import org.morriswa.messageboard.model.enumerated.Vote;
-import org.morriswa.messageboard.model.responsebody.PostCommunityResponse;
-import org.morriswa.messageboard.model.responsebody.PostDetailsResponse;
-import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
-import org.morriswa.messageboard.model.responsebody.PostUserResponse;
+import org.morriswa.messageboard.model.Comment;
+import org.morriswa.messageboard.enumerated.Vote;
+import org.morriswa.messageboard.model.PostCommunityResponse;
+import org.morriswa.messageboard.model.PostCommentResponse;
+import org.morriswa.messageboard.model.PostDraftResponse;
+import org.morriswa.messageboard.model.PostUserResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,5 +41,5 @@ public interface ContentService {
 
     void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws Exception;
 
-    PostDetailsResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception;
+    PostCommentResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception;
 }

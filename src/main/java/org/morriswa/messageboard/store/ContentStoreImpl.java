@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3Util;
 import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;

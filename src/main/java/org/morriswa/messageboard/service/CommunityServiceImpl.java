@@ -2,15 +2,15 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
-import org.morriswa.messageboard.model.entity.CommunityMembership;
-import org.morriswa.messageboard.model.entity.Community;
+import org.morriswa.messageboard.model.CommunityMembership;
+import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
-import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
-import org.morriswa.messageboard.model.responsebody.CommunityResponse;
-import org.morriswa.messageboard.model.validatedrequest.CreateCommunityRequest;
-import org.morriswa.messageboard.model.validatedrequest.JoinCommunityRequest;
+import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.CommunityResponse;
+import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
+import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
 import org.morriswa.messageboard.store.CommunityResourceStore;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class CommunityServiceImpl implements CommunityService {
     public void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws Exception {
         var userId = userProfileService.authenticate(token);
 
-        var newCommunity = new CreateCommunityRequest(request.getCommunityRef(), request.getCommunityName(), userId);
+        var newCommunity = new CreateCommunityRequest(request.communityRef(), request.communityName(), userId);
 
         this.validator.validateBeanOrThrow(newCommunity);
 
@@ -66,7 +66,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
 
-        validator.validateImageRequestOrThrow(uploadImageRequest);
+        validator.validate(uploadImageRequest);
 
         resources.setCommunityIcon(uploadImageRequest, communityId);
     }
@@ -79,7 +79,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
 
-        validator.validateImageRequestOrThrow(uploadImageRequest);
+        validator.validate(uploadImageRequest);
 
         resources.setCommunityBanner(uploadImageRequest, communityId);
     }

@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.model.entity.PostDraft;
+import org.morriswa.messageboard.model.PostDraft;
 
 import java.util.Optional;
 import java.util.UUID;

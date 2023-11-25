@@ -2,10 +2,10 @@ package org.morriswa.messageboard.service;
 
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.entity.User;
-import org.morriswa.messageboard.model.entity.UserUiProfile;
-import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.responsebody.UserProfile;
+import org.morriswa.messageboard.model.User;
+import org.morriswa.messageboard.model.UserUiProfile;
+import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
+import org.morriswa.messageboard.model.UserProfileResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +25,7 @@ public interface UserProfileService {
      * @return a full User Profile Response
      * @throws BadRequestException if the user cannot be found or authenticated
      */
-    UserProfile authenticateAndGetUserProfile(JwtAuthenticationToken token) throws Exception;
+    UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws Exception;
 
     /**
      * Authenticates an Oauth2 user with provided token
@@ -53,7 +53,7 @@ public interface UserProfileService {
      * @return a full User Profile Response
      * @throws BadRequestException if the user cannot be found
      */
-    UserProfile getUserProfile(UUID userId) throws Exception;
+    UserProfileResponse getUserProfile(UUID userId) throws Exception;
 
     /**
      * Creates a new Messageboard User

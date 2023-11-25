@@ -3,10 +3,10 @@ package org.morriswa.messageboard.dao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.entity.User;
-import org.morriswa.messageboard.model.entity.UserUiProfile;
-import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
+import org.morriswa.messageboard.model.User;
+import org.morriswa.messageboard.model.UserUiProfile;
+import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
+import org.morriswa.messageboard.validation.request.CreateUserRequest;
 
 import java.util.Optional;
 import java.util.UUID;

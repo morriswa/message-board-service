@@ -15,7 +15,7 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
 
     @Autowired
     public UserProfileServiceValidator(Environment e) {
-        super();
+        super(e);
         this.e = e;
     }
 

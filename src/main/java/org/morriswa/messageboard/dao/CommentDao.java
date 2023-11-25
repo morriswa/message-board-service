@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.model.enumerated.Vote;
-import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
-import org.morriswa.messageboard.model.entity.Comment;
+import org.morriswa.messageboard.enumerated.Vote;
+import org.morriswa.messageboard.validation.request.CommentRequest;
+import org.morriswa.messageboard.model.Comment;
 
 import java.util.List;
 import java.util.UUID;

@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.model.enumerated.Vote;
-import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
-import org.morriswa.messageboard.model.entity.Comment;
+import org.morriswa.messageboard.enumerated.Vote;
+import org.morriswa.messageboard.validation.request.CommentRequest;
+import org.morriswa.messageboard.model.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;

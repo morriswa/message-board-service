@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;

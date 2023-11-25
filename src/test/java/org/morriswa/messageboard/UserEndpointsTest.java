@@ -3,8 +3,8 @@ package org.morriswa.messageboard;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.entity.User;
-import org.morriswa.messageboard.model.enumerated.UserRole;
+import org.morriswa.messageboard.model.User;
+import org.morriswa.messageboard.enumerated.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 

@@ -1,11 +1,10 @@
 package org.morriswa.messageboard.dao;
 
-import com.amazonaws.services.apigateway.model.Op;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.ResourceException;
-import org.morriswa.messageboard.model.entity.Resource;
+import org.morriswa.messageboard.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;

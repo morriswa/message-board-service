@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.entity.UserUiProfile;
-import org.morriswa.messageboard.model.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.validatedrequest.CreateUserRequest;
-import org.morriswa.messageboard.model.entity.User;
-import org.morriswa.messageboard.model.enumerated.UserRole;
+import org.morriswa.messageboard.model.UserUiProfile;
+import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
+import org.morriswa.messageboard.validation.request.CreateUserRequest;
+import org.morriswa.messageboard.model.User;
+import org.morriswa.messageboard.enumerated.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DuplicateKeyException;
@@ -151,7 +151,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
 
         Map<String, Object> params = new HashMap<>(){{
             put("userId", userId);
-            if (!uiProfile.getTheme().isBlank()) put("theme", uiProfile.getTheme());
+            if (!uiProfile.theme().isBlank()) put("theme", uiProfile.theme());
         }};
 
         jdbc.update(queryUpdateUiProfile, params);
@@ -162,7 +162,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
 
         Map<String, Object> params = new HashMap<>(){{
             put("userId", userId);
-            if (!uiProfile.getTheme().isBlank()) put("theme", uiProfile.getTheme());
+            if (!uiProfile.theme().isBlank()) put("theme", uiProfile.theme());
         }};
 
         jdbc.update(queryUpdateUiProfile, params);

@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
-import org.morriswa.messageboard.model.entity.Community;
-import org.morriswa.messageboard.model.validatedrequest.CreateCommunityRequest;
+import org.morriswa.messageboard.model.Community;
+import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
 
 import java.util.List;
 import java.util.Optional;

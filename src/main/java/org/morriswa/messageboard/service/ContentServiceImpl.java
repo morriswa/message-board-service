@@ -7,18 +7,18 @@ import org.morriswa.messageboard.dao.PostDraftDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
-import org.morriswa.messageboard.model.entity.Comment;
-import org.morriswa.messageboard.model.entity.Post;
-import org.morriswa.messageboard.model.entity.Resource;
-import org.morriswa.messageboard.model.enumerated.PostContentType;
-import org.morriswa.messageboard.model.enumerated.Vote;
-import org.morriswa.messageboard.model.responsebody.PostCommunityResponse;
-import org.morriswa.messageboard.model.responsebody.PostDetailsResponse;
-import org.morriswa.messageboard.model.responsebody.PostDraftResponse;
-import org.morriswa.messageboard.model.responsebody.PostUserResponse;
-import org.morriswa.messageboard.model.validatedrequest.CommentRequest;
-import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.model.Comment;
+import org.morriswa.messageboard.model.Post;
+import org.morriswa.messageboard.model.Resource;
+import org.morriswa.messageboard.enumerated.PostContentType;
+import org.morriswa.messageboard.enumerated.Vote;
+import org.morriswa.messageboard.model.PostCommunityResponse;
+import org.morriswa.messageboard.model.PostCommentResponse;
+import org.morriswa.messageboard.model.PostDraftResponse;
+import org.morriswa.messageboard.model.PostUserResponse;
+import org.morriswa.messageboard.validation.request.CommentRequest;
+import org.morriswa.messageboard.validation.request.CreatePostRequest;
+import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.morriswa.messageboard.store.ContentStore;
 import org.morriswa.messageboard.validation.ContentServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -278,7 +278,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public PostDetailsResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception {
+    public PostCommentResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception {
         var post = posts.findPostByPostId(postId)
                 .orElseThrow(()->new BadRequestException("TODO Bad!"));
 
@@ -291,11 +291,9 @@ public class ContentServiceImpl implements ContentService {
                 add(content.retrieveImageResource(resource));
         }};
 
-        var postResponseWithUserData = new PostUserResponse(post, user, resourceUrls);
-
         var comments = getComments(post.getPostId());
 
-        return new PostDetailsResponse(postResponseWithUserData, comments);
+        return new PostCommentResponse(post, user, resourceUrls, comments);
     }
 
     @Override

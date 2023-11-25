@@ -2,12 +2,11 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.enumerated.Vote;
-import org.morriswa.messageboard.model.validatedrequest.CreatePostRequest;
-import org.morriswa.messageboard.model.entity.Post;
-import org.morriswa.messageboard.model.enumerated.PostContentType;
+import org.morriswa.messageboard.enumerated.Vote;
+import org.morriswa.messageboard.validation.request.CreatePostRequest;
+import org.morriswa.messageboard.model.Post;
+import org.morriswa.messageboard.enumerated.PostContentType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 

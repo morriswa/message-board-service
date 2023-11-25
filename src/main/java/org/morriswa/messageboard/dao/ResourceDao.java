@@ -1,8 +1,7 @@
 package org.morriswa.messageboard.dao;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.morriswa.messageboard.exception.ResourceException;
-import org.morriswa.messageboard.model.entity.Resource;
+import org.morriswa.messageboard.model.Resource;
 
 import java.util.Optional;
 import java.util.UUID;

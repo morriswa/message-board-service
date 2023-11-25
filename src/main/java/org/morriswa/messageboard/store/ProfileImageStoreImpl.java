@@ -2,7 +2,7 @@ package org.morriswa.messageboard.store;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.validatedrequest.UploadImageRequest;
+import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3UtilImpl;
 import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;

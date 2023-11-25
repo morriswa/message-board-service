@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.control;
 
-import org.morriswa.messageboard.model.requestbody.CreateCommunityRequestBody;
-import org.morriswa.messageboard.model.responsebody.CommunityResponse;
+import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
