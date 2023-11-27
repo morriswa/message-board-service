@@ -28,6 +28,9 @@ public class UserProfileDaoImpl implements UserProfileDao {
     private final Environment environment;
     private final NamedParameterJdbcTemplate jdbc;
 
+    private static final String AUTH0_UNIQUE_CONSTRAINT_VIOLATION = "duplicate key value violates unique constraint \"user_profile_auth_zero_id_key\"";
+    private static final String DISPLAY_NAME_UNIQUE_CONSTRAINT_VIOLATION = "duplicate key value violates unique constraint \"user_profile_display_name_key\"";
+
     @Autowired
     public UserProfileDaoImpl(Environment environment, NamedParameterJdbcTemplate jdbc) {
         this.environment = environment;
@@ -85,20 +88,17 @@ public class UserProfileDaoImpl implements UserProfileDao {
         try {
             jdbc.update(query, params);
         } catch (DuplicateKeyException e) {
-            if (e.getMostSpecificCause().getMessage().contains(
-                    "duplicate key value violates unique constraint \"user_profile_auth_zero_id_key\""
-            )) {
+            if (e.getMostSpecificCause().getMessage().contains(AUTH0_UNIQUE_CONSTRAINT_VIOLATION)) {
                 throw new ValidationException("user",user.getClass().getSimpleName(), "User is already registered!");
             }
 
-            if (e.getMostSpecificCause().getMessage().contains(
-                    "duplicate key value violates unique constraint \"user_profile_display_name_key\""
-            )) {
+            if (e.getMostSpecificCause().getMessage().contains(DISPLAY_NAME_UNIQUE_CONSTRAINT_VIOLATION)) {
                 throw new ValidationException("displayName",user.getDisplayName(),
                         environment.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
             }
 
             log.error("encountered unexpected error in data layer ", e);
+            throw e;
         }
     }
 
@@ -118,14 +118,13 @@ public class UserProfileDaoImpl implements UserProfileDao {
         try {
             jdbc.update(query, params);
         } catch (DuplicateKeyException e) {
-            if (e.getMostSpecificCause().getMessage().contains(
-                    "duplicate key value violates unique constraint \"user_profile_display_name_key\""
-            )) {
+            if (e.getMostSpecificCause().getMessage().contains(DISPLAY_NAME_UNIQUE_CONSTRAINT_VIOLATION)) {
                 throw new ValidationException("displayName",requestedDisplayName,
                         environment.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
             }
 
             log.error("encountered unexpected error in data layer ", e);
+            throw e;
         }
     }
 

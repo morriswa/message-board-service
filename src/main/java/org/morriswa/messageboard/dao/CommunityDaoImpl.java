@@ -23,6 +23,7 @@ public class CommunityDaoImpl implements CommunityDao {
 
     private final Environment environment;
     private final NamedParameterJdbcTemplate jdbc;
+    private static final String COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION = "duplicate key value violates unique constraint \"community_community_ref_key\"";
 
     @Autowired
     CommunityDaoImpl(Environment environment, NamedParameterJdbcTemplate jdbc) {
@@ -64,36 +65,20 @@ public class CommunityDaoImpl implements CommunityDao {
             put("userId", userId);
         }};
 
-        try {
-            return jdbc.query(query, params, rs -> {
-                List<Community> response = new ArrayList<>();
+        return jdbc.query(query, params, rs -> {
+            List<Community> response = new ArrayList<>();
 
-                while (rs.next())
-                    response.add(new Community(
-                            rs.getLong("communityId"),
-                            rs.getString("communityLocator"),
-                            rs.getString("displayName"),
-                            rs.getObject("owner", UUID.class),
-                            timestampToGregorian(rs.getTimestamp("dateCreated")),
-                            rs.getInt("count")));
+            while (rs.next())
+                response.add(new Community(
+                        rs.getLong("communityId"),
+                        rs.getString("communityLocator"),
+                        rs.getString("displayName"),
+                        rs.getObject("owner", UUID.class),
+                        timestampToGregorian(rs.getTimestamp("dateCreated")),
+                        rs.getInt("count")));
 
-                return response;
-            });
-        } catch (Exception e) {
-            log.error("Exception occurred CommunityDao.findAllByUserId", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public boolean existsByCommunityLocator(String communityLocator) {
-        final String query = "select 1 from community where community_ref=:communityLocator";
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("communityLocator", communityLocator);
-        }};
-
-        return jdbc.query(query, params, ResultSet::next);
+            return response;
+        });
     }
 
     @Override
@@ -113,7 +98,7 @@ public class CommunityDaoImpl implements CommunityDao {
             jdbc.update(query, params);
         } catch (DuplicateKeyException dke) {
             if (dke.getMostSpecificCause().getMessage()
-                    .contains("duplicate key value violates unique constraint \"community_community_ref_key\"")) {
+                    .contains(COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION)) {
 
                 throw new ValidationException("communityLocator",
                         newCreateCommunityRequest.getCommunityLocator(),
@@ -122,10 +107,7 @@ public class CommunityDaoImpl implements CommunityDao {
             }
 
             log.error("encountered unexpected error ", dke);
-            throw new RuntimeException(dke);
-        } catch (Exception ee) {
-            log.error("encountered unexpected error ", ee);
-            throw new RuntimeException(ee);
+            throw dke;
         }
     }
 
@@ -162,7 +144,7 @@ public class CommunityDaoImpl implements CommunityDao {
             jdbc.update(query, params);
         } catch (DuplicateKeyException dke) {
             if (dke.getMostSpecificCause().getMessage()
-                    .contains("duplicate key value violates unique constraint \"community_community_ref_key\"")) {
+                    .contains(COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION)) {
 
                 throw new ValidationException("communityLocator",
                         attributesToUpdate.communityLocator(),
@@ -171,10 +153,7 @@ public class CommunityDaoImpl implements CommunityDao {
             }
 
             log.error("encountered unexpected error!!!", dke);
-            throw new RuntimeException(dke);
-        } catch (Exception ee) {
-            log.error("encountered unexpected error!!!", ee);
-            throw new RuntimeException(ee);
+            throw dke;
         }
     }
 
@@ -191,11 +170,7 @@ public class CommunityDaoImpl implements CommunityDao {
             put("communityLocator",communityLocator);
         }};
 
-        try {
-            jdbc.update(query, params);
-        } catch (Exception ee) {
-            log.error("encountered error ", ee);
-        }
+        jdbc.update(query, params);
     }
 
     @Override
@@ -211,11 +186,7 @@ public class CommunityDaoImpl implements CommunityDao {
             put("displayName",displayName);
         }};
 
-        try {
-            jdbc.update(query, params);
-        } catch (Exception ee) {
-            log.error("encountered error ", ee);
-        }
+        jdbc.update(query, params);
     }
 
     @Override
@@ -236,52 +207,19 @@ public class CommunityDaoImpl implements CommunityDao {
             put("communityId", communityId);
         }};
 
-        try {
-            return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
-                if (rs.next()) {
-                    var owner = rs.getObject("ownerId", UUID.class);
-                    if (owner.equals(userId)) return true;
+        return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
+            if (rs.next()) {
+                var owner = rs.getObject("ownerId", UUID.class);
+                if (owner.equals(userId)) return true;
 
-                    var user = rs.getObject("userId", UUID.class);
-                    var standing = CommunityStanding.valueOf(rs.getString("standing"));
+                var user = rs.getObject("userId", UUID.class);
+                var standing = CommunityStanding.valueOf(rs.getString("standing"));
 
-                    if (user.equals(userId) && standing.equals(CommunityStanding.HEALTHY)) return true;
-                }
+                if (user.equals(userId) && standing.equals(CommunityStanding.HEALTHY)) return true;
+            }
 
-                return false;
-            }));
-        } catch (Exception ee) {
-            log.error("Exception occurred CommunityDao.verifyUserCanPostInCommunity", ee);
-            throw new RuntimeException(ee);
-        }
-    }
-
-    @Override
-    public boolean verifyUserCanEditCommunity(UUID userId, Long communityId) {
-        final String query = """            
-            select owner
-            from community
-            where owner=:userId and id=:communityId
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("userId", userId);
-            put("communityId", communityId);
-        }};
-
-        try {
-            return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
-                if (rs.next()) {
-                    var owner = rs.getObject("owner", UUID.class);
-                    return owner.equals(userId);
-                }
-
-                return false;
-            }));
-        } catch (Exception e) {
-            log.error("Exception occurred CommunityDao.verifyUserCanEditCommunity", e);
-            throw new RuntimeException(e);
-        }
+            return false;
+        }));
     }
 
     @Override
@@ -345,12 +283,7 @@ public class CommunityDaoImpl implements CommunityDao {
             put("communityLocator", communityLocator);
         }};
 
-        try {
-            return jdbc.query(query, params, this::unwrapCommunityResultSet);
-        } catch (Exception e) {
-            log.error("Exception occurred CommunityDao.findCommunity", e);
-            throw new RuntimeException(e);
-        }
+        return jdbc.query(query, params, this::unwrapCommunityResultSet);
     }
 
     @Override
@@ -371,11 +304,6 @@ public class CommunityDaoImpl implements CommunityDao {
             put("communityId", communityId);
         }};
 
-        try {
-            return jdbc.query(query, params, this::unwrapCommunityResultSet);
-        } catch (Exception e) {
-            log.error("Exception occurred CommunityDao.findCommunity", e);
-            throw new RuntimeException(e);
-        }
+        return jdbc.query(query, params, this::unwrapCommunityResultSet);
     }
 }

@@ -28,9 +28,6 @@ public interface CommunityDao {
 
     @Deprecated void setCommunityDisplayName(Long communityId, String displayName);
 
-    @Deprecated boolean existsByCommunityLocator(String communityLocator);
-
     @Deprecated boolean verifyUserCanPostInCommunity(UUID userId, Long communityId);
 
-    @Deprecated boolean verifyUserCanEditCommunity(UUID userId, Long communityId);
 }
