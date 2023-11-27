@@ -42,7 +42,7 @@ public class ContentServiceController {
 
         PostDraftResponse draft = contentService.getPostDraft(token, draftId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.draft.messages.get"),
                 draft);
@@ -56,7 +56,7 @@ public class ContentServiceController {
 
         contentService.createPostFromDraft(token, draftId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.draft.messages.post")
         );
@@ -72,7 +72,7 @@ public class ContentServiceController {
 
         contentService.editPostDraft(token, draftId, caption, description);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.draft.messages.patch"));
     }
@@ -87,7 +87,7 @@ public class ContentServiceController {
 
         UUID id = contentService.createPostDraft(token, communityId, caption, description);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.create-draft.messages.post"),
                 id);
@@ -102,7 +102,7 @@ public class ContentServiceController {
 
         contentService.addContentToDraft(token, draftId, content);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getProperty("content.service.endpoints.add-content.messages.post"));
     }
@@ -112,7 +112,7 @@ public class ContentServiceController {
 
         List<PostResponse> feed = contentService.getFeedForCommunity(communityId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getProperty("content.service.endpoints.community-feed.messages.get"),
                 feed);
@@ -123,7 +123,7 @@ public class ContentServiceController {
                                         @PathVariable Long postId) throws Exception {
         PostCommentResponse post = contentService.retrievePostDetails(token, postId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.post-details.messages.get"),
                 post);
@@ -136,7 +136,7 @@ public class ContentServiceController {
                                                 @RequestParam Vote vote) throws Exception {
         int count = contentService.voteOnPost(token, postId, vote);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.post-voting.messages.post"),
                 count);
@@ -149,7 +149,7 @@ public class ContentServiceController {
 
         contentService.leaveComment(token, postId, comment);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.comment.messages.post"));
     }
@@ -162,7 +162,7 @@ public class ContentServiceController {
 
         contentService.leaveComment(token, postId, parentId, comment);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.sub-comment.messages.post"));
     }
@@ -171,7 +171,7 @@ public class ContentServiceController {
     public ResponseEntity<?> getComments(@PathVariable Long postId) throws BadRequestException {
         List<Comment> comments = contentService.getComments(postId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.comment.messages.get"),
                 comments);
@@ -182,7 +182,7 @@ public class ContentServiceController {
                                             @PathVariable Long parentId) throws BadRequestException {
         var comments = contentService.getComments(postId, parentId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.sub-comment.messages.get"),
                 comments);
@@ -195,7 +195,7 @@ public class ContentServiceController {
                                         @RequestParam Vote vote) throws Exception {
         int count = contentService.voteOnComment(token, postId, commentId, vote);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.comment-voting.messages.post"),
                 count);

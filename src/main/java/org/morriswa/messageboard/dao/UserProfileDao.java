@@ -19,7 +19,7 @@ public interface UserProfileDao {
 
     Optional<UUID> getUserId(String authZeroId);
 
-    boolean existsByDisplayName(String displayName);
+    @Deprecated boolean existsByDisplayName(String displayName);
 
     void createNewUser(@Valid CreateUserRequest user) throws ValidationException, JsonProcessingException;
 

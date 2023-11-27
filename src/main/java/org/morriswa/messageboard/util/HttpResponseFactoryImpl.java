@@ -76,25 +76,25 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
         this.APPLICATION_VERSION = build.getVersion();
     }
 
-    public ResponseEntity<?> getResponse(HttpStatus status, String message) {
+    public ResponseEntity<?> build(HttpStatus status, String message) {
         return ResponseEntity
                 .status(status)
                 .body(new DefaultResponse<>(message));
     }
 
-    public ResponseEntity<?> getResponse(HttpStatus status, String message, Object payload) {
+    public ResponseEntity<?> build(HttpStatus status, String message, Object payload) {
         return ResponseEntity
                 .status(status)
                 .body(new DefaultResponse<>(message, payload));
     }
 
-    public ResponseEntity<?> getErrorResponse(HttpStatus status, String message, String description) {
+    public ResponseEntity<?> error(HttpStatus status, String message, String description) {
         return ResponseEntity
                 .status(status)
                 .body(new DefaultErrorResponse(message, description));
     }
 
-    public ResponseEntity<?> getErrorResponse(HttpStatus status, String message, String description, Object stack) {
+    public ResponseEntity<?> error(HttpStatus status, String message, String description, Object stack) {
         return ResponseEntity
                 .status(status)
                 .body(new DefaultErrorResponse(message, description, stack));

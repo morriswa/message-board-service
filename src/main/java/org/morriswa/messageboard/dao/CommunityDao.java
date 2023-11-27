@@ -1,5 +1,8 @@
 package org.morriswa.messageboard.dao;
 
+import jakarta.validation.Valid;
+import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
 
@@ -19,13 +22,15 @@ public interface CommunityDao {
 
     void createNewCommunity(CreateCommunityRequest newCommunity);
 
-    void setCommunityLocator(Long communityId, String ref);
+    void updateCommunityAttrs(Long communityId, @Valid UpdateCommunityRequest attributesToUpdate) throws ValidationException;
 
-    void setCommunityDisplayName(Long communityId, String displayName);
+    @Deprecated void setCommunityLocator(Long communityId, String ref);
 
-    boolean existsByCommunityLocator(String communityLocator);
+    @Deprecated void setCommunityDisplayName(Long communityId, String displayName);
 
-    boolean verifyUserCanPostInCommunity(UUID userId, Long communityId);
+    @Deprecated boolean existsByCommunityLocator(String communityLocator);
 
-    boolean verifyUserCanEditCommunity(UUID userId, Long communityId);
+    @Deprecated boolean verifyUserCanPostInCommunity(UUID userId, Long communityId);
+
+    @Deprecated boolean verifyUserCanEditCommunity(UUID userId, Long communityId);
 }

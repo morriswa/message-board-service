@@ -1,23 +1,22 @@
 package org.morriswa.messageboard.validation;
 
+import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Component
 public class CommunityServiceValidator extends BasicBeanValidator {
 
-    private final Environment e;
     public CommunityServiceValidator(Environment e) {
         super(e);
-        this.e = e;
     }
 
-    public void validateCommunityRefOrThrow(String ref) throws ValidationException {
-
+    private List<ValidationException.ValidationError> generateLocatorErrors(String ref) {
         // defn rules
         final String communityRefRegexp =
                 e.getRequiredProperty("community.service.rules.community-ref.regexp");
@@ -46,12 +45,10 @@ public class CommunityServiceValidator extends BasicBeanValidator {
                     ref,
                     ERROR_BAD_COMMUNITY_REF));
 
-        if (!errors.isEmpty()) throw new ValidationException(errors);
-
+        return errors;
     }
 
-    public void validateCommunityDisplayNameOrThrow(String ref) throws ValidationException {
-
+    private List<ValidationException.ValidationError> generateDisplayNameErrors(String displayName) {
         // defn rules
         final int MIN_LENGTH = Integer.parseInt(
                 e.getRequiredProperty("community.service.rules.display-name.min-length"));
@@ -64,13 +61,38 @@ public class CommunityServiceValidator extends BasicBeanValidator {
 
         var errors = new ArrayList<ValidationException.ValidationError>();
 
-        if (MIN_LENGTH>ref.length()||ref.length()>MAX_LENGTH)
+        if (MIN_LENGTH>displayName.length()||displayName.length()>MAX_LENGTH)
             errors.add(new ValidationException.ValidationError(
                     "communityDisplayName",
-                    ref,
+                    displayName,
                     ERROR_BAD_COMMUNITY_DISPLAY_NAME_LENGTH));
+
+        return errors;
+    }
+
+    public void validate(UpdateCommunityRequest request) throws ValidationException {
+        var errors = new ArrayList<ValidationException.ValidationError>();
+
+        if (request.communityId() == null) {
+            var error = new ValidationException.ValidationError("communityId", null, "Community ID must not be null!!!");
+            errors.add(error);
+        }
+
+        if (request.communityLocator() != null) {
+            var locatorErrors = generateLocatorErrors(request.communityLocator());
+            errors.addAll(locatorErrors);
+        }
+
+        if (request.communityDisplayName() != null) {
+            var communityDisplayNameErrors = generateDisplayNameErrors(request.communityDisplayName());
+            errors.addAll(communityDisplayNameErrors);
+        }
+
+        if (request.communityOwnerUserId() == null && request.communityLocator() == null && request.communityDisplayName() == null) {
+            var error = new ValidationException.ValidationError(null, null, "Must provide at least one request field to update!");
+            errors.add(error);
+        }
 
         if (!errors.isEmpty()) throw new ValidationException(errors);
     }
-
 }

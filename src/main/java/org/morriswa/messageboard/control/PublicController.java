@@ -31,7 +31,7 @@ public class PublicController {
     @GetMapping(path = "${common.service.endpoints.health.path}")
     public ResponseEntity<?> healthCheckup()
     {
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("common.service.endpoints.health.messages.get"));
     }
@@ -39,7 +39,7 @@ public class PublicController {
     @GetMapping(path = "${server.path}${common.service.endpoints.health.path}")
     public ResponseEntity<?> secureHealthCheckup(JwtAuthenticationToken token)
     {
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("common.service.endpoints.health.messages.get"),
                 token);
@@ -76,7 +76,7 @@ public class PublicController {
                     e.getRequiredProperty("content.service.rules.description.max-length"));
         }};
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getProperty("common.service.endpoints.preferences.messages.get"),
                 prefs);
@@ -87,7 +87,7 @@ public class PublicController {
 
         var feed = contentService.getRecentPosts();
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getProperty("common.service.endpoints.recent-post-feed.messages.get"),
                 feed);

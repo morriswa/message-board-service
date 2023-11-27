@@ -30,7 +30,7 @@ public class CustomControllerAdvice {
         log.error("Encountered 500 error: ", e);
 
         // and return a 500 with as much relevant information as they deserve
-        return responseFactory.getErrorResponse(
+        return responseFactory.error(
             HttpStatus.INTERNAL_SERVER_ERROR,
             e.getClass().getSimpleName(),
             e.getMessage());
@@ -43,7 +43,7 @@ public class CustomControllerAdvice {
     }) // in this controller...
     public ResponseEntity<?> badRequest(Exception e, WebRequest r) {
         // and assume user fault [400]
-        return responseFactory.getErrorResponse(
+        return responseFactory.error(
                         HttpStatus.BAD_REQUEST,
                         e.getClass().getSimpleName(),
                         e.getMessage());
@@ -57,7 +57,7 @@ public class CustomControllerAdvice {
         ValidationException v = (ValidationException) e;
 
         // and assume user fault [400]
-        return responseFactory.getErrorResponse(
+        return responseFactory.error(
                 HttpStatus.BAD_REQUEST,
                 e.getClass().getSimpleName(),
                 env.getRequiredProperty("common.service.errors.validation-exception-thrown"),

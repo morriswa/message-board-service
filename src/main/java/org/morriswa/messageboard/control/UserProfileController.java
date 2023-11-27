@@ -33,7 +33,7 @@ public class UserProfileController {
     @GetMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws Exception {
         UserProfileResponse user = userProfileService.authenticateAndGetUserProfile(jwt);
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.get"),
             user);
@@ -43,7 +43,7 @@ public class UserProfileController {
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
                                            @RequestParam String displayName) throws Exception {
         String newUserDisplayName = userProfileService.createNewUser(jwt, displayName);
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             String.format(
                 e.getRequiredProperty("user-profile.service.endpoints.user.messages.post"),
@@ -54,7 +54,7 @@ public class UserProfileController {
     public ResponseEntity<?> updateUserProfileImage(JwtAuthenticationToken jwt,
                                                     @RequestPart MultipartFile image) throws Exception {
         userProfileService.updateUserProfileImage(jwt, image);
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getProperty("user-profile.service.endpoints.user-profile-image.messages.post"));
     }
@@ -63,7 +63,7 @@ public class UserProfileController {
     public ResponseEntity<?> updateUserDisplayName(JwtAuthenticationToken jwt,
                                                     @RequestParam String displayName) throws Exception {
         userProfileService.updateUserProfileDisplayName(jwt, displayName);
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getProperty("user-profile.service.endpoints.user-profile-displayname.messages.patch"));
     }
@@ -72,7 +72,7 @@ public class UserProfileController {
     public ResponseEntity<?> getUIProfile(JwtAuthenticationToken jwt) throws Exception {
         UserUiProfile profile = userProfileService.getUserUiProfile(jwt);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("user-profile.service.endpoints.user-ui.messages.get"),
                 profile);
@@ -83,7 +83,7 @@ public class UserProfileController {
                                              @RequestBody UpdateUIProfileRequest request) throws Exception {
         userProfileService.updateUserUiProfile(jwt, request);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("user-profile.service.endpoints.user-ui.messages.patch"));
     }

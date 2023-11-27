@@ -2,12 +2,14 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
+import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
 import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
@@ -48,6 +50,60 @@ public class CommunityServiceImpl implements CommunityService {
         this.resources = resources;
     }
 
+    private boolean userHasPromoteAccessInCommunity(Community community, UUID requesterUserId) {
+        if (community.getOwnerId().equals(requesterUserId)) return true;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
+
+        return false;
+    }
+
+    private boolean userHasEditAccessInCommunity(Community community, UUID requesterUserId) {
+        if (community.getOwnerId().equals(requesterUserId)) return true;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
+
+        return false;
+    }
+
+    private boolean userIsCommunityOwner(Community community, UUID requesterUserId) {
+        return community.getOwnerId().equals(requesterUserId);
+    }
+
+
+    @Override
+    public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws Exception {
+        if (!communityDao.verifyUserCanPostInCommunity(userId, communityId))
+            throw new BadRequestException(
+                    e.getRequiredProperty("community.service.errors.user-cannot-post")
+            );
+    }
+
+    @Override
+    public void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception {
+        if (!userHasEditAccessInCommunity(community, userId))
+            throw new BadRequestException(String.format(
+                    e.getRequiredProperty("community.service.errors.user-cannot-edit"),
+                    userId,
+                    community.getCommunityId()
+            ));
+    }
+
+    private void verifyUserIsOwnerOrThrow(UUID requesterId, Community community) throws BadRequestException {
+        if (!userIsCommunityOwner(community, requesterId))
+            throw new BadRequestException(String.format(
+                    e.getRequiredProperty("community.service.errors.user-cannot-edit"),
+                    requesterId,
+                    community.getCommunityId()
+            ));
+    }
+
     @Override
     public void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws Exception {
         var userId = userProfileService.authenticate(token);
@@ -60,7 +116,10 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void updateCommunityIcon(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws Exception{
+    public void updateCommunityResource(JwtAuthenticationToken token,
+                                        MultipartFile image,
+                                        Long communityId,
+                                        CommunityResourceType resourceType) throws Exception {
         var userId = userProfileService.authenticate(token);
 
         var community = communityDao.findCommunity(communityId)
@@ -74,26 +133,8 @@ public class CommunityServiceImpl implements CommunityService {
 
         validator.validate(uploadImageRequest);
 
-        resources.setCommunityIcon(uploadImageRequest, communityId);
-    }
-
-    @Override
-    public void updateCommunityBanner(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws Exception {
-        var userId = userProfileService.authenticate(token);
-
-        var community = communityDao.findCommunity(communityId)
-                .orElseThrow(()->new BadRequestException(
-                        String.format(
-                                e.getRequiredProperty("community.service.errors.missing-community"),
-                                communityId)));
-
-        verifyUserCanEditCommunityOrThrow(userId, community);
-
-        var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
-
-        validator.validate(uploadImageRequest);
-
-        resources.setCommunityBanner(uploadImageRequest, communityId);
+        if (resourceType.equals(CommunityResourceType.ICON)) resources.setCommunityIcon(uploadImageRequest, communityId);
+        else if (resourceType.equals(CommunityResourceType.BANNER)) resources.setCommunityBanner(uploadImageRequest, communityId);
     }
 
     @Override
@@ -150,14 +191,6 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws Exception {
-        if (!communityDao.verifyUserCanPostInCommunity(userId, communityId))
-            throw new BadRequestException(
-                    e.getRequiredProperty("community.service.errors.user-cannot-post")
-            );
-    }
-
-    @Override
     public List<CommunityResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws Exception {
 
         var userId = userProfileService.authenticate(token);
@@ -181,52 +214,29 @@ public class CommunityServiceImpl implements CommunityService {
         }};
     }
 
-    @Override
-    public void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception {
-        if (!userHasEditAccessInCommunity(community, userId))
-            throw new BadRequestException(String.format(
-                    e.getRequiredProperty("community.service.errors.user-cannot-edit"),
-                    userId,
-                    community.getCommunityId()
-            ));
-    }
+
 
     @Override
     public void updateCommunityAttributes(JwtAuthenticationToken token,
-                                          Long communityId,
-                                          Optional<String> communityRef,
-                                          Optional<String> communityDisplayName) throws Exception{
+                                          UpdateCommunityRequest request) throws Exception {
 
-        var userId = userProfileService.authenticate(token);
+        validator.validate(request);
 
-        var community = communityDao.findCommunity(communityId)
+        var requesterId = userProfileService.authenticate(token);
+
+        var community = communityDao.findCommunity(request.communityId())
                 .orElseThrow(()->new BadRequestException(
                 String.format(
                         e.getRequiredProperty("community.service.errors.missing-community"),
-                        communityId)));
+                        request.communityId())));
 
-        verifyUserCanEditCommunityOrThrow(userId, community);
+        if (request.communityOwnerUserId() != null)
+            verifyUserIsOwnerOrThrow(requesterId, community);
+        else verifyUserCanEditCommunityOrThrow(requesterId, community);
 
-        if (communityRef.isPresent()) {
-            var requestedRef = communityRef.get();
-            // if the user requested the same name they already had, ignore
-            if (!requestedRef.equals(community.getCommunityLocator())) {
-                if (communityDao.existsByCommunityLocator(requestedRef))
-                    throw new BadRequestException(
-                            e.getRequiredProperty("community.service.errors.ref-already-taken")
-                    );
-                validator.validateCommunityRefOrThrow(requestedRef);
-                communityDao.setCommunityLocator(communityId, requestedRef);
-            }
-        }
-
-        if (communityDisplayName.isPresent()) {
-            var displayName = communityDisplayName.get();
-            validator.validateCommunityDisplayNameOrThrow(displayName);
-            communityDao.setCommunityDisplayName(communityId, displayName);
-        }
-
+        communityDao.updateCommunityAttrs(community.getCommunityId(), request);
     }
+
 
     @Override
     public CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws Exception {
@@ -252,25 +262,4 @@ public class CommunityServiceImpl implements CommunityService {
         communityMemberDao.updateCommunityMemberModerationLevel(userId, communityId, level);
     }
 
-    private boolean userHasPromoteAccessInCommunity(Community community, UUID requesterUserId) {
-        if (community.getOwnerId().equals(requesterUserId)) return true;
-
-        var requesterMembership =
-                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
-
-        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
-
-        return false;
-    }
-
-    private boolean userHasEditAccessInCommunity(Community community, UUID requesterUserId) {
-        if (community.getOwnerId().equals(requesterUserId)) return true;
-
-        var requesterMembership =
-                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
-
-        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
-
-        return false;
-    }
 }

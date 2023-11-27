@@ -8,11 +8,11 @@ import org.springframework.http.ResponseEntity;
  */
 public interface HttpResponseFactory {
 
-    ResponseEntity<?> getResponse(HttpStatus status, String message);
+    ResponseEntity<?> build(HttpStatus status, String message);
 
-    ResponseEntity<?> getResponse(HttpStatus status, String message, Object payload);
+    ResponseEntity<?> build(HttpStatus status, String message, Object payload);
 
-    ResponseEntity<?> getErrorResponse(HttpStatus status, String message, String description);
+    ResponseEntity<?> error(HttpStatus status, String message, String description);
 
-    ResponseEntity<?> getErrorResponse(HttpStatus status, String message, String description, Object stack);
+    ResponseEntity<?> error(HttpStatus status, String message, String description, Object stack);
 }

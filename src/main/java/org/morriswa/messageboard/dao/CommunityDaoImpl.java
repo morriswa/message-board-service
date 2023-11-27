@@ -1,10 +1,14 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
+import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
 import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +21,12 @@ import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
 @Component @Slf4j
 public class CommunityDaoImpl implements CommunityDao {
 
+    private final Environment environment;
     private final NamedParameterJdbcTemplate jdbc;
 
     @Autowired
-    CommunityDaoImpl(NamedParameterJdbcTemplate jdbc) {
+    CommunityDaoImpl(Environment environment, NamedParameterJdbcTemplate jdbc) {
+        this.environment = environment;
         this.jdbc = jdbc;
     }
 
@@ -106,8 +112,57 @@ public class CommunityDaoImpl implements CommunityDao {
 
         try {
             jdbc.update(query, params);
-        } catch (Exception e) {
-            log.error("encountered error ", e);
+        } catch (Exception ee) {
+            log.error("encountered error ", ee);
+        }
+    }
+
+    @Override
+    public void updateCommunityAttrs(Long communityId, UpdateCommunityRequest attributesToUpdate) throws ValidationException {
+        StringBuilder queryBuilder = new StringBuilder("update community set ");
+
+        var params = new HashMap<String,Object>(){{
+            put("communityId", communityId);
+        }};
+
+        if (attributesToUpdate.communityLocator() != null) {
+            queryBuilder.append("community_ref=:locator,");
+            params.put("locator", attributesToUpdate.communityLocator());
+        }
+
+        if (attributesToUpdate.communityDisplayName() != null) {
+            queryBuilder.append("display_name=:displayName,");
+            params.put("displayName", attributesToUpdate.communityDisplayName());
+        }
+
+        if (attributesToUpdate.communityOwnerUserId() != null) {
+            queryBuilder.append("owner=:ownerId,");
+            params.put("ownerId", attributesToUpdate.communityOwnerUserId());
+        }
+
+        queryBuilder.deleteCharAt(queryBuilder.length() - 1);
+
+        queryBuilder.append(" where id=:communityId");
+
+        final String query = queryBuilder.toString();
+
+        try {
+            jdbc.update(query, params);
+        } catch (DuplicateKeyException dke) {
+            if (dke.getMostSpecificCause().getMessage()
+                    .contains("duplicate key value violates unique constraint \"community_community_ref_key\"")) {
+
+                throw new ValidationException("communityLocator",
+                        attributesToUpdate.communityLocator(),
+                        environment.getRequiredProperty("community.service.errors.ref-already-taken")
+                );
+            }
+
+            log.error("encountered unexpected error!!!", dke);
+            throw new RuntimeException(dke);
+        } catch (Exception ee) {
+            log.error("encountered unexpected error!!!", ee);
+            throw new RuntimeException(ee);
         }
     }
 
@@ -126,8 +181,8 @@ public class CommunityDaoImpl implements CommunityDao {
 
         try {
             jdbc.update(query, params);
-        } catch (Exception e) {
-            log.error("encountered error ", e);
+        } catch (Exception ee) {
+            log.error("encountered error ", ee);
         }
     }
 
@@ -146,8 +201,8 @@ public class CommunityDaoImpl implements CommunityDao {
 
         try {
             jdbc.update(query, params);
-        } catch (Exception e) {
-            log.error("encountered error ", e);
+        } catch (Exception ee) {
+            log.error("encountered error ", ee);
         }
     }
 
@@ -183,9 +238,9 @@ public class CommunityDaoImpl implements CommunityDao {
 
                 return false;
             }));
-        } catch (Exception e) {
-            log.error("Exception occurred CommunityDao.verifyUserCanPostInCommunity", e);
-            throw new RuntimeException(e);
+        } catch (Exception ee) {
+            log.error("Exception occurred CommunityDao.verifyUserCanPostInCommunity", ee);
+            throw new RuntimeException(ee);
         }
     }
 

@@ -155,7 +155,7 @@ public class WebSecurityConfig
                 // UNAUTHENTICATED REQUEST ERROR HANDLING
                     .authenticationEntryPoint((request, response, authException) -> {
                         var customErrorResponse =
-                                responseFactory.getErrorResponse(
+                                responseFactory.error(
                                         HttpStatus.UNAUTHORIZED,
                                         e.getRequiredProperty("common.service.errors.security.not-allowed"),
                                         e.getRequiredProperty("common.service.errors.security.not-allowed-desc"));
@@ -168,7 +168,7 @@ public class WebSecurityConfig
                 // INSUFFICIENT SCOPE ERROR HANDLING
                     .accessDeniedHandler((request, response, authException) -> {
                         var customErrorResponse =
-                                responseFactory.getErrorResponse(
+                                responseFactory.error(
                                         HttpStatus.FORBIDDEN,
                                         e.getRequiredProperty("common.service.errors.security.not-allowed"),
                                         e.getRequiredProperty("common.service.errors.security.scope-error-message"));
@@ -184,7 +184,7 @@ public class WebSecurityConfig
                     oauth2
                     .authenticationEntryPoint((request, response, exception) -> {
                         var customErrorResponse =
-                                responseFactory.getErrorResponse(
+                                responseFactory.error(
                                         HttpStatus.UNAUTHORIZED,
                                         e.getRequiredProperty("common.service.errors.security.invalid-jwt"),
                                         exception.getMessage());
@@ -196,7 +196,7 @@ public class WebSecurityConfig
                         response.setStatus(customErrorResponse.getStatusCode().value());
                     })
                     .accessDeniedHandler((request, response, authException) -> {
-                        var customErrorResponse = responseFactory.getErrorResponse(
+                        var customErrorResponse = responseFactory.error(
                                 HttpStatus.FORBIDDEN,
                                 e.getRequiredProperty("common.service.errors.security.not-allowed"),
                                 e.getRequiredProperty("common.service.errors.security.not-allowed-desc"));

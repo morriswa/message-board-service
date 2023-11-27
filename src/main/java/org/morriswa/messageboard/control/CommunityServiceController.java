@@ -1,10 +1,12 @@
 package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
+import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController @CrossOrigin
@@ -36,7 +37,7 @@ public class CommunityServiceController {
                                              @RequestBody CreateCommunityRequestBody request) throws Exception {
         this.community.createNewCommunity(jwt, request);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.community.messages.post"));
     }
@@ -45,7 +46,7 @@ public class CommunityServiceController {
     public ResponseEntity<?> getAllCommunityInformation(@RequestParam String communityLocator) throws Exception {
         CommunityResponse response = this.community.getAllCommunityInfo(communityLocator);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("community.service.endpoints.community.messages.get"),
                 response);
@@ -53,12 +54,10 @@ public class CommunityServiceController {
 
     @PatchMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> updateCommunityInformation(JwtAuthenticationToken token,
-                                                        @RequestParam Long communityId,
-                                                        @RequestParam Optional<String> communityRef,
-                                                        @RequestParam Optional<String> communityDisplayName) throws Exception {
-        community.updateCommunityAttributes(token, communityId, communityRef, communityDisplayName);
+                                                        @RequestBody UpdateCommunityRequest request) throws Exception {
+        community.updateCommunityAttributes(token, request);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.community.messages.patch"));
     }
@@ -67,9 +66,9 @@ public class CommunityServiceController {
     public ResponseEntity<?> updateCommunityBanner(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId,
                                              @RequestPart MultipartFile image) throws Exception {
-        this.community.updateCommunityBanner(jwt, image, communityId);
+        this.community.updateCommunityResource(jwt, image, communityId, CommunityResourceType.BANNER);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.update-community-banner.messages.post"));
     }
@@ -78,9 +77,9 @@ public class CommunityServiceController {
     public ResponseEntity<?> updateCommunityIcon(JwtAuthenticationToken jwt,
                                                  @PathVariable Long communityId,
                                                  @RequestPart("image") MultipartFile file) throws Exception {
-        this.community.updateCommunityIcon(jwt, file, communityId);
+        this.community.updateCommunityResource(jwt, file, communityId, CommunityResourceType.ICON);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.update-community-icon.messages.post"));
     }
@@ -90,7 +89,7 @@ public class CommunityServiceController {
                                            @PathVariable Long communityId) throws Exception {
         var membership = this.community.getCommunityMembershipInfo(jwt, communityId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("community.service.endpoints.community-membership.messages.get"),
                 membership);
@@ -101,7 +100,7 @@ public class CommunityServiceController {
                                              @PathVariable Long communityId) throws Exception {
         this.community.joinCommunity(jwt, communityId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.community-membership.messages.post"));
     }
@@ -111,7 +110,7 @@ public class CommunityServiceController {
                                                  @PathVariable Long communityId) throws Exception {
         this.community.leaveCommunity(jwt, communityId);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.community-membership.messages.delete"));
     }
@@ -120,7 +119,7 @@ public class CommunityServiceController {
     public ResponseEntity<?> getUsersCommunities(JwtAuthenticationToken jwtAuthenticationToken) throws Exception {
         List<CommunityResponse> communities = this.community.getAllUsersCommunities(jwtAuthenticationToken);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.get-users-communities.messages.get"),
             communities);
@@ -130,7 +129,7 @@ public class CommunityServiceController {
     public ResponseEntity<?> findCommunities(@RequestParam String searchText) {
         List<CommunityResponse> communities = this.community.searchForCommunities(searchText);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("community.service.endpoints.search-communities.messages.get"),
                 communities);
@@ -143,7 +142,7 @@ public class CommunityServiceController {
                                                                   @RequestParam ModerationLevel promote) throws Exception {
         this.community.updateCommunityMemberModerationLevel(token, communityId, userId, promote);
 
-        return responseFactory.getResponse(
+        return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("community.service.endpoints.community-moderation.messages.patch"));
     }

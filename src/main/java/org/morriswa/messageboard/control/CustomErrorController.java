@@ -26,6 +26,6 @@ public class CustomErrorController implements ErrorController
     @RequestMapping(path = "${common.service.endpoints.error.path}")
     public ResponseEntity<?> ohNoErr404()
     {
-        return responseFactory.getErrorResponse(HttpStatus.NOT_FOUND, "404" ,errorMessage);
+        return responseFactory.error(HttpStatus.NOT_FOUND, "404" ,errorMessage);
     }
 }
