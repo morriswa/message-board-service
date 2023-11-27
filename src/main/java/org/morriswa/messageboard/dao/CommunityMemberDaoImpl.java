@@ -2,6 +2,7 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
@@ -76,7 +77,7 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
         Map<String, Object> params = new HashMap<>(){{
             put("communityId", newRelationship.getCommunityId());
             put("userId", newRelationship.getUserId());
-            put("moderationLevel", newRelationship.getModerationLevel());
+            put("moderationLevel", newRelationship.getModerationLevel().toString());
             put("standing", newRelationship.getCommunityStanding().toString());
         }};
 
@@ -109,7 +110,11 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
 
     @Override
     public CommunityMembership retrieveRelationship(UUID userId, Long communityId) {
-        final String query = "select user_id, community_id, standing from community_member where community_id=:communityId and user_id=:userId";
+        final String query = """
+            select *
+            from community_member
+            where community_id=:communityId and user_id=:userId
+        """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityId", communityId);
@@ -122,11 +127,29 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
                         true,
                         rs.getObject("user_id", UUID.class),
                         rs.getLong("community_id"),
-                        CommunityStanding.valueOf(rs.getString("standing"))
+                        CommunityStanding.valueOf(rs.getString("standing")),
+                        ModerationLevel.valueOf(rs.getString("moderation_level"))
                 );
             }
 
-            return new CommunityMembership(false, userId, communityId, null);
+            return new CommunityMembership(false, userId, communityId, null, null);
         });
+    }
+
+    @Override
+    public void updateCommunityMemberModerationLevel(UUID userId, Long communityId, ModerationLevel level) {
+        final String query = """
+            update community_member
+                set moderation_level = :level
+            where user_id = :userId and community_id = :communityId
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("communityId", communityId);
+            put("userId", userId);
+            put("level", level.toString());
+        }};
+
+        jdbc.update(query, params);
     }
 }

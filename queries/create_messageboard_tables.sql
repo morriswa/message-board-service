@@ -1,3 +1,4 @@
+
 create table user_profile (
     id uuid primary key,
     auth_zero_id varchar(100) unique not null,
@@ -34,7 +35,7 @@ create table community_member (
     id bigserial primary key,
     community_id bigint not null,
     user_id uuid not null,
-    moderation_level int not null,
+    moderation_level varchar(20) not null,
     standing varchar(20) not null,
     date_created timestamp with time zone not null,
     date_updated timestamp with time zone not null

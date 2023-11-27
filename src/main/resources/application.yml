@@ -136,6 +136,10 @@ community:
           get: Retrieved relationship info
           post: "You have successfully joined the requested community!"
           delete: "You have successfully left the requested community"
+      community-moderation:
+        path: community/{communityId}/mod
+        messages:
+          patch: You have successfully updated user's moderation status!
       update-community-banner:
         path: community/{communityId}/banner
         messages:

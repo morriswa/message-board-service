@@ -1,5 +1,7 @@
 package org.morriswa.messageboard.service;
 
+import org.morriswa.messageboard.enumerated.ModerationLevel;
+import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.model.CommunityResponse;
@@ -26,7 +28,7 @@ public interface CommunityService {
 
     void leaveCommunity(JwtAuthenticationToken token, Long communityId) throws Exception;
 
-    void verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws Exception;
+    void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception;
 
     void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws Exception;
 
@@ -37,4 +39,6 @@ public interface CommunityService {
     void updateCommunityAttributes(JwtAuthenticationToken token, Long communityId, Optional<String> communityRef, Optional<String> communityDisplayName) throws Exception;
 
     CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws Exception;
+
+    void updateCommunityMemberModerationLevel(JwtAuthenticationToken token, Long communityId, UUID userId, ModerationLevel level) throws Exception;
 }

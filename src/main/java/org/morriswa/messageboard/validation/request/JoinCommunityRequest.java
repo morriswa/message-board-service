@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
+import org.morriswa.messageboard.enumerated.ModerationLevel;
 
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public class JoinCommunityRequest {
     private UUID userId;
 
     @NotNull
-    private Integer moderationLevel;
+    private ModerationLevel moderationLevel;
 
     @NotNull
     private CommunityStanding communityStanding;
@@ -26,6 +27,6 @@ public class JoinCommunityRequest {
         this.userId = userId;
         this.communityId = communityId;
         this.communityStanding = CommunityStanding.HEALTHY;
-        this.moderationLevel = 0;
+        this.moderationLevel = ModerationLevel.NONE;
     }
 }

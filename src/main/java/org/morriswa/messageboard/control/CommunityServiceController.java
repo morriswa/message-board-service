@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.control;
 
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController @CrossOrigin
 @RequestMapping("${server.path}")
@@ -134,5 +136,16 @@ public class CommunityServiceController {
                 communities);
     }
 
+    @PatchMapping("${community.service.endpoints.community-moderation.path}")
+    public ResponseEntity<?> updateCommunityMemberModerationLevel(JwtAuthenticationToken token,
+                                                                  @PathVariable Long communityId,
+                                                                  @RequestParam UUID userId,
+                                                                  @RequestParam ModerationLevel promote) throws Exception {
+        this.community.updateCommunityMemberModerationLevel(token, communityId, userId, promote);
+
+        return responseFactory.getResponse(
+                HttpStatus.OK,
+                e.getRequiredProperty("community.service.endpoints.community-moderation.messages.patch"));
+    }
 
 }

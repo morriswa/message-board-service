@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
+import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
@@ -21,4 +22,6 @@ public interface CommunityMemberDao {
     void deleteRelationship(UUID userId, Long communityId);
 
     CommunityMembership retrieveRelationship(UUID userId, Long communityId);
+
+    void updateCommunityMemberModerationLevel(UUID userId, Long communityId, ModerationLevel level);
 }

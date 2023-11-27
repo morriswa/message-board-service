@@ -2,6 +2,7 @@ package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
+import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
@@ -62,8 +63,13 @@ public class CommunityServiceImpl implements CommunityService {
     public void updateCommunityIcon(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws Exception{
         var userId = userProfileService.authenticate(token);
 
-        verifyUserCanEditCommunityOrThrow(userId, communityId);
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community"),
+                                communityId)));
 
+        verifyUserCanEditCommunityOrThrow(userId, community);
         var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
 
         validator.validate(uploadImageRequest);
@@ -75,7 +81,13 @@ public class CommunityServiceImpl implements CommunityService {
     public void updateCommunityBanner(JwtAuthenticationToken token, MultipartFile image, Long communityId) throws Exception {
         var userId = userProfileService.authenticate(token);
 
-        verifyUserCanEditCommunityOrThrow(userId, communityId);
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community"),
+                                communityId)));
+
+        verifyUserCanEditCommunityOrThrow(userId, community);
 
         var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
 
@@ -170,12 +182,12 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void verifyUserCanEditCommunityOrThrow(UUID userId, Long communityId) throws Exception {
-        if (!communityDao.verifyUserCanEditCommunity(userId, communityId))
+    public void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception {
+        if (!userHasEditAccessInCommunity(community, userId))
             throw new BadRequestException(String.format(
                     e.getRequiredProperty("community.service.errors.user-cannot-edit"),
                     userId,
-                    communityId
+                    community.getCommunityId()
             ));
     }
 
@@ -187,13 +199,13 @@ public class CommunityServiceImpl implements CommunityService {
 
         var userId = userProfileService.authenticate(token);
 
-        verifyUserCanEditCommunityOrThrow(userId, communityId);
-
         var community = communityDao.findCommunity(communityId)
                 .orElseThrow(()->new BadRequestException(
                 String.format(
                         e.getRequiredProperty("community.service.errors.missing-community"),
                         communityId)));
+
+        verifyUserCanEditCommunityOrThrow(userId, community);
 
         if (communityRef.isPresent()) {
             var requestedRef = communityRef.get();
@@ -221,5 +233,44 @@ public class CommunityServiceImpl implements CommunityService {
         var userId = userProfileService.authenticate(jwt);
 
         return communityMemberDao.retrieveRelationship(userId, communityId);
+    }
+
+    @Override
+    public void updateCommunityMemberModerationLevel(JwtAuthenticationToken token, Long communityId, UUID userId, ModerationLevel level) throws Exception {
+        var requesterUserId = userProfileService.authenticate(token);
+
+        var communityInfo = communityDao
+                .findCommunity(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community-by-id"),
+                                communityId.toString())));
+
+        if (!userHasPromoteAccessInCommunity(communityInfo, requesterUserId))
+            throw new BadRequestException("NO");
+
+        communityMemberDao.updateCommunityMemberModerationLevel(userId, communityId, level);
+    }
+
+    private boolean userHasPromoteAccessInCommunity(Community community, UUID requesterUserId) {
+        if (community.getOwnerId().equals(requesterUserId)) return true;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
+
+        return false;
+    }
+
+    private boolean userHasEditAccessInCommunity(Community community, UUID requesterUserId) {
+        if (community.getOwnerId().equals(requesterUserId)) return true;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
+
+        return false;
     }
 }
