@@ -57,15 +57,13 @@ public class CommunityServiceImpl implements CommunityService {
             return;
 
         if (community.getOwnerId().equals(requestedUserId))
-            // TODO extern
-            throw new PermissionsException("Unable to change the Permissions of the Community Owner!");
+            throw new PermissionsException(e.getRequiredProperty("community.service.errors.edit-owner"));
 
         var requestedMembership =
                 communityMemberDao.retrieveRelationship(requestedUserId, community.getCommunityId());
 
         if (requestedMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
-            // TODO extern
-            throw new PermissionsException("Unable to change another Community Promoter's Permissions!");
+            throw new PermissionsException(e.getRequiredProperty("community.service.errors.edit-promoter"));
 
         var requesterMembership =
                 communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
@@ -73,8 +71,7 @@ public class CommunityServiceImpl implements CommunityService {
         if (requesterMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
             return;
 
-        // TODO extern
-        throw new PermissionsException("You do not have appropriate permissions to perform this action!");
+        throw new PermissionsException();
     }
 
     private boolean userIsCommunityOwner(Community community, UUID requesterUserId) {

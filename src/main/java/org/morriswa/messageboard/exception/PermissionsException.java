@@ -2,6 +2,7 @@ package org.morriswa.messageboard.exception;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,16 @@ import java.util.List;
 public class PermissionsException extends Exception {
 
     private final List<String> permissionViolations;
+
+
+    /**
+     * Creates a Permissions Exception when only one error needs to be returned
+     *
+     */
+    public PermissionsException() {
+        super();
+        this.permissionViolations = List.of();
+    }
 
     /**
      * Creates a Permissions Exception when only one error needs to be returned

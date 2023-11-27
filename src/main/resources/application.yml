@@ -72,7 +72,7 @@ common:
     errors:
       bad-datasource-config: "DATASOURCE COULD NOT BE CONFIGURED, PLEASE CHECK CONFIG <3"
       validation-exception-thrown: A validation exception has occurred!
-      permissions-exception-thrown: A permissions violation has occurred!
+      permissions-exception-thrown: "You do not have appropriate permissions to perform this action!"
       security:
         not-allowed: YOU SHALL NOT PASS!
         not-allowed-desc: The requested service requires authorization, which you didn't bother to provide
@@ -172,6 +172,8 @@ community:
       no-relation-found: You do not appear to be a part of this community!
       user-cannot-post: You are not authorized to post to this community!
       user-cannot-edit: "User %s was denied edit access to community #%s"
+      edit-owner: "Unable to modify the Permissions of the Community Owner!"
+      edit-promoter: "Unable to change another Community Promoter's Permissions!"
       bad-community-ref-length: "Bad L"
       bad-community-ref: Please only include lowercase letters, numbers, and hyphens!
         Additionally, your ref should not start or end with a hyphen, or start with a number. Thanks!
