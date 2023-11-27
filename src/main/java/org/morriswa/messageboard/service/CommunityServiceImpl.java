@@ -3,7 +3,9 @@ package org.morriswa.messageboard.service;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
 import org.morriswa.messageboard.enumerated.CommunityResourceType;
+import org.morriswa.messageboard.enumerated.CommunityStanding;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
+import org.morriswa.messageboard.exception.PermissionsException;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
@@ -50,26 +52,29 @@ public class CommunityServiceImpl implements CommunityService {
         this.resources = resources;
     }
 
-    private boolean userHasPromoteAccessInCommunity(Community community, UUID requesterUserId) {
-        if (community.getOwnerId().equals(requesterUserId)) return true;
+    private void userCanPromoteOrThrow(Community community, UUID requesterUserId, UUID requestedUserId) throws PermissionsException {
+        if (community.getOwnerId().equals(requesterUserId))
+            return;
+
+        if (community.getOwnerId().equals(requestedUserId))
+            // TODO extern
+            throw new PermissionsException("Unable to change the Permissions of the Community Owner!");
+
+        var requestedMembership =
+                communityMemberDao.retrieveRelationship(requestedUserId, community.getCommunityId());
+
+        if (requestedMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
+            // TODO extern
+            throw new PermissionsException("Unable to change another Community Promoter's Permissions!");
 
         var requesterMembership =
                 communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
 
-        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
+        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
+            return;
 
-        return false;
-    }
-
-    private boolean userHasEditAccessInCommunity(Community community, UUID requesterUserId) {
-        if (community.getOwnerId().equals(requesterUserId)) return true;
-
-        var requesterMembership =
-                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
-
-        if (requesterMembership.getModerationLevel().weight > ModerationLevel.PROMOTE_MOD.weight) return true;
-
-        return false;
+        // TODO extern
+        throw new PermissionsException("You do not have appropriate permissions to perform this action!");
     }
 
     private boolean userIsCommunityOwner(Community community, UUID requesterUserId) {
@@ -79,25 +84,51 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws Exception {
-        if (!communityDao.verifyUserCanPostInCommunity(userId, communityId))
-            throw new BadRequestException(
-                    e.getRequiredProperty("community.service.errors.user-cannot-post")
-            );
+
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()-> new BadRequestException(
+                    String.format(e.getRequiredProperty("community.service.errors.missing-community-by-id"),
+                    communityId)
+                ));
+
+        if (community.getOwnerId().equals(userId)) return;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+
+        if (!requesterMembership.isExists())
+            throw new PermissionsException(
+                    e.getRequiredProperty("community.service.errors.no-relation-found"));
+
+        if (requesterMembership.getStanding().equals(CommunityStanding.HEALTHY))
+            return;
+
+        throw new PermissionsException(
+                e.getRequiredProperty("community.service.errors.user-cannot-post"));
     }
 
     @Override
     public void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception {
-        if (!userHasEditAccessInCommunity(community, userId))
-            throw new BadRequestException(String.format(
-                    e.getRequiredProperty("community.service.errors.user-cannot-edit"),
-                    userId,
-                    community.getCommunityId()
-            ));
+
+        if (community.getOwnerId().equals(userId)) return;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.EDIT_MOD.weight)
+            return;
+
+        throw new PermissionsException(
+                String.format(
+                e.getRequiredProperty("community.service.errors.user-cannot-edit"),
+                userId,
+                community.getCommunityId()
+        ));
     }
 
-    private void verifyUserIsOwnerOrThrow(UUID requesterId, Community community) throws BadRequestException {
+    private void verifyUserIsOwnerOrThrow(UUID requesterId, Community community) throws Exception {
         if (!userIsCommunityOwner(community, requesterId))
-            throw new BadRequestException(String.format(
+            throw new PermissionsException(String.format(
                     e.getRequiredProperty("community.service.errors.user-cannot-edit"),
                     requesterId,
                     community.getCommunityId()
@@ -256,8 +287,7 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community-by-id"),
                                 communityId.toString())));
 
-        if (!userHasPromoteAccessInCommunity(communityInfo, requesterUserId))
-            throw new BadRequestException("NO");
+        userCanPromoteOrThrow(communityInfo, requesterUserId, userId);
 
         communityMemberDao.updateCommunityMemberModerationLevel(userId, communityId, level);
     }

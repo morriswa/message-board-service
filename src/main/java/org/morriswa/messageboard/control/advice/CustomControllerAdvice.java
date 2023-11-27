@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.NoRegisteredUserException;
+import org.morriswa.messageboard.exception.PermissionsException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,21 @@ public class CustomControllerAdvice {
                 e.getClass().getSimpleName(),
                 env.getRequiredProperty("common.service.errors.validation-exception-thrown"),
                 v.getValidationErrors());
+    }
+
+    @ExceptionHandler({ // catch...
+            PermissionsException.class // Custom Validator exceptions
+    }) // in this controller...
+    public ResponseEntity<?> handlePermissionExceptions(Exception e, WebRequest r) {
+
+        PermissionsException v = (PermissionsException) e;
+
+        // and assume user fault [403]
+        return responseFactory.error(
+                HttpStatus.FORBIDDEN,
+                e.getClass().getSimpleName(),
+                env.getRequiredProperty("common.service.errors.permissions-exception-thrown"),
+                v.getPermissionViolations());
     }
 
 }

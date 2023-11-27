@@ -72,6 +72,7 @@ common:
     errors:
       bad-datasource-config: "DATASOURCE COULD NOT BE CONFIGURED, PLEASE CHECK CONFIG <3"
       validation-exception-thrown: A validation exception has occurred!
+      permissions-exception-thrown: A permissions violation has occurred!
       security:
         not-allowed: YOU SHALL NOT PASS!
         not-allowed-desc: The requested service requires authorization, which you didn't bother to provide
