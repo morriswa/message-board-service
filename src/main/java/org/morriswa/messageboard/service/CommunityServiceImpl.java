@@ -110,7 +110,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         var newCommunity = new CreateCommunityRequest(request.communityRef(), request.communityName(), userId);
 
-        this.validator.validateBeanOrThrow(newCommunity);
+        validator.validate(newCommunity);
 
         communityDao.createNewCommunity(newCommunity);
     }

@@ -2,6 +2,7 @@ package org.morriswa.messageboard.validation;
 
 import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +69,28 @@ public class CommunityServiceValidator extends BasicBeanValidator {
                     ERROR_BAD_COMMUNITY_DISPLAY_NAME_LENGTH));
 
         return errors;
+    }
+
+    public void validate(CreateCommunityRequest request) throws ValidationException {
+        var errors = new ArrayList<ValidationException.ValidationError>();
+
+        if (request.getCommunityLocator() == null) {
+            var error = new ValidationException.ValidationError("communityId", null, "Community ID must not be null!!!");
+            errors.add(error);
+        } else {
+            var locatorErrors = generateLocatorErrors(request.getCommunityLocator());
+            errors.addAll(locatorErrors);
+        }
+
+        if (request.getCommunityDisplayName() == null) {
+            var error = new ValidationException.ValidationError("communityDisplayName", null, "Community Display Name must not be null!!!");
+            errors.add(error);
+        } else {
+            var communityDisplayNameErrors = generateDisplayNameErrors(request.getCommunityDisplayName());
+            errors.addAll(communityDisplayNameErrors);
+        }
+
+        if (!errors.isEmpty()) throw new ValidationException(errors);
     }
 
     public void validate(UpdateCommunityRequest request) throws ValidationException {

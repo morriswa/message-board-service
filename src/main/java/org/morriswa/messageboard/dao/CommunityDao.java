@@ -20,7 +20,7 @@ public interface CommunityDao {
 
     List<Community> findAllCommunities(UUID userId);
 
-    void createNewCommunity(CreateCommunityRequest newCommunity);
+    void createNewCommunity(CreateCommunityRequest newCommunity) throws ValidationException;
 
     void updateCommunityAttrs(Long communityId, @Valid UpdateCommunityRequest attributesToUpdate) throws ValidationException;
 

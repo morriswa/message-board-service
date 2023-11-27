@@ -97,7 +97,7 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public void createNewCommunity(CreateCommunityRequest newCreateCommunityRequest) {
+    public void createNewCommunity(CreateCommunityRequest newCreateCommunityRequest) throws ValidationException {
         final String query = """
             insert into community(id, community_ref, display_name, owner, date_created)
             values (DEFAULT, :communityRef, :displayName, :owner, current_timestamp)
@@ -109,11 +109,23 @@ public class CommunityDaoImpl implements CommunityDao {
             put("owner", newCreateCommunityRequest.getCommunityOwnerUserId());
         }};
 
-
         try {
             jdbc.update(query, params);
+        } catch (DuplicateKeyException dke) {
+            if (dke.getMostSpecificCause().getMessage()
+                    .contains("duplicate key value violates unique constraint \"community_community_ref_key\"")) {
+
+                throw new ValidationException("communityLocator",
+                        newCreateCommunityRequest.getCommunityLocator(),
+                        environment.getRequiredProperty("community.service.errors.ref-already-taken")
+                );
+            }
+
+            log.error("encountered unexpected error ", dke);
+            throw new RuntimeException(dke);
         } catch (Exception ee) {
-            log.error("encountered error ", ee);
+            log.error("encountered unexpected error ", ee);
+            throw new RuntimeException(ee);
         }
     }
 
