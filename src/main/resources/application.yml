@@ -160,7 +160,7 @@ community:
     rules:
       banner-scale-factor: 0.5
       display-name:
-        min-length: 0
+        min-length: 3
         max-length: 100
       community-ref:
         regexp: "^[a-z][a-z0-9-]*[a-z0-9]$"

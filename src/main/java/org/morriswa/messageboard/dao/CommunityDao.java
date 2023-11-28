@@ -23,11 +23,4 @@ public interface CommunityDao {
     void createNewCommunity(CreateCommunityRequest newCommunity) throws ValidationException;
 
     void updateCommunityAttrs(Long communityId, @Valid UpdateCommunityRequest attributesToUpdate) throws ValidationException;
-
-    @Deprecated void setCommunityLocator(Long communityId, String ref);
-
-    @Deprecated void setCommunityDisplayName(Long communityId, String displayName);
-
-    @Deprecated boolean verifyUserCanPostInCommunity(UUID userId, Long communityId);
-
 }

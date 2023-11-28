@@ -3,9 +3,8 @@ package org.morriswa.messageboard.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
 import org.morriswa.messageboard.model.Community;
-import org.morriswa.messageboard.enumerated.CommunityStanding;
+import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DuplicateKeyException;
@@ -155,71 +154,6 @@ public class CommunityDaoImpl implements CommunityDao {
             log.error("encountered unexpected error!!!", dke);
             throw dke;
         }
-    }
-
-    @Override
-    public void setCommunityLocator(Long communityId, String communityLocator) {
-        final String query = """
-            update community
-                set community_ref = :communityLocator
-            where id = :id
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("id", communityId);
-            put("communityLocator",communityLocator);
-        }};
-
-        jdbc.update(query, params);
-    }
-
-    @Override
-    public void setCommunityDisplayName(Long communityId, String displayName) {
-        final String query = """
-            update community
-                set display_name = :displayName
-            where id = :id
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("id", communityId);
-            put("displayName",displayName);
-        }};
-
-        jdbc.update(query, params);
-    }
-
-    @Override
-    public boolean verifyUserCanPostInCommunity(UUID userId, Long communityId) {
-        final String query = """            
-            select DISTINCT
-                    co.owner ownerId,
-                    cm.user_id userId,
-                    cm.standing standing
-                from community_member cm
-                full join community co
-                    on co.id=cm.community_id
-                where (cm.user_id=:userId or co.owner=:userId) and co.id=:communityId
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("userId", userId);
-            put("communityId", communityId);
-        }};
-
-        return Boolean.TRUE.equals(jdbc.query(query, params, rs -> {
-            if (rs.next()) {
-                var owner = rs.getObject("ownerId", UUID.class);
-                if (owner.equals(userId)) return true;
-
-                var user = rs.getObject("userId", UUID.class);
-                var standing = CommunityStanding.valueOf(rs.getString("standing"));
-
-                if (user.equals(userId) && standing.equals(CommunityStanding.HEALTHY)) return true;
-            }
-
-            return false;
-        }));
     }
 
     @Override
