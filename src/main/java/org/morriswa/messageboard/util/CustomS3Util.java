@@ -15,4 +15,6 @@ public interface CustomS3Util {
     boolean doesObjectExist(String pathToCheck);
 
     URL getSignedObjectUrl(String pathToObject, int expirationMinutes);
+
+    void deleteObject(String pathToObject);
 }

@@ -2,6 +2,7 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.dao.model.PostWithCommunityInfoRow;
 import org.morriswa.messageboard.enumerated.Vote;
 import org.morriswa.messageboard.validation.request.CreatePostRequest;
 import org.morriswa.messageboard.model.Post;
@@ -112,27 +113,30 @@ public class PostDaoImpl implements PostDao{
     }
 
     @Override
-    public List<Post> getMostRecent() {
+    public List<PostWithCommunityInfoRow> getMostRecent() {
         return this.getMostRecent(10);
     }
 
     @Override
-    public List<Post> getMostRecent(int endSlice) {
+    public List<PostWithCommunityInfoRow> getMostRecent(int endSlice) {
         final String query = """
              select
-                posts.id id,
-                posts.user_id user_id,
-                users.display_name display_name,
-                posts.community_id community_id,
-                posts.caption caption,
-                posts.description description,
-                posts.content_type content_type,
-                posts.date_created date_created,
-                posts.resource_id resource_id,
-                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id) AS vote_count
-            from user_post posts
-                join user_profile users on posts.user_id = users.id
-            order by posts.date_created desc limit :endSlice
+                    posts.id id,
+                    posts.user_id user_id,
+                    users.display_name display_name,
+                    posts.community_id community_id,
+                    com.community_ref community_locator,
+                    com.display_name community_display_name,
+                    posts.caption caption,
+                    posts.description description,
+                    posts.content_type content_type,
+                    posts.date_created date_created,
+                    posts.resource_id resource_id,
+                    coalesce((select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id),0) AS vote_count
+                from user_post posts
+                        join user_profile users on posts.user_id = users.id
+                        join community com on posts.community_id = com.id
+                order by posts.date_created desc limit :endSlice
         """;
 
         Map<String, Object> params = new HashMap<>(){{
@@ -140,14 +144,16 @@ public class PostDaoImpl implements PostDao{
         }};
 
         return jdbcTemplate.query(query, params, rs -> {
-            List<Post> createPostRequests = new ArrayList<>();
+            List<PostWithCommunityInfoRow> createPostRequests = new ArrayList<>();
 
             while (rs.next()) {
-                createPostRequests.add(new Post(
+                createPostRequests.add(new PostWithCommunityInfoRow(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
                         rs.getString("display_name"),
                         rs.getLong("community_id"),
+                        rs.getString("community_locator"),
+                        rs.getString("community_display_name"),
                         rs.getString("caption"),
                         rs.getString("description"),
                         PostContentType.valueOf(rs.getString("content_type")),
@@ -162,21 +168,24 @@ public class PostDaoImpl implements PostDao{
     }
 
     @Override
-    public List<Post> getMostRecent(int startSlice, int endSlice) {
+    public List<PostWithCommunityInfoRow> getMostRecent(int startSlice, int endSlice) {
         final String query = """
-            select
-                posts.id id,
-                posts.user_id user_id,
-                users.display_name display_name,
-                posts.community_id community_id,
-                posts.caption caption,
-                posts.description description,
-                posts.content_type content_type,
-                posts.date_created date_created,
-                posts.resource_id resource_id,
-                (select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id) AS vote_count
-            from user_post posts
-                join user_profile users on posts.user_id = users.id
+             select
+                    posts.id id,
+                    posts.user_id user_id,
+                    users.display_name display_name,
+                    posts.community_id community_id,
+                    com.community_ref community_locator,
+                    com.display_name community_display_name,
+                    posts.caption caption,
+                    posts.description description,
+                    posts.content_type content_type,
+                    posts.date_created date_created,
+                    posts.resource_id resource_id,
+                    coalesce((select sum(pvt.vote_value) from post_vote pvt where pvt.post_id=posts.id),0) AS vote_count
+                from user_post posts
+                        join user_profile users on posts.user_id = users.id
+                        join community com on posts.community_id = com.id
             order by posts.date_created desc limit :selects offset :startSlice
         """;
 
@@ -186,14 +195,16 @@ public class PostDaoImpl implements PostDao{
         }};
 
         return jdbcTemplate.query(query, params, rs -> {
-            List<Post> createPostRequests = new ArrayList<>();
+            List<PostWithCommunityInfoRow> createPostRequests = new ArrayList<>();
 
             while (rs.next()) {
-                createPostRequests.add(new Post(
+                createPostRequests.add(new PostWithCommunityInfoRow(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
                         rs.getString("display_name"),
                         rs.getLong("community_id"),
+                        rs.getString("community_locator"),
+                        rs.getString("community_display_name"),
                         rs.getString("caption"),
                         rs.getString("description"),
                         PostContentType.valueOf(rs.getString("content_type")),
@@ -289,5 +300,19 @@ public class PostDaoImpl implements PostDao{
         Objects.requireNonNull(newCount);
 
         return newCount.orElse(0);
+    }
+
+    @Override
+    public void deletePost(Long postId) {
+        final String query = """
+            delete from user_post
+            where id=:id
+        """;
+
+        final Map<String, Object> params = new HashMap<>(){{
+            put("id", postId);
+        }};
+
+        jdbcTemplate.update(query, params);
     }
 }

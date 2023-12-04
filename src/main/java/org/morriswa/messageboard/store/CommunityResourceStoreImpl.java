@@ -11,6 +11,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URL;
 
 @Component @Slf4j
 public class CommunityResourceStoreImpl implements CommunityResourceStore {
@@ -76,5 +77,14 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
         }
 
         return response;
+    }
+
+    @Override
+    public URL getCommunityIcon(Long communityId) {
+        if (s3Store.doesObjectExist(COMMUNITY_ICON_PATH+communityId)) {
+            return s3Store.getSignedObjectUrl(COMMUNITY_ICON_PATH+communityId, SIGNED_URL_EXPIRATION_MINUTES);
+        } else {
+            return s3Store.getSignedObjectUrl(DEFAULT_COMMUNITY_ICON, SIGNED_URL_EXPIRATION_MINUTES);
+        }
     }
 }

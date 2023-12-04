@@ -4,6 +4,7 @@ import com.amazonaws.HttpMethod;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -107,5 +108,10 @@ public class CustomS3UtilImpl implements CustomS3Util {
                         pathToObject)
                         .withMethod(HttpMethod.GET)
                         .withExpiration(expiration));
+    }
+
+    @Override
+    public void deleteObject(String pathToObject) {
+        s3.deleteObject(new DeleteObjectRequest(ACTIVE_BUCKET, pathToObject));
     }
 }

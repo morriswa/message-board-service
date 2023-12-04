@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
+import org.morriswa.messageboard.model.Resource;
 import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3Util;
 import org.morriswa.messageboard.util.ImageScaleUtil;
@@ -54,5 +55,13 @@ public class ContentStoreImpl implements ContentStore {
     @Override
     public URL retrieveImageResource(UUID resourceId) {
         return s3Store.getSignedObjectUrl(POST_RESOURCE_IMAGE_STORE+resourceId, SIGNED_URL_EXPIRATION_MINUTES);
+    }
+
+    @Override
+    public void deleteResource(Resource resource) {
+        var resources = resource.getResources();
+        resources.forEach(rs->{
+            s3Store.deleteObject(POST_RESOURCE_IMAGE_STORE+rs);
+        });
     }
 }

@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URL;
 import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.blobTypeToImageFormat;
@@ -104,8 +105,7 @@ public class CommunityServiceImpl implements CommunityService {
                 e.getRequiredProperty("community.service.errors.user-cannot-post"));
     }
 
-    @Override
-    public void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception {
+    private void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception {
 
         if (community.getOwnerId().equals(userId)) return;
 
@@ -121,6 +121,30 @@ public class CommunityServiceImpl implements CommunityService {
                 userId,
                 community.getCommunityId()
         ));
+    }
+
+    @Override
+    public void verifyUserCanModerateContentOrThrow(UUID userId, Long communityId) throws Exception {
+
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community"),
+                                communityId)));
+
+        if (community.getOwnerId().equals(userId)) return;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.CONTENT_MOD.weight)
+            return;
+
+        throw new PermissionsException(
+                String.format(
+                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
+                        userId, communityId)
+        );
     }
 
     private void verifyUserIsOwnerOrThrow(UUID requesterId, Community community) throws Exception {
@@ -287,6 +311,11 @@ public class CommunityServiceImpl implements CommunityService {
         userCanPromoteOrThrow(communityInfo, requesterUserId, userId);
 
         communityMemberDao.updateCommunityMemberModerationLevel(userId, communityId, level);
+    }
+
+    @Override
+    public URL getIcon(Long communityId) {
+        return resources.getCommunityIcon(communityId);
     }
 
 }

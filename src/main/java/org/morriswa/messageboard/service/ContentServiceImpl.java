@@ -5,6 +5,7 @@ import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.PostDraftDao;
 import org.morriswa.messageboard.dao.ResourceDao;
+import org.morriswa.messageboard.dao.model.PostWithCommunityInfoRow;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.model.*;
@@ -71,7 +72,10 @@ public class ContentServiceImpl implements ContentService {
 
         var post = posts.findPostByPostId(postId)
                 .orElseThrow(()->new BadRequestException(
-                        e.getRequiredProperty("content.service.errors.cannot-locate-post")
+                        String.format(
+                                e.getRequiredProperty("content.service.errors.cannot-locate-post"),
+                                postId
+                        )
                 ));
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
@@ -92,7 +96,10 @@ public class ContentServiceImpl implements ContentService {
 
         var post = posts.findPostByPostId(postId)
                 .orElseThrow(()->new BadRequestException(
-                        e.getRequiredProperty("content.service.errors.cannot-locate-post")
+                        String.format(
+                                e.getRequiredProperty("content.service.errors.cannot-locate-post"),
+                                postId
+                        )
                 ));
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
@@ -114,7 +121,10 @@ public class ContentServiceImpl implements ContentService {
 
         var post = posts.findPostByPostId(postId)
                 .orElseThrow(()->new BadRequestException(
-                        e.getRequiredProperty("content.service.errors.cannot-locate-post")
+                        String.format(
+                                e.getRequiredProperty("content.service.errors.cannot-locate-post"),
+                                postId
+                        )
                 ));
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
@@ -128,7 +138,10 @@ public class ContentServiceImpl implements ContentService {
 
         var post = posts.findPostByPostId(postId)
                 .orElseThrow(()->new BadRequestException(
-                        e.getRequiredProperty("content.service.errors.cannot-locate-post")
+                        String.format(
+                                e.getRequiredProperty("content.service.errors.cannot-locate-post"),
+                                postId
+                        )
                 ));
 
         communityService.verifyUserCanPostInCommunityOrThrow(userId, post.getCommunityId());
@@ -160,7 +173,7 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public void addContentToDraft(JwtAuthenticationToken token, UUID draftId, MultipartFile file) throws Exception {
-        var userId = userProfileService.authenticate(token);
+        userProfileService.authenticate(token);
 
         Objects.requireNonNull(file.getContentType());
 
@@ -274,10 +287,18 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public PostCommentResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception {
         var post = posts.findPostByPostId(postId)
-                .orElseThrow(()->new BadRequestException("TODO Bad!"));
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("content.service.errors.cannot-locate-post"),
+                                postId
+                        )
+                ));
 
         var resourceEntity = resources.findResourceByResourceId(post.getResourceId())
-                .orElseThrow();
+                .orElseThrow(()->new ResourceException(
+                        String.format(
+                                e.getRequiredProperty("content.service.errors.cannot-locate-resource"),
+                                post.getResourceId())));
         var resourceUrls = new ArrayList<URL>(){{
             for (UUID resource : resourceEntity.getResources())
                 add(content.retrieveImageResource(resource));
@@ -286,6 +307,35 @@ public class ContentServiceImpl implements ContentService {
         var comments = getComments(post.getPostId());
 
         return new PostCommentResponse(post, resourceUrls, comments);
+    }
+
+    @Override
+    public void deletePost(JwtAuthenticationToken token, Long postId) throws Exception {
+        var userId = userProfileService.authenticate(token);
+
+        var post = posts.findPostByPostId(postId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                    e.getRequiredProperty("content.service.errors.cannot-locate-post"),
+                                postId
+                        )
+                ));
+
+        communityService.verifyUserCanModerateContentOrThrow(userId, post.getCommunityId());
+
+        var resource = resources.findResourceByResourceId(post.getResourceId())
+                .orElseThrow(()->new ResourceException(String.format(
+                        e.getRequiredProperty("content.service.errors.cannot-locate-resource"),
+                        post.getResourceId())));
+
+        // delete all stored content
+        content.deleteResource(resource);
+        // delete resource
+        resources.deleteResource(post.getResourceId());
+        // delete all post comments (inc. subcomments)
+        comments.deletePostComments(post.getPostId());
+        // finally delete post
+        posts.deletePost(post.getPostId());
     }
 
     @Override
@@ -328,17 +378,18 @@ public class ContentServiceImpl implements ContentService {
 
         var response = new ArrayList<PostCommunityResponse>(10);
 
-        for (Post post : recentPosts) {
-            var community = communityService.getAllCommunityInfo(post.getCommunityId());
-            var resourceEntity = resources.findResourceByResourceId(post.getResourceId())
+        for (PostWithCommunityInfoRow post : recentPosts) {
+//            var community = communityService.getAllCommunityInfo(post.getCommunityId());
+            var resourceEntity = resources.findResourceByResourceId(post.resourceId())
                     .orElseThrow();
 
+            var communityIcon = communityService.getIcon(post.communityId());
             var resourceUrls = new ArrayList<URL>(){{
                 for (UUID resource : resourceEntity.getResources())
                     add(content.retrieveImageResource(resource));
             }};
 
-            response.add(new PostCommunityResponse(post, community, resourceUrls));
+            response.add(new PostCommunityResponse(post, resourceUrls, communityIcon));
         }
 
         return response;

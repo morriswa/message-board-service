@@ -38,4 +38,6 @@ public interface ContentService {
     void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws Exception;
 
     PostCommentResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception;
+
+    void deletePost(JwtAuthenticationToken token, Long postId) throws Exception;
 }

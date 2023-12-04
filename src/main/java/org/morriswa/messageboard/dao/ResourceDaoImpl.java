@@ -107,4 +107,18 @@ public class ResourceDaoImpl implements ResourceDao{
 
         jdbc.update(query,params);
     }
+
+    @Override
+    public void deleteResource(UUID resourceId) {
+        final String query = """
+            delete from post_resource
+            where id=:id
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("id", resourceId);
+        }};
+
+        jdbc.update(query, params);
+    }
 }

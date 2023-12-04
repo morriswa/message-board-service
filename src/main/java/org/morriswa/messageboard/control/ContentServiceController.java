@@ -200,4 +200,14 @@ public class ContentServiceController {
                 e.getRequiredProperty("content.service.endpoints.comment-voting.messages.post"),
                 count);
     }
+
+    @DeleteMapping("${content.service.endpoints.post-details.path}")
+    public ResponseEntity<?> deletePost(JwtAuthenticationToken token,
+                                        @PathVariable Long postId) throws Exception {
+        contentService.deletePost(token, postId);
+
+        return responseFactory.build(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.post-details.messages.delete"));
+    }
 }

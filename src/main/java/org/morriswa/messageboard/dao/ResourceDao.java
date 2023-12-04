@@ -12,4 +12,6 @@ public interface ResourceDao {
     void createNewPostResource(Resource newResource) throws ResourceException;
 
     void updateResource(Resource resource) throws ResourceException;
+
+    void deleteResource(UUID resourceId);
 }
