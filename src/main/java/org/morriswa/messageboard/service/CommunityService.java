@@ -2,6 +2,7 @@ package org.morriswa.messageboard.service;
 
 import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
+import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.model.CommunityResponse;
@@ -44,4 +45,6 @@ public interface CommunityService {
     void updateCommunityMemberModerationLevel(JwtAuthenticationToken token, Long communityId, UUID userId, ModerationLevel level) throws Exception;
 
     URL getIcon(Long communityId);
+
+    void verifyUserCanModerateCommentsOrThrow(UUID userId, Long communityId) throws BadRequestException, Exception;
 }

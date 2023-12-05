@@ -143,7 +143,30 @@ public class CommunityServiceImpl implements CommunityService {
         throw new PermissionsException(
                 String.format(
                         e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
-                        userId, communityId)
+                        userId, ModerationLevel.CONTENT_MOD, communityId)
+        );
+    }
+
+    @Override
+    public void verifyUserCanModerateCommentsOrThrow(UUID userId, Long communityId) throws Exception {
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community"),
+                                communityId)));
+
+        if (community.getOwnerId().equals(userId)) return;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.COMMENT_MOD.weight)
+            return;
+
+        throw new PermissionsException(
+                String.format(
+                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
+                        userId, ModerationLevel.COMMENT_MOD, communityId)
         );
     }
 
@@ -317,5 +340,6 @@ public class CommunityServiceImpl implements CommunityService {
     public URL getIcon(Long communityId) {
         return resources.getCommunityIcon(communityId);
     }
+
 
 }

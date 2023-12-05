@@ -185,4 +185,19 @@ public class CommentDaoImpl implements CommentDao{
         jdbc.update(deleteQuery, params);
     }
 
+    @Override
+    public void deletePostComment(Long postId, Long commentId) {
+        final String deleteQuery = """
+            delete from post_comment
+            where post_id=:postId and id=:commentId
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("postId", postId);
+            put("commentId",commentId);
+        }};
+
+        jdbc.update(deleteQuery, params);
+    }
+
 }

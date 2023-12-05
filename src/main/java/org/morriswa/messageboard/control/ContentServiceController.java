@@ -157,7 +157,7 @@ public class ContentServiceController {
     @PostMapping("${content.service.endpoints.sub-comment.path}")
     public ResponseEntity<?> leaveSubComment(JwtAuthenticationToken token,
                                                 @PathVariable Long postId,
-                                                @PathVariable Long parentId,
+                                                @PathVariable("commentId") Long parentId,
                                                 @RequestBody String comment) throws Exception {
 
         contentService.leaveComment(token, postId, parentId, comment);
@@ -179,7 +179,7 @@ public class ContentServiceController {
 
     @GetMapping("${content.service.endpoints.sub-comment.path}")
     public ResponseEntity<?> getSubComments(@PathVariable Long postId,
-                                            @PathVariable Long parentId) throws BadRequestException {
+                                            @PathVariable("commentId") Long parentId) throws BadRequestException {
         var comments = contentService.getComments(postId, parentId);
 
         return responseFactory.build(
@@ -209,5 +209,16 @@ public class ContentServiceController {
         return responseFactory.build(
                 HttpStatus.OK,
                 e.getRequiredProperty("content.service.endpoints.post-details.messages.delete"));
+    }
+
+    @DeleteMapping("${content.service.endpoints.sub-comment.path}")
+    public ResponseEntity<?> deletePost(JwtAuthenticationToken token,
+                                        @PathVariable Long postId,
+                                        @PathVariable Long commentId) throws Exception {
+        contentService.deleteComment(token, postId,commentId);
+
+        return responseFactory.build(
+                HttpStatus.OK,
+                e.getRequiredProperty("content.service.endpoints.sub-comment.messages.delete"));
     }
 }

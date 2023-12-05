@@ -40,4 +40,6 @@ public interface ContentService {
     PostCommentResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception;
 
     void deletePost(JwtAuthenticationToken token, Long postId) throws Exception;
+
+    void deleteComment(JwtAuthenticationToken token, Long postId, Long commentId) throws Exception;
 }

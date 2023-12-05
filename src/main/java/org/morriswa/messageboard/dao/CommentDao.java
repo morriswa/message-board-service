@@ -17,4 +17,6 @@ public interface CommentDao {
     int vote(UUID userId, Long postId, Long commentId, Vote vote);
 
     void deletePostComments(Long postId);
+
+    void deletePostComment(Long postId, Long commentId);
 }

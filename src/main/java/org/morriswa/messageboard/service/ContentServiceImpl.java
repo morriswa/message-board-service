@@ -339,6 +339,24 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
+    public void deleteComment(JwtAuthenticationToken token, Long postId, Long commentId) throws Exception {
+        var userId = userProfileService.authenticate(token);
+
+        var post = posts.findPostByPostId(postId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("content.service.errors.cannot-locate-post"),
+                                postId
+                        )
+                ));
+
+        communityService.verifyUserCanModerateCommentsOrThrow(userId, post.getCommunityId());
+
+        // delete requested post comment
+        comments.deletePostComment(post.getPostId(), commentId);
+    }
+
+    @Override
     public List<Comment> getComments(Long postId) {
         return comments.findComments(postId);
     }
