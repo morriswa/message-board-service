@@ -141,6 +141,7 @@ community:
         path: community/{communityId}/mod
         messages:
           patch: You have successfully updated user's moderation status!
+          get: Successfully retrieved Community's Moderators
       update-community-banner:
         path: community/{communityId}/banner
         messages:
@@ -170,6 +171,7 @@ community:
       missing-community: "We could not locate a community named %s :("
       missing-community-by-id: "We could not locate a community #%s :("
       no-relation-found: You do not appear to be a part of this community!
+      user-not-in-community: This user does not appear to be part of your community, cannot promote!
       user-cannot-post: You are not authorized to post to this community!
       user-cannot-edit: "User %s was denied edit access to community #%s"
       user-cannot-moderate: "User %s was denied %s access to community #%s"

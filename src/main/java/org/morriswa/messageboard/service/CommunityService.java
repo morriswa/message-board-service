@@ -5,6 +5,7 @@ import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.model.CommunityModeratorResponse;
 import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -47,4 +48,6 @@ public interface CommunityService {
     URL getIcon(Long communityId);
 
     void verifyUserCanModerateCommentsOrThrow(UUID userId, Long communityId) throws BadRequestException, Exception;
+
+    List<CommunityModeratorResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception;
 }

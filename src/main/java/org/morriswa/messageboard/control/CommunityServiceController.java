@@ -84,6 +84,17 @@ public class CommunityServiceController {
             e.getRequiredProperty("community.service.endpoints.update-community-icon.messages.post"));
     }
 
+    @GetMapping("${community.service.endpoints.community-moderation.path}")
+    public ResponseEntity<?> getAllCommunityModerators(JwtAuthenticationToken jwt,
+                                                        @PathVariable Long communityId) throws Exception {
+        var mods = this.community.getCommunityModerators(jwt, communityId);
+
+        return responseFactory.build(
+                HttpStatus.OK,
+                e.getRequiredProperty("community.service.endpoints.community-moderation.messages.get"),
+                mods);
+    }
+
     @GetMapping("${community.service.endpoints.community-membership.path}")
     public ResponseEntity<?> getCommunityMembershipInfo(JwtAuthenticationToken jwt,
                                            @PathVariable Long communityId) throws Exception {

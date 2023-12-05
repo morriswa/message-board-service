@@ -6,6 +6,7 @@ import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
+import org.morriswa.messageboard.model.CommunityModeratorResponse;
 import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -151,5 +152,40 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
         }};
 
         jdbc.update(query, params);
+    }
+
+    @Override
+    public List<CommunityModeratorResponse> getCommunityModerators(Long communityId) {
+        final String query = """
+            select
+                up.id user_id,
+                up.display_name display_name,
+                up.email email,
+                cm.moderation_level moderation_level
+            from community_member cm
+                join user_profile up
+                on cm.user_id=up.id
+            where community_id=:communityId
+                and moderation_level != 'NONE'
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("communityId", communityId);
+        }};
+
+        return jdbc.query(query, params, rs -> {
+            List<CommunityModeratorResponse> response = new ArrayList<>();
+
+            while (rs.next()) {
+                response.add(new CommunityModeratorResponse(
+                        rs.getObject("user_id", UUID.class),
+                        rs.getString("display_name"),
+                        rs.getString("email"),
+                        ModerationLevel.valueOf(rs.getString("moderation_level"))
+                ));
+            }
+
+            return response;
+        });
     }
 }

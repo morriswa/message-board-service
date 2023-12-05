@@ -12,6 +12,7 @@ import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
+import org.morriswa.messageboard.model.CommunityModeratorResponse;
 import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
@@ -168,6 +169,47 @@ public class CommunityServiceImpl implements CommunityService {
                         e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
                         userId, ModerationLevel.COMMENT_MOD, communityId)
         );
+    }
+
+    private void verifyUserIsPromoterOrThrow(UUID userId, Community community) throws PermissionsException {
+        if (community.getOwnerId().equals(userId)) return;
+
+        var requesterMembership =
+                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+
+        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
+            return;
+
+        throw new PermissionsException(
+                String.format(
+                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
+                        userId, ModerationLevel.PROMOTE_MOD, community.getCommunityId())
+        );
+    }
+
+    @Override
+    public List<CommunityModeratorResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception {
+
+        var userId = userProfileService.authenticate(jwt);
+
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community"),
+                                communityId)));
+
+        verifyUserIsPromoterOrThrow(userId, community);
+
+        var members = communityMemberDao.getCommunityModerators(communityId);
+
+        var membersResponse = new ArrayList<CommunityModeratorResponse>(members.size());
+        members.forEach(member->{
+            var profileImage = userProfileService.getProfileImage(member.getUserId());
+            member.setProfileImage(profileImage);
+            membersResponse.add(member);
+        });
+
+        return membersResponse;
     }
 
     private void verifyUserIsOwnerOrThrow(UUID requesterId, Community community) throws Exception {
@@ -333,13 +375,15 @@ public class CommunityServiceImpl implements CommunityService {
 
         userCanPromoteOrThrow(communityInfo, requesterUserId, userId);
 
-        communityMemberDao.updateCommunityMemberModerationLevel(userId, communityId, level);
+        if (!communityMemberDao.relationshipExists(userId, communityInfo.getCommunityId()))
+            throw new BadRequestException(e.getRequiredProperty("community.service.errors.user-not-in-community"));
+
+        communityMemberDao.updateCommunityMemberModerationLevel(userId, communityInfo.getCommunityId(), level);
     }
 
     @Override
     public URL getIcon(Long communityId) {
         return resources.getCommunityIcon(communityId);
     }
-
 
 }

@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMembership;
 import org.morriswa.messageboard.model.CommunityMember;
+import org.morriswa.messageboard.model.CommunityModeratorResponse;
 import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,4 +26,6 @@ public interface CommunityMemberDao {
     CommunityMembership retrieveRelationship(UUID userId, Long communityId);
 
     void updateCommunityMemberModerationLevel(UUID userId, Long communityId, ModerationLevel level);
+
+    List<CommunityModeratorResponse> getCommunityModerators(Long communityId);
 }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -138,6 +139,11 @@ public class UserProfileServiceImpl implements UserProfileService {
         var userId = authenticate(jwt);
 
         userProfileDao.setUIProfile(userId, request);
+    }
+
+    @Override
+    public URL getProfileImage(UUID userId) {
+        return profileImageStoreImpl.getSignedUserProfileImage(userId);
     }
 
 }
