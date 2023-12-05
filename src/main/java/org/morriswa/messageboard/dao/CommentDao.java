@@ -18,5 +18,5 @@ public interface CommentDao {
 
     void deletePostComments(Long postId);
 
-    void deletePostComment(Long postId, Long commentId);
+    void deleteCommentAndChildren(Long postId, Long commentId);
 }

@@ -352,8 +352,8 @@ public class ContentServiceImpl implements ContentService {
 
         communityService.verifyUserCanModerateCommentsOrThrow(userId, post.getCommunityId());
 
-        // delete requested post comment
-        comments.deletePostComment(post.getPostId(), commentId);
+        // delete requested post comment and children
+        comments.deleteCommentAndChildren(post.getPostId(), commentId);
     }
 
     @Override

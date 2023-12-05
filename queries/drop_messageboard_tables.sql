@@ -8,4 +8,3 @@ drop table post_comment;
 drop table post_vote;
 drop table comment_vote;
 drop table post_session;
-

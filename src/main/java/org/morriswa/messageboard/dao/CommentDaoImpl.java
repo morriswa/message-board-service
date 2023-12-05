@@ -17,6 +17,16 @@ import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
 public class CommentDaoImpl implements CommentDao{
     private final NamedParameterJdbcTemplate jdbc;
 
+    private static final String GET_SUBCOMMENTS_SQL = """
+        select id from post_comment
+        where post_id=:postId and parent_id=:commentId
+    """;
+
+    private static final String BATCH_DEL_COMMENTS_SQL = """
+        delete from post_comment
+        where post_id=:postId and id in (:marked_for_del)
+    """;
+
     @Autowired
     public CommentDaoImpl(NamedParameterJdbcTemplate jdbc) {
         this.jdbc = jdbc;
@@ -185,12 +195,48 @@ public class CommentDaoImpl implements CommentDao{
         jdbc.update(deleteQuery, params);
     }
 
+
+
+    private void deleteSubcomments(Long postId, Long commentId) {
+
+        Map<String, Object> subcommentParams = new HashMap<>(){{
+            put("postId", postId);
+            put("commentId",commentId);
+        }};
+
+        List<Long> subcomments = jdbc.query(GET_SUBCOMMENTS_SQL, subcommentParams, rs -> {
+            List<Long> ids = new ArrayList<>();
+
+            while (rs.next())
+                ids.add(rs.getLong("id"));
+
+            return ids;
+        });
+
+        assert subcomments != null;
+        // if no subcomments are retrieved, continue with next iteration
+        if (subcomments.isEmpty()) return;
+
+        Map<String, Object> batchDeleteParams = new HashMap<>(){{
+            put("postId", postId);
+            // mark all subcomments for deletion
+            put("marked_for_del",subcomments);
+        }};
+
+        jdbc.update(BATCH_DEL_COMMENTS_SQL, batchDeleteParams);
+
+        // recursively continue deleting subcomments
+        subcomments.forEach(subCommentFound->deleteSubcomments(postId, subCommentFound));
+    }
+
     @Override
-    public void deletePostComment(Long postId, Long commentId) {
+    public void deleteCommentAndChildren(Long postId, Long commentId) {
+        deleteSubcomments(postId, commentId);
+
         final String deleteQuery = """
-            delete from post_comment
-            where post_id=:postId and id=:commentId
-        """;
+                delete from post_comment
+                where post_id=:postId and id=:commentId
+            """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("postId", postId);
