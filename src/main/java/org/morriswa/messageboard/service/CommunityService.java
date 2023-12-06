@@ -3,9 +3,9 @@ package org.morriswa.messageboard.service;
 import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.CommunityMembership;
+import org.morriswa.messageboard.model.CommunityWatcherStatus;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
-import org.morriswa.messageboard.model.CommunityModeratorResponse;
+import org.morriswa.messageboard.model.CommunityMemberResponse;
 import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -41,7 +41,7 @@ public interface CommunityService {
 
     List<CommunityResponse> searchForCommunities(String searchText);
 
-    CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws Exception;
+    CommunityWatcherStatus getWatcherStatus(JwtAuthenticationToken jwt, Long communityId) throws Exception;
 
     void updateCommunityMemberModerationLevel(JwtAuthenticationToken token, Long communityId, UUID userId, ModerationLevel level) throws Exception;
 
@@ -49,5 +49,7 @@ public interface CommunityService {
 
     void verifyUserCanModerateCommentsOrThrow(UUID userId, Long communityId) throws BadRequestException, Exception;
 
-    List<CommunityModeratorResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception;
+    List<CommunityMemberResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception;
+
+    CommunityMemberResponse getCommunityMemberInfo(JwtAuthenticationToken jwt, Long communityId, UUID userId) throws Exception;
 }

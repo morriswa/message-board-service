@@ -95,35 +95,47 @@ public class CommunityServiceController {
                 mods);
     }
 
-    @GetMapping("${community.service.endpoints.community-membership.path}")
-    public ResponseEntity<?> getCommunityMembershipInfo(JwtAuthenticationToken jwt,
-                                           @PathVariable Long communityId) throws Exception {
-        var membership = this.community.getCommunityMembershipInfo(jwt, communityId);
+    @GetMapping("${community.service.endpoints.member-details.path}")
+    public ResponseEntity<?> getMemberInfo(JwtAuthenticationToken jwt,
+                                                        @PathVariable Long communityId,
+                                                        @PathVariable UUID userId) throws Exception {
+        var membership = this.community.getCommunityMemberInfo(jwt, communityId, userId);
 
         return responseFactory.build(
                 HttpStatus.OK,
-                e.getRequiredProperty("community.service.endpoints.community-membership.messages.get"),
+                e.getRequiredProperty("community.service.endpoints.member-details.messages.get"),
                 membership);
     }
 
-    @PostMapping("${community.service.endpoints.community-membership.path}")
+    @GetMapping("${community.service.endpoints.watcher.path}")
+    public ResponseEntity<?> getWatcherStatus(JwtAuthenticationToken jwt,
+                                           @PathVariable Long communityId) throws Exception {
+        var membership = this.community.getWatcherStatus(jwt, communityId);
+
+        return responseFactory.build(
+                HttpStatus.OK,
+                e.getRequiredProperty("community.service.endpoints.watcher.messages.get"),
+                membership);
+    }
+
+    @PostMapping("${community.service.endpoints.member.path}")
     public ResponseEntity<?> joinCommunity(JwtAuthenticationToken jwt,
                                              @PathVariable Long communityId) throws Exception {
         this.community.joinCommunity(jwt, communityId);
 
         return responseFactory.build(
             HttpStatus.OK,
-            e.getRequiredProperty("community.service.endpoints.community-membership.messages.post"));
+            e.getRequiredProperty("community.service.endpoints.member.messages.post"));
     }
 
-    @DeleteMapping("${community.service.endpoints.community-membership.path}")
+    @DeleteMapping("${community.service.endpoints.member.path}")
     public ResponseEntity<?> leaveCommunity(JwtAuthenticationToken jwt,
                                                  @PathVariable Long communityId) throws Exception {
         this.community.leaveCommunity(jwt, communityId);
 
         return responseFactory.build(
             HttpStatus.OK,
-            e.getRequiredProperty("community.service.endpoints.community-membership.messages.delete"));
+            e.getRequiredProperty("community.service.endpoints.member.messages.delete"));
     }
 
     @GetMapping("${community.service.endpoints.get-users-communities.path}")

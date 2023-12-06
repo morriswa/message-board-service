@@ -2,11 +2,10 @@ package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.enumerated.ModerationLevel;
-import org.morriswa.messageboard.model.CommunityMembership;
-import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
-import org.morriswa.messageboard.model.CommunityModeratorResponse;
+import org.morriswa.messageboard.enumerated.ModerationLevel;
+import org.morriswa.messageboard.model.CommunityMember;
+import org.morriswa.messageboard.model.CommunityWatcherStatus;
 import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -29,7 +28,20 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
 
     @Override
     public Optional<CommunityMember> findCommunityMemberByUserIdAndCommunityId(UUID userId, Long communityId) {
-        final String query = "select * from community_member where user_id=:userId and community_id=:communityId";
+        final String query = """
+             select
+                            up.id user_id,
+                            up.display_name display_name,
+                            up.email email,
+                            cm.moderation_level moderation_level,
+                            cm.standing standing,
+                            cm.date_created joined,
+                            cm.date_updated updated
+                        from community_member cm
+                            join user_profile up
+                            on cm.user_id=up.id
+                        where cm.community_id=:communityId and cm.user_id=:userId
+            """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("communityId", communityId);
@@ -40,13 +52,13 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
             if (rs.next()) {
                 return Optional.of(
                         new CommunityMember(
-                                rs.getLong("id"),
-                                rs.getLong("community_id"),
                                 rs.getObject("user_id", UUID.class),
-                                rs.getInt("moderation_level"),
+                                rs.getString("display_name"),
+                                rs.getString("email"),
+                                ModerationLevel.valueOf(rs.getString("moderation_level")),
                                 CommunityStanding.valueOf(rs.getString("standing")),
-                                timestampToGregorian(rs.getTimestamp("date_updated")),
-                                timestampToGregorian(rs.getTimestamp("date_created"))));
+                                timestampToGregorian(rs.getTimestamp("updated")),
+                                timestampToGregorian(rs.getTimestamp("joined"))));
             }
 
             return Optional.empty();
@@ -110,7 +122,7 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
     }
 
     @Override
-    public CommunityMembership retrieveRelationship(UUID userId, Long communityId) {
+    public CommunityWatcherStatus getWatcherStatus(UUID userId, Long communityId) {
         final String query = """
             select *
             from community_member
@@ -124,7 +136,7 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
 
         return jdbc.query(query, params, rs -> {
             if (rs.next()) {
-                return new CommunityMembership(
+                return new CommunityWatcherStatus(
                         true,
                         rs.getObject("user_id", UUID.class),
                         rs.getLong("community_id"),
@@ -133,7 +145,7 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
                 );
             }
 
-            return new CommunityMembership(false, userId, communityId, null, null);
+            return new CommunityWatcherStatus(false, userId, communityId, null, null);
         });
     }
 
@@ -155,13 +167,16 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
     }
 
     @Override
-    public List<CommunityModeratorResponse> getCommunityModerators(Long communityId) {
+    public List<CommunityMember> getCommunityModerators(Long communityId) {
         final String query = """
             select
                 up.id user_id,
                 up.display_name display_name,
                 up.email email,
-                cm.moderation_level moderation_level
+                cm.moderation_level moderation_level,
+                cm.standing standing,
+                cm.date_created joined,
+                cm.date_updated updated
             from community_member cm
                 join user_profile up
                 on cm.user_id=up.id
@@ -174,18 +189,22 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
         }};
 
         return jdbc.query(query, params, rs -> {
-            List<CommunityModeratorResponse> response = new ArrayList<>();
+            List<CommunityMember> response = new ArrayList<>();
 
             while (rs.next()) {
-                response.add(new CommunityModeratorResponse(
+                response.add(new CommunityMember(
                         rs.getObject("user_id", UUID.class),
                         rs.getString("display_name"),
                         rs.getString("email"),
-                        ModerationLevel.valueOf(rs.getString("moderation_level"))
+                        ModerationLevel.valueOf(rs.getString("moderation_level")),
+                        CommunityStanding.valueOf(rs.getString("standing")),
+                        timestampToGregorian(rs.getTimestamp("updated")),
+                        timestampToGregorian(rs.getTimestamp("joined"))
                 ));
             }
 
             return response;
         });
     }
+
 }

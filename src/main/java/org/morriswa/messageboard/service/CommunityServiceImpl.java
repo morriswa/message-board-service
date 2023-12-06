@@ -6,13 +6,13 @@ import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.exception.PermissionsException;
-import org.morriswa.messageboard.model.CommunityMembership;
+import org.morriswa.messageboard.model.CommunityWatcherStatus;
 import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
-import org.morriswa.messageboard.model.CommunityModeratorResponse;
+import org.morriswa.messageboard.model.CommunityMemberResponse;
 import org.morriswa.messageboard.validation.request.UploadImageRequest;
 import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
@@ -62,15 +62,15 @@ public class CommunityServiceImpl implements CommunityService {
             throw new PermissionsException(e.getRequiredProperty("community.service.errors.edit-owner"));
 
         var requestedMembership =
-                communityMemberDao.retrieveRelationship(requestedUserId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(requestedUserId, community.getCommunityId());
 
-        if (requestedMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
+        if (requestedMembership.moderationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
             throw new PermissionsException(e.getRequiredProperty("community.service.errors.edit-promoter"));
 
         var requesterMembership =
-                communityMemberDao.retrieveRelationship(requesterUserId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(requesterUserId, community.getCommunityId());
 
-        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
+        if (requesterMembership.moderationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
             return;
 
         throw new PermissionsException();
@@ -93,13 +93,13 @@ public class CommunityServiceImpl implements CommunityService {
         if (community.getOwnerId().equals(userId)) return;
 
         var requesterMembership =
-                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
 
-        if (!requesterMembership.isExists())
+        if (!requesterMembership.exists())
             throw new PermissionsException(
                     e.getRequiredProperty("community.service.errors.no-relation-found"));
 
-        if (requesterMembership.getStanding().equals(CommunityStanding.HEALTHY))
+        if (requesterMembership.standing().equals(CommunityStanding.HEALTHY))
             return;
 
         throw new PermissionsException(
@@ -111,9 +111,9 @@ public class CommunityServiceImpl implements CommunityService {
         if (community.getOwnerId().equals(userId)) return;
 
         var requesterMembership =
-                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
 
-        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.EDIT_MOD.weight)
+        if (requesterMembership.moderationLevel().weight >= ModerationLevel.EDIT_MOD.weight)
             return;
 
         throw new PermissionsException(
@@ -136,15 +136,31 @@ public class CommunityServiceImpl implements CommunityService {
         if (community.getOwnerId().equals(userId)) return;
 
         var requesterMembership =
-                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
 
-        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.CONTENT_MOD.weight)
+        if (requesterMembership.moderationLevel().weight >= ModerationLevel.CONTENT_MOD.weight)
             return;
 
         throw new PermissionsException(
                 String.format(
                         e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
                         userId, ModerationLevel.CONTENT_MOD, communityId)
+        );
+    }
+
+    private void verifyUserCanModerateCommentsOrThrow(UUID userId, Community community) throws Exception {
+        if (community.getOwnerId().equals(userId)) return;
+
+        var requesterMembership =
+                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
+
+        if (requesterMembership.moderationLevel().weight >= ModerationLevel.COMMENT_MOD.weight)
+            return;
+
+        throw new PermissionsException(
+                String.format(
+                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
+                        userId, ModerationLevel.COMMENT_MOD, community.getCommunityId())
         );
     }
 
@@ -156,28 +172,16 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityId)));
 
-        if (community.getOwnerId().equals(userId)) return;
-
-        var requesterMembership =
-                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
-
-        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.COMMENT_MOD.weight)
-            return;
-
-        throw new PermissionsException(
-                String.format(
-                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
-                        userId, ModerationLevel.COMMENT_MOD, communityId)
-        );
+        verifyUserCanModerateCommentsOrThrow(userId, community);
     }
 
     private void verifyUserIsPromoterOrThrow(UUID userId, Community community) throws PermissionsException {
         if (community.getOwnerId().equals(userId)) return;
 
         var requesterMembership =
-                communityMemberDao.retrieveRelationship(userId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
 
-        if (requesterMembership.getModerationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
+        if (requesterMembership.moderationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
             return;
 
         throw new PermissionsException(
@@ -188,7 +192,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<CommunityModeratorResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception {
+    public List<CommunityMemberResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception {
 
         var userId = userProfileService.authenticate(jwt);
 
@@ -198,18 +202,49 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityId)));
 
-        verifyUserIsPromoterOrThrow(userId, community);
+        verifyUserCanModerateCommentsOrThrow(userId, community);
 
         var members = communityMemberDao.getCommunityModerators(communityId);
 
-        var membersResponse = new ArrayList<CommunityModeratorResponse>(members.size());
+        var membersResponse = new ArrayList<CommunityMemberResponse>(members.size());
         members.forEach(member->{
             var profileImage = userProfileService.getProfileImage(member.getUserId());
-            member.setProfileImage(profileImage);
-            membersResponse.add(member);
+            membersResponse.add(CommunityMemberResponse.buildMemberResponse(member, profileImage));
         });
 
         return membersResponse;
+    }
+
+    @Override
+    public CommunityMemberResponse getCommunityMemberInfo(JwtAuthenticationToken jwt, Long communityId, UUID userId) throws Exception {
+        var requester = userProfileService.authenticate(jwt);
+
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()->new BadRequestException(
+                        String.format(
+                                e.getRequiredProperty("community.service.errors.missing-community"),
+                                communityId)));
+
+        verifyUserCanModerateCommentsOrThrow(requester, community);
+
+        CommunityMemberResponse member;
+        if (userId.equals(community.getOwnerId()))
+        {
+            var profile = userProfileService.getUserProfile(userId);
+            member = CommunityMemberResponse.buildOwnerResponse(profile);
+        }
+        else
+        {
+            var profile = communityMemberDao.findCommunityMemberByUserIdAndCommunityId(userId, communityId)
+                    .orElseThrow(() -> new BadRequestException(
+                            e.getRequiredProperty("community.service.errors.user-not-in-community")
+                    ));
+
+            var profileImage = userProfileService.getProfileImage(profile.getUserId());
+
+            member = CommunityMemberResponse.buildMemberResponse(profile, profileImage);
+        }
+        return member;
     }
 
     private void verifyUserIsOwnerOrThrow(UUID requesterId, Community community) throws Exception {
@@ -356,10 +391,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 
     @Override
-    public CommunityMembership getCommunityMembershipInfo(JwtAuthenticationToken jwt, Long communityId) throws Exception {
+    public CommunityWatcherStatus getWatcherStatus(JwtAuthenticationToken jwt, Long communityId) throws Exception {
         var userId = userProfileService.authenticate(jwt);
 
-        return communityMemberDao.retrieveRelationship(userId, communityId);
+        return communityMemberDao.getWatcherStatus(userId, communityId);
     }
 
     @Override
