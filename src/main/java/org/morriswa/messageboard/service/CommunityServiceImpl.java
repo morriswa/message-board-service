@@ -118,8 +118,9 @@ public class CommunityServiceImpl implements CommunityService {
 
         throw new PermissionsException(
                 String.format(
-                e.getRequiredProperty("community.service.errors.user-cannot-edit"),
+                e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
                 userId,
+                ModerationLevel.EDIT_MOD,
                 community.getCommunityId()
         ));
     }

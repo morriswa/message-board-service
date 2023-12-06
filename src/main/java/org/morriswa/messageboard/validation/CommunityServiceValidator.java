@@ -28,7 +28,8 @@ public class CommunityServiceValidator extends BasicBeanValidator {
 
         // defn error messages
         final String ERROR_BAD_COMMUNITY_REF_LENGTH =
-                e.getRequiredProperty("community.service.errors.bad-community-ref-length");
+                String.format(e.getRequiredProperty("community.service.errors.bad-community-ref-length"),
+                MIN_LENGTH, MAX_LENGTH);
         final String ERROR_BAD_COMMUNITY_REF =
                 e.getRequiredProperty("community.service.errors.bad-community-ref");
 
@@ -58,7 +59,9 @@ public class CommunityServiceValidator extends BasicBeanValidator {
 
         // defn errors
         final String ERROR_BAD_COMMUNITY_DISPLAY_NAME_LENGTH =
-                e.getRequiredProperty("community.service.errors.bad-community-display-name-length");
+                String.format(
+                e.getRequiredProperty("community.service.errors.bad-community-display-name-length"),
+                MIN_LENGTH, MAX_LENGTH);
 
         var errors = new ArrayList<ValidationException.ValidationError>();
 

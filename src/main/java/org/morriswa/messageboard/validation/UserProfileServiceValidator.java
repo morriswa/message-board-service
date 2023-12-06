@@ -28,13 +28,18 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
         final int MAX_LENGTH = Integer.parseInt(
                 e.getRequiredProperty("user-profile.service.rules.display-name.max-length"));;
 
+        final String BAD_DISPLAY_NAME_LENGTH_MESSAGE = String.format(
+                e.getRequiredProperty("user-profile.service.errors.bad-display-name-length"),
+                MIN_LENGTH, MAX_LENGTH
+        );
+
         var errors = new ArrayList<ValidationException.ValidationError>();
 
         if (MIN_LENGTH>displayName.length()||displayName.length()>MAX_LENGTH)
             errors.add(new ValidationException.ValidationError(
                     "displayName",
-                    displayName,
-                    e.getRequiredProperty("user-profile.service.errors.bad-display-name-length")));
+                    displayName, BAD_DISPLAY_NAME_LENGTH_MESSAGE
+                    ));
 
         if (!Pattern.matches(DISPLAY_NAME_REGEXP, displayName))
             errors.add(new ValidationException.ValidationError(

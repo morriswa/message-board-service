@@ -235,8 +235,11 @@ public class UserEndpointsTest extends MessageboardTest {
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
-                        e.getRequiredProperty("user-profile.service.errors.bad-display-name-length")
-                )))
+                        String.format(
+                                e.getRequiredProperty("user-profile.service.errors.bad-display-name-length"),
+                                e.getRequiredProperty("user-profile.service.rules.display-name.min-length"),
+                                e.getRequiredProperty("user-profile.service.rules.display-name.max-length")
+                ))))
                 .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(
                         longDisplayName
                 )))
@@ -262,8 +265,11 @@ public class UserEndpointsTest extends MessageboardTest {
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
                 )))
                 .andExpect(jsonPath("$.stack[0].message", Matchers.is(
-                        e.getRequiredProperty("user-profile.service.errors.bad-display-name-length")
-                )))
+                        String.format(
+                        e.getRequiredProperty("user-profile.service.errors.bad-display-name-length"),
+                        e.getRequiredProperty("user-profile.service.rules.display-name.min-length"),
+                        e.getRequiredProperty("user-profile.service.rules.display-name.max-length")
+                ))))
                 .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(
                         shortDisplayName
                 )))

@@ -114,7 +114,7 @@ user-profile:
       missing-user: No registered user
       display-name-already-exists: Could not update your display name because another user is already registered with that display name!
       bad-display-name: "Alphanumeric chars, underscores, hyphens and periods only please."
-      bad-display-name-length: "Display Name should be at least 3 and not more than 30 chars."
+      bad-display-name-length: "Display Name should be at least %s and not more than %s chars."
     rules:
       display-name:
         regexp: "^[A-Za-z0-9._-]*$"
@@ -176,27 +176,22 @@ community:
         max-length: 30
     errors:
       missing-community: "We could not locate a community named %s :("
-      missing-community-by-id: "We could not locate a community #%s :("
+      missing-community-by-id: "We could not locate a community # %s :("
       no-relation-found: You do not appear to be a part of this community!
       user-not-in-community: This user does not appear to be part of your community.
       user-cannot-post: You are not authorized to post to this community!
-      user-cannot-edit: "User %s was denied edit access to community #%s"
-      user-cannot-moderate: "User %s was denied %s access to community #%s"
+      user-cannot-moderate: "User %s was denied %s access to community # %s"
       edit-owner: "Unable to modify the Permissions of the Community Owner!"
       edit-promoter: "Unable to change another Community Promoter's Permissions!"
-      bad-community-ref-length: "Bad L"
+      bad-community-ref-length: "Community locator must be between %s and %s characters!"
       bad-community-ref: Please only include lowercase letters, numbers, and hyphens!
         Additionally, your ref should not start or end with a hyphen, or start with a number. Thanks!
-      bad-community-display-name-length: "Bad Display  Name L"
+      bad-community-display-name-length: "Community display name must be between %s and %s characters!"
       ref-already-taken: "bad kitty that name is already taken"
 
 content:
   service:
     endpoints:
-      create-post:
-        path: community/{communityId}/post
-        messages:
-          post: Good!
       community-feed:
         path: community/{communityId}/feed
         messages:
@@ -229,7 +224,7 @@ content:
         path: draft/{draftId}
         messages:
           get: FINE!
-          post: FINE!
+          post: Successfully created post, congrats!
           patch: FINE!
       add-content:
         path: draft/{draftId}/add
