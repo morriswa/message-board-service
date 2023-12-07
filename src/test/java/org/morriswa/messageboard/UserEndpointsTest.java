@@ -2,10 +2,12 @@ package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.enumerated.UserRole;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Optional;
@@ -86,8 +88,8 @@ public class UserEndpointsTest extends MessageboardTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .post(targetUrl)
                         .header("Authorization",DEFAULT_TOKEN)
-                        .param("email", TEST_EMAIL)
-                        .param("displayName",DISPLAY_NAME))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(new NewUserRequestBody(DISPLAY_NAME, "2000-1-1"))))
 
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.message", Matchers.notNullValue()))
@@ -106,8 +108,9 @@ public class UserEndpointsTest extends MessageboardTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                     .post(targetUrl)
                         .header("Authorization",DEFAULT_TOKEN)
-                        .param("email", TEST_EMAIL)
-                        .param("displayName",badDisplayName))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(new NewUserRequestBody(badDisplayName, "2000-1-1"))))
+
 
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description", Matchers.is(
@@ -138,8 +141,9 @@ public class UserEndpointsTest extends MessageboardTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .post(targetUrl)
                         .header("Authorization",DEFAULT_TOKEN)
-                        .param("email",TEST_EMAIL)
-                        .param("displayName",DISPLAY_NAME))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(new NewUserRequestBody(DISPLAY_NAME, "2000-1-1"))))
+
 
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description", Matchers.is(

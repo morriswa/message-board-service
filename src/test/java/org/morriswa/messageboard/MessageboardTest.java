@@ -1,5 +1,6 @@
 package org.morriswa.messageboard;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.morriswa.messageboard.config.TestConfig;
 import org.morriswa.messageboard.dao.*;
 import org.morriswa.messageboard.util.HttpResponseFactory;
@@ -10,8 +11,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
@@ -37,4 +36,10 @@ public class MessageboardTest {
     @MockBean protected ResourceDao resourceDao;
 
     @MockBean protected UserProfileDao userProfileDao;
+
+    final protected ObjectMapper om;
+
+    public MessageboardTest() {
+        om = new ObjectMapper();
+    }
 }
