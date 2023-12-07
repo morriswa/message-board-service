@@ -3,13 +3,15 @@ package org.morriswa.messageboard;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
+import org.morriswa.messageboard.enumerated.UserRole;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.User;
-import org.morriswa.messageboard.enumerated.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +38,20 @@ public class UserEndpointsTest extends MessageboardTest {
                 TEST_EMAIL,
                 DISPLAY_NAME,
                 UserRole.DEFAULT);
+    }
+
+    private String getMinimumAgeDate(int offsetYears) {
+        final int MINIMUM_AGE = Integer.parseInt(e.getRequiredProperty("common.minimum-age"));
+
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(
+                e.getRequiredProperty("common.date-format")
+        );
+
+        final LocalDate todaysDate = LocalDate.now();
+
+        final LocalDate offsetDate = todaysDate.minusYears(MINIMUM_AGE + offsetYears);
+
+        return offsetDate.format(format);
     }
 
     @Test
@@ -89,7 +105,7 @@ public class UserEndpointsTest extends MessageboardTest {
                         .post(targetUrl)
                         .header("Authorization",DEFAULT_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(new NewUserRequestBody(DISPLAY_NAME, "2000-1-1"))))
+                        .content(om.writeValueAsString(new NewUserRequestBody(DISPLAY_NAME, getMinimumAgeDate(2)))))
 
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.message", Matchers.notNullValue()))
@@ -122,6 +138,31 @@ public class UserEndpointsTest extends MessageboardTest {
                 .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(
                         badDisplayName
                 )))
+        ;
+    }
+
+    @Test
+    void testRegisterUserEndpointWithYoungBirthday() throws Exception {
+
+        final String targetUrl = String.format("/%s%s",
+                e.getRequiredProperty("server.path"),
+                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
+
+        final String date = getMinimumAgeDate(-1);
+
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .post(targetUrl)
+                        .header("Authorization",DEFAULT_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(new NewUserRequestBody("displayName", date))))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$.description",
+                        Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown")
+                )))
+                .andExpect(jsonPath("$.stack[0].message",
+                        Matchers.is(String.format(e.getRequiredProperty("user-profile.service.errors.too-young"),
+                                e.getRequiredProperty("common.minimum-age")))))
+                .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(date)))
         ;
     }
 

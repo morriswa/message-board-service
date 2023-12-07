@@ -61,6 +61,9 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
     }
 
     public void validate(NewUserRequestBody request) throws ValidationException {
+
+        final int MINIMUM_AGE = Integer.parseInt(e.getRequiredProperty("common.minimum-age"));
+
         var errors = new ArrayList<ValidationException.ValidationError>();
 
         errors.addAll(getErrorsDisplayName(request.displayName()));
@@ -69,15 +72,17 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
                 e.getRequiredProperty("common.date-format")
         );
 
+        final LocalDate todaysDate = LocalDate.now();
+        final LocalDate minimumDate = todaysDate.minusYears(MINIMUM_AGE);
+
         try {
-            LocalDate date = LocalDate.parse(request.birthdate(), format);
-            if (date.isAfter(LocalDate.parse(e.getRequiredProperty("common.youngest")
-                    ,format)))
+            LocalDate birthdate = LocalDate.parse(request.birthdate(), format);
+            if (birthdate.isAfter(minimumDate))
                 errors.add(new ValidationException.ValidationError(
                         "birthdate",
                         request.birthdate(),
                         String.format(e.getRequiredProperty("user-profile.service.errors.too-young"),
-                                e.getRequiredProperty("common.youngest"))));
+                                e.getRequiredProperty("common.minimum-age"))));
         } catch (DateTimeParseException dtpe) {
             errors.add(new ValidationException.ValidationError(
                     "birthdate",

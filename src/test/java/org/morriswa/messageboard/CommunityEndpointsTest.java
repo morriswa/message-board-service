@@ -89,7 +89,8 @@ public class CommunityEndpointsTest extends MessageboardTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(body)))
                 .andExpect(status().is(201))
-                .andExpect(jsonPath("$.message", Matchers.is(e.getRequiredProperty("community.service.endpoints.community.messages.post"))))
+                .andExpect(jsonPath("$.message",
+                        Matchers.is(e.getRequiredProperty("community.service.endpoints.community.messages.post"))))
         ;
     }
 
@@ -136,12 +137,14 @@ public class CommunityEndpointsTest extends MessageboardTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(body)))
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.description", Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
-                .andExpect(jsonPath("$.stack[0].message", Matchers.is(
-                        String.format(
-                        e.getRequiredProperty("community.service.errors.bad-community-ref-length"),
-                        e.getRequiredProperty("community.service.rules.community-ref.min-length"),
-                        e.getRequiredProperty("community.service.rules.community-ref.max-length"))
+                .andExpect(jsonPath("$.description",
+                        Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
+                .andExpect(jsonPath("$.stack[0].message",
+                        Matchers.is(
+                            String.format(
+                                e.getRequiredProperty("community.service.errors.bad-community-ref-length"),
+                                e.getRequiredProperty("community.service.rules.community-ref.min-length"),
+                                e.getRequiredProperty("community.service.rules.community-ref.max-length"))
                 )))
         ;
     }
@@ -190,7 +193,8 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
         when(userProfileService.authenticate(any())).thenReturn(ownerId);
 
-        when(communityRepo.findCommunity(any(Long.class))).thenReturn(Optional.of(new Community(1L, null, null, ownerId, null, 1)));
+        when(communityRepo.findCommunity(any(Long.class)))
+                .thenReturn(Optional.of(new Community(1L, null, null, ownerId, null, 1)));
 
         final var request = new UpdateCommunityRequest(
                 null,

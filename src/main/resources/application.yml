@@ -35,7 +35,7 @@ testing:
 
 common:
   date-format: yyyy-M-d
-  youngest: 2010-1-1
+  minimum-age: 13
   public: >
     /health
     /feed
@@ -118,7 +118,7 @@ user-profile:
       display-name-already-exists: Could not update your display name because another user is already registered with that display name!
       bad-display-name: "Alphanumeric chars, underscores, hyphens and periods only please."
       bad-display-name-length: "Display Name should be at least %s and not more than %s chars."
-      too-young: You must be born before %s to join :(
+      too-young: You must be at least %s years old to join :(
     rules:
       display-name:
         regexp: "^[A-Za-z0-9._-]*$"
