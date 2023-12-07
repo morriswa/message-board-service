@@ -58,7 +58,7 @@ public class CommunityServiceController {
         community.updateCommunityAttributes(token, request);
 
         return responseFactory.build(
-            HttpStatus.NO_CONTENT,
+            HttpStatus.OK,
             e.getRequiredProperty("community.service.endpoints.community.messages.patch"));
     }
 
