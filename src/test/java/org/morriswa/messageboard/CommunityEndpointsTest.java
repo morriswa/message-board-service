@@ -275,7 +275,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                         .header("Authorization", DEFAULT_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(request)))
-                .andExpect(status().is(204))
+                .andExpect(status().is(200))
                 .andExpect(jsonPath("$.message",
                         Matchers.is(e.getRequiredProperty("community.service.endpoints.community.messages.patch"))))
         ;
