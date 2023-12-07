@@ -38,7 +38,7 @@ public class CommunityServiceController {
         this.community.createNewCommunity(jwt, request);
 
         return responseFactory.build(
-            HttpStatus.OK,
+            HttpStatus.CREATED,
             e.getRequiredProperty("community.service.endpoints.community.messages.post"));
     }
 
@@ -58,7 +58,7 @@ public class CommunityServiceController {
         community.updateCommunityAttributes(token, request);
 
         return responseFactory.build(
-            HttpStatus.OK,
+            HttpStatus.NO_CONTENT,
             e.getRequiredProperty("community.service.endpoints.community.messages.patch"));
     }
 

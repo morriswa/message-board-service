@@ -75,6 +75,7 @@ common:
       bad-datasource-config: "DATASOURCE COULD NOT BE CONFIGURED, PLEASE CHECK CONFIG <3"
       validation-exception-thrown: A validation exception has occurred!
       permissions-exception-thrown: "You do not have appropriate permissions to perform this action!"
+      missing-required-fields: You are missing the required field(s) %s on request body
       security:
         not-allowed: YOU SHALL NOT PASS!
         not-allowed-desc: The requested service requires authorization, which you didn't bother to provide

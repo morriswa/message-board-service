@@ -100,7 +100,8 @@ public class CommunityServiceValidator extends BasicBeanValidator {
         var errors = new ArrayList<ValidationException.ValidationError>();
 
         if (request.communityId() == null) {
-            var error = new ValidationException.ValidationError("communityId", null, "Community ID must not be null!!!");
+            var error = new ValidationException.ValidationError("communityId", null,
+                    String.format(e.getRequiredProperty("common.service.errors.missing-required-fields"),"communityId"));
             errors.add(error);
         }
 
@@ -115,7 +116,9 @@ public class CommunityServiceValidator extends BasicBeanValidator {
         }
 
         if (request.communityOwnerUserId() == null && request.communityLocator() == null && request.communityDisplayName() == null) {
-            var error = new ValidationException.ValidationError(null, null, "Must provide at least one request field to update!");
+            var error = new ValidationException.ValidationError(null, null,
+                    String.format(e.getRequiredProperty("common.service.errors.missing-required-fields"),"[communityOwnerUserId OR communityLocator OR communityDisplayName]"));
+
             errors.add(error);
         }
 
