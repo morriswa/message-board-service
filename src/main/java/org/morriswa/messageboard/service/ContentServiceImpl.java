@@ -6,6 +6,7 @@ import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.PostDraftDao;
 import org.morriswa.messageboard.dao.ResourceDao;
 import org.morriswa.messageboard.dao.model.PostWithCommunityInfoRow;
+import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.model.*;
@@ -321,7 +322,7 @@ public class ContentServiceImpl implements ContentService {
                         )
                 ));
 
-        communityService.verifyUserCanModerateContentOrThrow(userId, post.getCommunityId());
+        communityService.assertUserHasPrivilegeInCommunity(userId, ModerationLevel.CONTENT_MOD, post.getCommunityId());
 
         var resource = resources.findResourceByResourceId(post.getResourceId())
                 .orElseThrow(()->new ResourceException(String.format(
@@ -350,7 +351,7 @@ public class ContentServiceImpl implements ContentService {
                         )
                 ));
 
-        communityService.verifyUserCanModerateCommentsOrThrow(userId, post.getCommunityId());
+        communityService.assertUserHasPrivilegeInCommunity(userId, ModerationLevel.COMMENT_MOD, post.getCommunityId());
 
         // delete requested post comment and children
         comments.deleteCommentAndChildren(post.getPostId(), commentId);

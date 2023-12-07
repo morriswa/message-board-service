@@ -3,6 +3,8 @@ package org.morriswa.messageboard.service;
 import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.exception.BadRequestException;
+import org.morriswa.messageboard.exception.PermissionsException;
+import org.morriswa.messageboard.model.Community;
 import org.morriswa.messageboard.model.CommunityWatcherStatus;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.model.CommunityMemberResponse;
@@ -17,11 +19,11 @@ import java.util.UUID;
 
 public interface CommunityService {
 
-//    void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception;
+    void assertUserHasPrivilegeInCommunity(UUID userId, ModerationLevel privilege, Long communityId) throws PermissionsException, BadRequestException;
+
+    void assertUserHasPrivilegeInCommunity(UUID userId, ModerationLevel privilege, Community community) throws PermissionsException, BadRequestException;
 
     void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws Exception;
-
-    void verifyUserCanModerateContentOrThrow(UUID userId, Long communityId) throws Exception;
 
     void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws Exception;
 
@@ -46,8 +48,6 @@ public interface CommunityService {
     void updateCommunityMemberModerationLevel(JwtAuthenticationToken token, Long communityId, UUID userId, ModerationLevel level) throws Exception;
 
     URL getIcon(Long communityId);
-
-    void verifyUserCanModerateCommentsOrThrow(UUID userId, Long communityId) throws BadRequestException, Exception;
 
     List<CommunityMemberResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception;
 

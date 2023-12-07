@@ -82,6 +82,38 @@ public class CommunityServiceImpl implements CommunityService {
 
 
     @Override
+    public void assertUserHasPrivilegeInCommunity(UUID userId, ModerationLevel privilege, Long communityId) throws PermissionsException, BadRequestException {
+
+        var community = communityDao.findCommunity(communityId)
+                .orElseThrow(()-> new BadRequestException(
+                        String.format(e.getRequiredProperty("community.service.errors.missing-community-by-id"),
+                                communityId)
+                ));
+
+        assertUserHasPrivilegeInCommunity(userId, privilege, community);
+
+    }
+
+    @Override
+    public void assertUserHasPrivilegeInCommunity(UUID userId, ModerationLevel privilege, Community community) throws PermissionsException, BadRequestException {
+        if (community.getOwnerId().equals(userId)) return;
+
+        var requesterMembership =
+                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
+
+        if (requesterMembership.moderationLevel().weight >= privilege.weight)
+            return;
+
+        throw new PermissionsException(
+                String.format(
+                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
+                        userId,
+                        privilege,
+                        community.getCommunityId()
+                ));
+    }
+
+    @Override
     public void verifyUserCanPostInCommunityOrThrow(UUID userId, Long communityId) throws Exception {
 
         var community = communityDao.findCommunity(communityId)
@@ -106,92 +138,6 @@ public class CommunityServiceImpl implements CommunityService {
                 e.getRequiredProperty("community.service.errors.user-cannot-post"));
     }
 
-    private void verifyUserCanEditCommunityOrThrow(UUID userId, Community community) throws Exception {
-
-        if (community.getOwnerId().equals(userId)) return;
-
-        var requesterMembership =
-                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
-
-        if (requesterMembership.moderationLevel().weight >= ModerationLevel.EDIT_MOD.weight)
-            return;
-
-        throw new PermissionsException(
-                String.format(
-                e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
-                userId,
-                ModerationLevel.EDIT_MOD,
-                community.getCommunityId()
-        ));
-    }
-
-    @Override
-    public void verifyUserCanModerateContentOrThrow(UUID userId, Long communityId) throws Exception {
-
-        var community = communityDao.findCommunity(communityId)
-                .orElseThrow(()->new BadRequestException(
-                        String.format(
-                                e.getRequiredProperty("community.service.errors.missing-community"),
-                                communityId)));
-
-        if (community.getOwnerId().equals(userId)) return;
-
-        var requesterMembership =
-                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
-
-        if (requesterMembership.moderationLevel().weight >= ModerationLevel.CONTENT_MOD.weight)
-            return;
-
-        throw new PermissionsException(
-                String.format(
-                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
-                        userId, ModerationLevel.CONTENT_MOD, communityId)
-        );
-    }
-
-    private void verifyUserCanModerateCommentsOrThrow(UUID userId, Community community) throws Exception {
-        if (community.getOwnerId().equals(userId)) return;
-
-        var requesterMembership =
-                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
-
-        if (requesterMembership.moderationLevel().weight >= ModerationLevel.COMMENT_MOD.weight)
-            return;
-
-        throw new PermissionsException(
-                String.format(
-                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
-                        userId, ModerationLevel.COMMENT_MOD, community.getCommunityId())
-        );
-    }
-
-    @Override
-    public void verifyUserCanModerateCommentsOrThrow(UUID userId, Long communityId) throws Exception {
-        var community = communityDao.findCommunity(communityId)
-                .orElseThrow(()->new BadRequestException(
-                        String.format(
-                                e.getRequiredProperty("community.service.errors.missing-community"),
-                                communityId)));
-
-        verifyUserCanModerateCommentsOrThrow(userId, community);
-    }
-
-    private void verifyUserIsPromoterOrThrow(UUID userId, Community community) throws PermissionsException {
-        if (community.getOwnerId().equals(userId)) return;
-
-        var requesterMembership =
-                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
-
-        if (requesterMembership.moderationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
-            return;
-
-        throw new PermissionsException(
-                String.format(
-                        e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
-                        userId, ModerationLevel.PROMOTE_MOD, community.getCommunityId())
-        );
-    }
-
     @Override
     public List<CommunityMemberResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception {
 
@@ -203,7 +149,7 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityId)));
 
-        verifyUserCanModerateCommentsOrThrow(userId, community);
+        assertUserHasPrivilegeInCommunity(userId, ModerationLevel.COMMENT_MOD, community);
 
         var members = communityMemberDao.getCommunityModerators(communityId);
 
@@ -226,7 +172,7 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityId)));
 
-        verifyUserCanModerateCommentsOrThrow(requester, community);
+        assertUserHasPrivilegeInCommunity(requester, ModerationLevel.COMMENT_MOD, community);
 
         CommunityMemberResponse member;
         if (userId.equals(community.getOwnerId()))
@@ -281,7 +227,7 @@ public class CommunityServiceImpl implements CommunityService {
                                 e.getRequiredProperty("community.service.errors.missing-community"),
                                 communityId)));
 
-        verifyUserCanEditCommunityOrThrow(userId, community);
+        assertUserHasPrivilegeInCommunity(userId, ModerationLevel.EDIT_MOD, community);
         var uploadImageRequest = new UploadImageRequest(image.getBytes(), blobTypeToImageFormat(Objects.requireNonNull(image.getContentType())));
 
         validator.validate(uploadImageRequest);
@@ -385,7 +331,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         if (request.communityOwnerUserId() != null)
             verifyUserIsOwnerOrThrow(requesterId, community);
-        else verifyUserCanEditCommunityOrThrow(requesterId, community);
+        else assertUserHasPrivilegeInCommunity(requesterId, ModerationLevel.EDIT_MOD, community);
 
         communityDao.updateCommunityAttrs(community.getCommunityId(), request);
     }
