@@ -56,4 +56,11 @@ public abstract class BasicBeanValidator {
 
         if (!errors.isEmpty()) throw new ValidationException(errors);
     }
+
+    public String missingRequiredField(String field) {
+        return String.format(
+                e.getRequiredProperty("common.service.errors.missing-required-fields"), field
+        );
+
+    }
 }

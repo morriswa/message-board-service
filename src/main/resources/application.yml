@@ -246,6 +246,8 @@ content:
       cannot-locate-session: could not locate post creation session :(
       null-comment: No null comments!!!
       bad-comment-length: Comments may not be more than %d characters!
+      bad-caption-length: Post captions must be between %s and %s characters!
+      bad-desc-length: Post descriptions must be no longer than %s characters!
     rules:
       image-scale-factor: 0.5
       max-allowed-content: 10

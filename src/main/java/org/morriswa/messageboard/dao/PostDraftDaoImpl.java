@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.control.requestbody.DraftBody;
 import org.morriswa.messageboard.model.PostDraft;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -20,10 +21,8 @@ public class PostDraftDaoImpl implements PostDraftDao {
         this.jdbc = jdbc;
     }
 
-
-
     @Override
-    public void create(UUID id, UUID userId, Long communityId, UUID resourceId, Optional<String> caption, Optional<String> description) {
+    public void create(UUID id, UUID userId, Long communityId, UUID resourceId, DraftBody draft) {
         final String query = """
             insert into post_session (id, user_id, community_id, resource_id, caption, description)
             values(:id, :userId, :communityId, :resourceId, :caption, :description)
@@ -34,8 +33,8 @@ public class PostDraftDaoImpl implements PostDraftDao {
             put("userId", userId);
             put("communityId", communityId);
             put("resourceId", resourceId);
-            put("caption", caption.orElse(null));
-            put("description", description.orElse(null));
+            put("caption", draft.caption());
+            put("description", draft.description());
         }};
 
         jdbc.update(query, params);
@@ -67,7 +66,7 @@ public class PostDraftDaoImpl implements PostDraftDao {
     }
 
     @Override
-    public void edit(UUID userId, UUID draftId, Optional<String> caption, Optional<String> description) {
+    public void edit(UUID userId, UUID draftId, DraftBody draft) {
         StringBuilder queryBuilder = new StringBuilder();
 
         Map<String, Object> params = new HashMap<>(){{
@@ -75,26 +74,23 @@ public class PostDraftDaoImpl implements PostDraftDao {
             put("userId", userId);
         }};
 
-        queryBuilder.append("update post_session set ");
-        if (caption.isPresent()) {
-            queryBuilder.append("caption=:caption ");
-            params.put("caption", caption.get());
+        queryBuilder.append("update post_session set  ");
+        if (draft.caption() != null) {
+            queryBuilder.append("caption=:caption,");
+            params.put("caption", draft.caption());
         }
 
-        if (description.isPresent()) {
-            if (caption.isPresent()) queryBuilder.append(", ");
-            queryBuilder.append("description=:description ");
-            params.put("description", description.get());
+        if (draft.description() != null) {
+            queryBuilder.append("description=:description,");
+            params.put("description", draft.description());
         }
 
-        queryBuilder.append("where user_id=:userId and id=:id");
+        queryBuilder.deleteCharAt(queryBuilder.length()-1);
+
+        queryBuilder.append(" where user_id=:userId and id=:id");
         final String query = queryBuilder.toString();
 
-        try {
-            jdbc.update(query, params);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        jdbc.update(query, params);
     }
 
     @Override

@@ -1,9 +1,10 @@
 package org.morriswa.messageboard.control;
 
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.control.requestbody.DraftBody;
+import org.morriswa.messageboard.enumerated.Vote;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.model.Comment;
-import org.morriswa.messageboard.enumerated.Vote;
 import org.morriswa.messageboard.model.PostCommentResponse;
 import org.morriswa.messageboard.model.PostDraftResponse;
 import org.morriswa.messageboard.model.PostResponse;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController @CrossOrigin @Slf4j
@@ -66,11 +66,10 @@ public class ContentServiceController {
     public ResponseEntity<?> editPostDraft(
             JwtAuthenticationToken token,
             @PathVariable UUID draftId,
-            @RequestParam Optional<String> caption,
-            @RequestParam Optional<String> description)
+            @RequestBody DraftBody draft)
             throws Exception {
 
-        contentService.editPostDraft(token, draftId, caption, description);
+        contentService.editPostDraft(token, draftId, draft);
 
         return responseFactory.build(
                 HttpStatus.OK,
@@ -79,16 +78,15 @@ public class ContentServiceController {
 
     @PostMapping(value = "${content.service.endpoints.create-draft.path}")
     public ResponseEntity<?> startPostSession(
-                                        JwtAuthenticationToken token,
-                                        @PathVariable Long communityId,
-                                        @RequestParam Optional<String> caption,
-                                        @RequestParam Optional<String> description)
+            JwtAuthenticationToken token,
+            @PathVariable Long communityId,
+            @RequestBody DraftBody draft)
             throws Exception {
 
-        UUID id = contentService.createPostDraft(token, communityId, caption, description);
+        UUID id = contentService.createPostDraft(token, communityId, draft);
 
         return responseFactory.build(
-                HttpStatus.OK,
+                HttpStatus.CREATED,
                 e.getRequiredProperty("content.service.endpoints.create-draft.messages.post"),
                 id);
     }

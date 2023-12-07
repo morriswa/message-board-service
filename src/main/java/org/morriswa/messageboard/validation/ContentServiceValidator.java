@@ -1,11 +1,14 @@
 package org.morriswa.messageboard.validation;
 
+import org.morriswa.messageboard.control.requestbody.DraftBody;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.validation.request.CommentRequest;
+import org.morriswa.messageboard.validation.request.CreatePostRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ContentServiceValidator extends BasicBeanValidator {
@@ -45,6 +48,82 @@ public class ContentServiceValidator extends BasicBeanValidator {
                     ERROR_MSG
             ));
         }
+
+        if (!errors.isEmpty()) throw new ValidationException(errors);
+    }
+
+
+    private List<ValidationException.ValidationError> getPostCaptionErrors(String caption) {
+        final int MIN_LENGTH = Integer.parseInt(
+                e.getRequiredProperty("content.service.rules.caption.min-length"));
+        final int MAX_LENGTH = Integer.parseInt(
+                e.getRequiredProperty("content.service.rules.caption.max-length"));
+
+
+        var response = new ArrayList<ValidationException.ValidationError>();
+
+        if (caption.length() < MIN_LENGTH || caption.length() > MAX_LENGTH) {
+            response.add(new ValidationException.ValidationError("caption",caption,
+                    String.format(
+                            e.getRequiredProperty("content.service.errors.bad-caption-length"),
+                            e.getRequiredProperty("content.service.rules.caption.min-length"),
+                            e.getRequiredProperty("content.service.rules.caption.max-length")
+                    )));
+        }
+
+       return response;
+    }
+
+    private List<ValidationException.ValidationError> getPostDescriptionErrors(String description) {
+
+        final int MAX_LENGTH = Integer.parseInt(
+                e.getRequiredProperty("content.service.rules.description.max-length"));
+
+
+        var response = new ArrayList<ValidationException.ValidationError>();
+
+        if (description.length() > MAX_LENGTH) {
+            response.add(new ValidationException.ValidationError("description",description,
+                    String.format(
+                            e.getRequiredProperty("content.service.errors.bad-desc-length"),
+                            e.getRequiredProperty("content.service.rules.description.max-length"))));
+        }
+
+        return response;
+    }
+
+    public void validate(DraftBody draft) throws ValidationException {
+        var errors = new ArrayList<ValidationException.ValidationError>();
+
+        if (draft.caption() != null) {
+            errors.addAll(getPostCaptionErrors(draft.caption()));
+        }
+
+        if (draft.description() != null) {
+            errors.addAll(getPostDescriptionErrors(draft.description()));
+        }
+
+        if (!errors.isEmpty()) throw new ValidationException(errors);
+    }
+
+    public void validateNonNull(DraftBody draft) throws ValidationException {
+
+        if (draft.caption() == null && draft.description() == null)
+             throw new ValidationException(null, null, missingRequiredField("[caption||description]"));
+
+        validate(draft);
+    }
+
+    public void validate(CreatePostRequest request) throws ValidationException {
+
+        validateBeanOrThrow(request);
+
+        var errors = new ArrayList<ValidationException.ValidationError>();
+
+        errors.addAll(getPostCaptionErrors(request.getCaption()));
+
+        if (request.getDescription() != null)
+            errors.addAll(getPostDescriptionErrors(request.getDescription()));
 
         if (!errors.isEmpty()) throw new ValidationException(errors);
     }

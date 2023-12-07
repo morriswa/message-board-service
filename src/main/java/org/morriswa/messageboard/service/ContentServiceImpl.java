@@ -1,6 +1,7 @@
 package org.morriswa.messageboard.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.control.requestbody.DraftBody;
 import org.morriswa.messageboard.dao.CommentDao;
 import org.morriswa.messageboard.dao.PostDao;
 import org.morriswa.messageboard.dao.PostDraftDao;
@@ -151,25 +152,29 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public UUID createPostDraft(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws Exception {
+    public UUID createPostDraft(JwtAuthenticationToken token, Long communityId, DraftBody draft) throws Exception {
         var userId = userProfileService.authenticate(token);
+
+        validator.validate(draft);
 
         var newResource = new Resource();
 
         resources.createNewPostResource(newResource);
 
-        var id = UUID.randomUUID();
+        var newDraftId = UUID.randomUUID();
 
-        drafts.create(id, userId, communityId, newResource.getId(), caption, description);
+        drafts.create(newDraftId, userId, communityId, newResource.getId(), draft);
 
-        return id;
+        return newDraftId;
     }
 
     @Override
-    public void editPostDraft(JwtAuthenticationToken token, UUID draftId, Optional<String> caption, Optional<String> description) throws Exception {
+    public void editPostDraft(JwtAuthenticationToken token, UUID draftId, DraftBody draft) throws Exception {
         var userId = userProfileService.authenticate(token);
 
-        drafts.edit(userId, draftId, caption, description);
+        validator.validateNonNull(draft);
+
+        drafts.edit(userId, draftId, draft);
     }
 
     @Override
@@ -278,7 +283,7 @@ public class ContentServiceImpl implements ContentService {
                 getDraftType(resource.getResources().size()),
                 session.getResourceId());
 
-        validator.validateBeanOrThrow(newPost);
+        validator.validate(newPost);
 
         posts.createNewPost(newPost);
 

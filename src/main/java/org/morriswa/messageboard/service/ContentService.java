@@ -1,12 +1,12 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.messageboard.model.*;
+import org.morriswa.messageboard.control.requestbody.DraftBody;
 import org.morriswa.messageboard.enumerated.Vote;
+import org.morriswa.messageboard.model.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface ContentService {
@@ -27,9 +27,9 @@ public interface ContentService {
 
     int voteOnComment(JwtAuthenticationToken token, Long postId, Long commentId, Vote vote) throws Exception;
 
-    UUID createPostDraft(JwtAuthenticationToken token, Long communityId, Optional<String> caption, Optional<String> description) throws Exception;
+    UUID createPostDraft(JwtAuthenticationToken token, Long communityId, DraftBody draft) throws Exception;
 
-    void editPostDraft(JwtAuthenticationToken token, UUID draftId, Optional<String> caption, Optional<String> description) throws Exception;
+    void editPostDraft(JwtAuthenticationToken token, UUID draftId, DraftBody draft) throws Exception;
 
     void addContentToDraft(JwtAuthenticationToken token, UUID draftId, MultipartFile file) throws Exception;
 
