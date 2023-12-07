@@ -72,16 +72,17 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public void createNewUser(@Valid CreateUserRequest user) throws ValidationException, JsonProcessingException {
+    public void createNewUser(@Valid CreateUserRequest user) throws ValidationException {
         final String query = """
-            insert into user_profile(id, auth_zero_id, display_name, email, role)
-            values (gen_random_uuid(), :authZeroId, :displayName, :email, :role)
+            insert into user_profile(id, auth_zero_id, display_name, email, birthdate, role)
+            values (gen_random_uuid(), :authZeroId, :displayName, :email, :birthdate, :role)
         """;
 
         Map<String, Object> params = new HashMap<>(){{
             put("authZeroId", user.getAuthZeroId());
             put("displayName", user.getDisplayName());
             put("email", user.getEmail());
+            put("birthdate", user.getBirthdate());
             put("role", user.getRole().toString());
         }};
 

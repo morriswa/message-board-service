@@ -2,6 +2,7 @@ package org.morriswa.messageboard.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
 import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.exception.ValidationException;
@@ -22,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -84,14 +87,21 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public String createNewUser(JwtAuthenticationToken token, String displayName) throws ValidationException, JsonProcessingException {
+    public String createNewUser(JwtAuthenticationToken token, NewUserRequestBody request) throws ValidationException, JsonProcessingException {
 
-        validator.validateDisplayNameOrThrow(displayName);
+        validator.validate(request);
+
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(
+                e.getRequiredProperty("common.date-format")
+        );
+
+        final LocalDate parsedDate = LocalDate.parse(request.birthdate(), format);
 
         var newUser = new CreateUserRequest(
                 token.getName(),
                 extractEmailFromJwt(token),
-                displayName,
+                parsedDate,
+                request.displayName(),
                 UserRole.DEFAULT);
 
         validator.validateBeanOrThrow(newUser);

@@ -1,14 +1,20 @@
 package org.morriswa.messageboard.validation;
 
+import lombok.extern.slf4j.Slf4j;
+import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
-@Component
+@Component @Slf4j
 public class UserProfileServiceValidator extends BasicBeanValidator {
 
     private final Environment e;
@@ -20,7 +26,11 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
     }
 
     public void validateDisplayNameOrThrow(String displayName) throws ValidationException {
+        var errors = getErrorsDisplayName(displayName);
+        if (!errors.isEmpty()) throw new ValidationException(errors);
+    }
 
+    private List<ValidationException.ValidationError> getErrorsDisplayName(String displayName) {
         final String DISPLAY_NAME_REGEXP =
                 e.getRequiredProperty("user-profile.service.rules.display-name.regexp");
         final int MIN_LENGTH = Integer.parseInt(
@@ -47,7 +57,35 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
                     displayName,
                     e.getRequiredProperty("user-profile.service.errors.bad-display-name")));
 
-        if (!errors.isEmpty()) throw new ValidationException(errors);
+        return errors;
     }
 
+    public void validate(NewUserRequestBody request) throws ValidationException {
+        var errors = new ArrayList<ValidationException.ValidationError>();
+
+        errors.addAll(getErrorsDisplayName(request.displayName()));
+
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(
+                e.getRequiredProperty("common.date-format")
+        );
+
+        try {
+            LocalDate date = LocalDate.parse(request.birthdate(), format);
+            if (date.isAfter(LocalDate.parse(e.getRequiredProperty("common.youngest")
+                    ,format)))
+                errors.add(new ValidationException.ValidationError(
+                        "birthdate",
+                        request.birthdate(),
+                        String.format(e.getRequiredProperty("user-profile.service.errors.too-young"),
+                                e.getRequiredProperty("common.youngest"))));
+        } catch (DateTimeParseException dtpe) {
+            errors.add(new ValidationException.ValidationError(
+                    "birthdate",
+                    request.birthdate(),
+                    dtpe.getMessage()
+                    ));
+        }
+
+        if (!errors.isEmpty()) throw new ValidationException(errors);
+    }
 }

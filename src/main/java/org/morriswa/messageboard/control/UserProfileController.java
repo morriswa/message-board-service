@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.control;
 
+import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
 import org.morriswa.messageboard.model.UserUiProfile;
 import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
 import org.morriswa.messageboard.model.UserProfileResponse;
@@ -41,8 +42,8 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
-                                           @RequestParam String displayName) throws Exception {
-        String newUserDisplayName = userProfileService.createNewUser(jwt, displayName);
+                                           @RequestBody NewUserRequestBody request) throws Exception {
+        String newUserDisplayName = userProfileService.createNewUser(jwt, request);
         return responseFactory.build(
             HttpStatus.OK,
             String.format(

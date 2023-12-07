@@ -34,6 +34,8 @@ testing:
   email: test@email.com
 
 common:
+  date-format: yyyy-M-d
+  youngest: 2010-1-1
   public: >
     /health
     /feed
@@ -115,6 +117,7 @@ user-profile:
       display-name-already-exists: Could not update your display name because another user is already registered with that display name!
       bad-display-name: "Alphanumeric chars, underscores, hyphens and periods only please."
       bad-display-name-length: "Display Name should be at least %s and not more than %s chars."
+      too-young: You must be born before %s to join :(
     rules:
       display-name:
         regexp: "^[A-Za-z0-9._-]*$"

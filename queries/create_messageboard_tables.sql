@@ -4,6 +4,7 @@ create table user_profile (
     auth_zero_id varchar(100) unique not null,
     display_name varchar(32) unique not null,
     email varchar(100) unique not null,
+    birthdate date not null,
     role varchar(10) not null
 );
 

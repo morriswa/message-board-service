@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.service;
 
+import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.User;
@@ -64,7 +65,7 @@ public interface UserProfileService {
      * @return the display name that the user was registered with
      * @throws ValidationException if the displayName is poorly formatted or already taken
      */
-    String createNewUser(JwtAuthenticationToken token, String displayName) throws Exception;
+    String createNewUser(JwtAuthenticationToken token, NewUserRequestBody request) throws Exception;
 
     /**
      * Updates a User's profile image
