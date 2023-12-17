@@ -1,7 +1,7 @@
 
 server:
   port: 8081
-  path: v0/
+  path: secured/
   error.include-message: always
 
 spring:
@@ -21,8 +21,6 @@ spring:
 auth0:
   audience: "http://127.0.0.1:8081/v0"
   issuer-uri: "https://dev-9deub659.us.auth0.com/"
-  rbac:
-    permissions: "org.morriswa.messageboard:test org.morriswa.messageboard:develop"
 
 aws:
   secret-name: "messageboard/local"
@@ -36,10 +34,23 @@ testing:
 common:
   date-format: yyyy-M-d
   minimum-age: 13
+  # include all public access paths here
   public: >
     /health
     /feed
     /preferences
+  # request matcher for secure API routes
+  secured: /secured/**
+  # required permissions to access secure API routes
+  secured-permissions: >
+    org.morriswa.messageboard:test
+    org.morriswa.messageboard:develop
+    fudge
+  # request matcher for secure developer API routes
+  develop: /developer
+  # required permissions to access secure developer API routes
+  develop-permissions: >
+    org.morriswa.messageboard:develop
   cache: ./localfilecache/
   stores:
     prefix: developer-content
@@ -71,6 +82,10 @@ common:
         path: feed
         messages:
           get: Successfully retrieved post feed
+      developer:
+        path: developer
+        messages:
+          get: Hello
     errors:
       bad-datasource-config: "DATASOURCE COULD NOT BE CONFIGURED, PLEASE CHECK CONFIG <3"
       validation-exception-thrown: A validation exception has occurred!
@@ -78,7 +93,7 @@ common:
       missing-required-fields: You are missing the required field(s) %s on request body
       security:
         not-allowed: YOU SHALL NOT PASS!
-        not-allowed-desc: The requested service requires authorization, which you didn't bother to provide
+        not-allowed-desc: The requested service requires an access token, which you didn't bother to provide
         invalid-jwt: "invalid jwt :("
         scope-error-message: The requested service requires a higher scope than you provided.
       audience:

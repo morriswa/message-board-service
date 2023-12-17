@@ -73,13 +73,13 @@ public class WebSecurityConfig
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration secureRoutesCors = new CorsConfiguration(){{
+        final CorsConfiguration secureRoutesCors = new CorsConfiguration(){{
             setAllowedOrigins(List.of("*"));
             setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
             setAllowedHeaders(List.of("*"));
         }};
 
-        CorsConfiguration publicRoutesCors = new CorsConfiguration(){{
+        final CorsConfiguration publicRoutesCors = new CorsConfiguration(){{
             setAllowedOrigins(List.of("*"));
             setAllowedMethods(List.of("GET"));
             setAllowedHeaders(List.of("*"));
@@ -88,7 +88,11 @@ public class WebSecurityConfig
         UrlBasedCorsConfigurationSource sources = new UrlBasedCorsConfigurationSource();
         {
             sources.registerCorsConfiguration(
-                    String.format("/%s**", e.getRequiredProperty("server.path")),
+                    e.getRequiredProperty("common.secured"),
+                    secureRoutesCors);
+
+            sources.registerCorsConfiguration(
+                    e.getRequiredProperty("common.develop"),
                     secureRoutesCors);
 
             final String[] publicPaths = e.getRequiredProperty("common.public").split("\\s");
@@ -116,14 +120,33 @@ public class WebSecurityConfig
         return jwtAuthConverter;
     }
 
-    private AuthorizationManager<RequestAuthorizationContext> getConfiguredAuthorizationManager() {
+    private AuthorizationManager<RequestAuthorizationContext> getSecuredRoutesAuthorizationManager() {
+
         List<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
-        final String permissionString = e.getProperty("auth0.rbac.permissions", "none");
+
+        final String permissionString = e.getProperty("common.secured-permissions", "none");
 
         if (permissionString.equals("none"))
             return AuthorizationManagers.allOf();
 
-        final List<String> permissions = List.of(permissionString.split(" "));
+        final List<String> permissions = List.of(permissionString.split("\\s"));
+
+        for (String scope : permissions)
+            list.add(AuthorityAuthorizationManager.hasAuthority("AUTH0_"+scope));
+
+        return AuthorizationManagers.allOf(list.toArray(new AuthorityAuthorizationManager[0]));
+    }
+
+    private AuthorizationManager<RequestAuthorizationContext> getDeveloperRoutesAuthorizationManager() {
+
+        List<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
+
+        final String permissionString = e.getProperty("common.develop-permissions", "none");
+
+        if (permissionString.equals("none"))
+            throw new RuntimeException("Please set common.develop-permissions, else developer paths may be vulnerable!");
+
+        final List<String> permissions = List.of(permissionString.split("\\s"));
 
         for (String scope : permissions)
             list.add(AuthorityAuthorizationManager.hasAuthority("AUTH0_"+scope));
@@ -134,18 +157,20 @@ public class WebSecurityConfig
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
-
-        final String path = e.getRequiredProperty("server.path");
         final String[] publicPaths = e.getRequiredProperty("common.public").split("\\s");
+        final String securePath = e.getRequiredProperty("common.secured");
+        final String developPath =  e.getProperty("common.develop", "/developer/**");
 
         http    // All http requests will...
                 // Be stateless
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                // Will allow any request on /health endpoint
+                // Will allow any request on explicitly public access endpoint
                         .requestMatchers(publicPaths).permitAll()
                 // Will require authentication and proper permissions for secured routes
-                        .requestMatchers("/" + path + "**").access(getConfiguredAuthorizationManager())
+                        .requestMatchers(securePath).access(getSecuredRoutesAuthorizationManager())
+                // Will use developer auth manager for developer routes
+                        .requestMatchers(developPath).access(getDeveloperRoutesAuthorizationManager())
                 // Will deny all other unauthenticated requests
                         .anyRequest().denyAll())
                 // Will allow certain cross origin requests
@@ -195,21 +220,9 @@ public class WebSecurityConfig
                         response.setContentType("application/json");
                         response.setStatus(customErrorResponse.getStatusCode().value());
                     })
-                    .accessDeniedHandler((request, response, authException) -> {
-                        var customErrorResponse = responseFactory.error(
-                                HttpStatus.FORBIDDEN,
-                                e.getRequiredProperty("common.service.errors.security.not-allowed"),
-                                e.getRequiredProperty("common.service.errors.security.not-allowed-desc"));
 
-                        response.getOutputStream().println(
-                                objectMapper.writeValueAsString(customErrorResponse.getBody()));
-                        response.setContentType("application/json");
-                        response.setStatus(customErrorResponse.getStatusCode().value());
-                    })
                 // provide a jwt
-
                     .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(makePermissionsConverter()));
-
                 });
 
 

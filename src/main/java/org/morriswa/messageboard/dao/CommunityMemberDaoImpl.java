@@ -66,20 +66,6 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
     }
 
     @Override
-    public int countCommunityMembersByCommunityId(Long communityId) {
-        final String query = "select count(id) from community_member where community_id=:communityId";
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("communityId", communityId);
-        }};
-
-        return jdbc.query(query, params, rs->{
-            if (rs.next()) return rs.getInt("count");
-            return 0;
-        });
-    }
-
-    @Override
     public void createNewRelationship(@Valid JoinCommunityRequest newRelationship) {
         final String query =
             """

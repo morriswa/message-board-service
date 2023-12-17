@@ -43,7 +43,7 @@ public class UserProfileController {
     @PostMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
                                            @RequestBody NewUserRequestBody request) throws Exception {
-        String newUserDisplayName = userProfileService.createNewUser(jwt, request);
+        String newUserDisplayName = userProfileService.registerUser(jwt, request);
         return responseFactory.build(
             HttpStatus.OK,
             String.format(

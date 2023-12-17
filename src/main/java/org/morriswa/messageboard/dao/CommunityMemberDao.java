@@ -14,8 +14,6 @@ public interface CommunityMemberDao {
 
     Optional<CommunityMember> findCommunityMemberByUserIdAndCommunityId(UUID userId, Long communityId);
 
-    @Deprecated int countCommunityMembersByCommunityId(Long communityId);
-
     void createNewRelationship(@Valid JoinCommunityRequest newRelationship);
 
     boolean relationshipExists(UUID userId, Long communityId);

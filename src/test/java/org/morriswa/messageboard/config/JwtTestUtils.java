@@ -16,7 +16,7 @@ public class JwtTestUtils {
     static final String TOKEN = "token";
     static final String SUB = "sms|12345678";
 
-    @Value("${auth0.rbac.permissions}")
+    @Value("${common.secured-permissions}")
     String PERMISSIONS;
 
     @Value("${testing.email}")
@@ -26,7 +26,7 @@ public class JwtTestUtils {
         // This is a place to add general and maybe custom claims which should be available after parsing token in the live system
         var claims = new HashMap<String, Object>(){{
             put("sub", SUB);
-            put("permissions", List.of(PERMISSIONS.split(" ")));
+            put("permissions", List.of(PERMISSIONS.split("\\s")));
             put("email", TEST_EMAIL);
         }};
 

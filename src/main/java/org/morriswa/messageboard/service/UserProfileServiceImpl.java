@@ -87,7 +87,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public String createNewUser(JwtAuthenticationToken token, NewUserRequestBody request) throws ValidationException, JsonProcessingException {
+    public String registerUser(JwtAuthenticationToken token, NewUserRequestBody request) throws ValidationException, JsonProcessingException {
 
         validator.validate(request);
 

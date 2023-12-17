@@ -21,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 public class WebSecurityTest extends MessageboardTest {
-    @Value("${auth0.rbac.permissions}")
+
+    @Value("${common.secured-permissions}")
     String PERMISSIONS;
 
     @MockBean
@@ -31,7 +32,7 @@ public class WebSecurityTest extends MessageboardTest {
     void testSuccessful() throws Exception {
         var claims = new HashMap<String, Object>(){{
             put("sub", "sms|12345678");
-            put("permissions", List.of(PERMISSIONS.split(" ")));
+            put("permissions", List.of(PERMISSIONS.split("\\s")));
             put("email", "test@email.com");
         }};
 

@@ -25,7 +25,6 @@ public interface UserProfileService {
      *
      * @param token to authenticate with
      * @return a full User Profile Response
-     * @throws BadRequestException if the user cannot be found or authenticated
      */
     UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws Exception;
 
@@ -34,7 +33,6 @@ public interface UserProfileService {
      *
      * @param token to authenticate with
      * @return a User Response
-     * @throws BadRequestException if the user cannot be found or authenticated
      */
     User authenticateAndGetUser(JwtAuthenticationToken token) throws Exception;
 
@@ -43,7 +41,6 @@ public interface UserProfileService {
      *
      * @param token to authenticate with
      * @return a UUID representing the user
-     * @throws BadRequestException if the user cannot be found or authenticated
      */
     UUID authenticate(JwtAuthenticationToken token) throws Exception;
 
@@ -61,19 +58,16 @@ public interface UserProfileService {
      * Creates a new Messageboard User
      *
      * @param token to authenticate and register with
-     * @param displayName user's requested display name
+     * @param request containing important registration info
      * @return the display name that the user was registered with
-     * @throws ValidationException if the displayName is poorly formatted or already taken
      */
-    String createNewUser(JwtAuthenticationToken token, NewUserRequestBody request) throws Exception;
+    String registerUser(JwtAuthenticationToken token, NewUserRequestBody request) throws Exception;
 
     /**
      * Updates a User's profile image
      *
      * @param token to authenticate user with
      * @param image representing new profile image
-     * @throws BadRequestException if the user cannot be authenticated
-     * @throws IOException if the image cannot be processed and uploaded successfully
      */
     void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws Exception;
 
@@ -82,8 +76,6 @@ public interface UserProfileService {
      *
      * @param token to authenticate with
      * @param requestedDisplayName user's requested new display name
-     * @throws BadRequestException
-     * @throws ValidationException
      */
     void updateUserProfileDisplayName(JwtAuthenticationToken token, String requestedDisplayName) throws Exception;
 
