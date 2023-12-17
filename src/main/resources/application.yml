@@ -28,10 +28,6 @@ aws:
   s3:
     bucket: circlesdevocean
 
-# Only required for local and testing environments, no need to include in deployment configs
-testing:
-  email: test@email.com
-
 common:
   date-format: yyyy-M-d
   minimum-age: 13
@@ -46,7 +42,6 @@ common:
   secured-permissions: >
     org.morriswa.messageboard:test
     org.morriswa.messageboard:develop
-    fudge
   # request matcher for secure developer API routes
   develop: /developer
   # required permissions to access secure developer API routes

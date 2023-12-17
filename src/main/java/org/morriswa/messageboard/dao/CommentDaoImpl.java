@@ -122,7 +122,7 @@ public class CommentDaoImpl implements CommentDao{
     }
 
     @Override
-    public int vote(UUID userId, Long postId, Long commentId, Vote vote) {
+    public Integer vote(UUID userId, Long postId, Long commentId, Vote vote) {
         final String existsQuery = """
                 select 1 from comment_vote where user_id=:userId and post_id=:postId and comment_id=:commentId
             """;
@@ -175,9 +175,7 @@ public class CommentDaoImpl implements CommentDao{
         }
 
         return jdbc.query(countQuery, params, rs -> {
-            if (rs.next()) {
-                return rs.getInt("count");
-            }
+            if (rs.next()) return rs.getInt("count");
             return 0;
         });
     }
@@ -205,7 +203,7 @@ public class CommentDaoImpl implements CommentDao{
         }};
 
         List<Long> subcomments = jdbc.query(GET_SUBCOMMENTS_SQL, subcommentParams, rs -> {
-            List<Long> ids = new ArrayList<>();
+            List<Long> ids = List.of();
 
             while (rs.next())
                 ids.add(rs.getLong("id"));
@@ -213,9 +211,8 @@ public class CommentDaoImpl implements CommentDao{
             return ids;
         });
 
-        assert subcomments != null;
         // if no subcomments are retrieved, continue with next iteration
-        if (subcomments.isEmpty()) return;
+        if (subcomments == null || subcomments.isEmpty()) return;
 
         Map<String, Object> batchDeleteParams = new HashMap<>(){{
             put("postId", postId);

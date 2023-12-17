@@ -13,6 +13,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 @SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
+@TestPropertySource(properties = {"testing.email=test@email.com"})
 @AutoConfigureMockMvc
 public class MessageboardTest {
 

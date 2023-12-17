@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author William A. Morris [william@morriswa.org]
  */
-@Configuration @Slf4j
+@Configuration @Slf4j 
 @EnableWebSecurity // Enables Spring Security for Web Services importing this config
 public class WebSecurityConfig
 {
@@ -120,7 +120,7 @@ public class WebSecurityConfig
         return jwtAuthConverter;
     }
 
-    private AuthorizationManager<RequestAuthorizationContext> getSecuredRoutesAuthorizationManager() {
+    @SuppressWarnings("unchecked") private AuthorizationManager<RequestAuthorizationContext> getSecuredRoutesAuthorizationManager() {
 
         List<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
 
@@ -137,9 +137,7 @@ public class WebSecurityConfig
         return AuthorizationManagers.allOf(list.toArray(new AuthorityAuthorizationManager[0]));
     }
 
-    private AuthorizationManager<RequestAuthorizationContext> getDeveloperRoutesAuthorizationManager() {
-
-        List<AuthorityAuthorizationManager<Object>> list = new ArrayList<>();
+    @SuppressWarnings("unchecked") private AuthorizationManager<RequestAuthorizationContext> getDeveloperRoutesAuthorizationManager() {
 
         final String permissionString = e.getProperty("common.develop-permissions", "none");
 
@@ -147,6 +145,8 @@ public class WebSecurityConfig
             throw new RuntimeException("Please set common.develop-permissions, else developer paths may be vulnerable!");
 
         final List<String> permissions = List.of(permissionString.split("\\s"));
+
+        List<AuthorityAuthorizationManager<RequestAuthorizationContext>> list = new ArrayList<>();
 
         for (String scope : permissions)
             list.add(AuthorityAuthorizationManager.hasAuthority("AUTH0_"+scope));

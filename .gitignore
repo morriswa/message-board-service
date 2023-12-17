@@ -31,7 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/**
-!.vscode/launch.json
+!.vscode/example-launch.json
+!.vscode/settings.json
 
 ### DAMN MACS ###
 **/.DS_Store

@@ -34,7 +34,7 @@ public class AppConfig {
      * @return a Property Source to be imported to spring
      * @throws JsonProcessingException if YAML file cannot be read
      */
-    public static PropertiesPropertySource build() throws JsonProcessingException {
+    public static PropertiesPropertySource build() {
         // retrieve latest config from AWS
         final GetLatestConfigurationResult configurationResponse;
         {
@@ -73,7 +73,12 @@ public class AppConfig {
             var rawConfig = StandardCharsets.UTF_8.decode(configurationResponse.getConfiguration()).toString();
 
             // create a deep config map from YAML String
-            Map<String, Object> configMap = mapper.readValue(rawConfig, typeRef);
+            Map<String, Object> configMap;
+            try {
+                configMap = mapper.readValue(rawConfig, typeRef);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Encountered exception while reading properties file, cannot start application...", e);
+            }
 
             // flatten and return properties map
             config = JsonMapFlattener.flatten(configMap);

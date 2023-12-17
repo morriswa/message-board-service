@@ -84,7 +84,7 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
     }
 
     @Override
-    public boolean relationshipExists(UUID userId, Long communityId) {
+    public Boolean relationshipExists(UUID userId, Long communityId) {
         final String query = "select 1 from community_member where community_id=:communityId and user_id=:userId";
 
         Map<String, Object> params = new HashMap<>(){{

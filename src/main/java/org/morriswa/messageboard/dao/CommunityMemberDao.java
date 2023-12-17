@@ -16,7 +16,7 @@ public interface CommunityMemberDao {
 
     void createNewRelationship(@Valid JoinCommunityRequest newRelationship);
 
-    boolean relationshipExists(UUID userId, Long communityId);
+    Boolean relationshipExists(UUID userId, Long communityId);
 
     void deleteRelationship(UUID userId, Long communityId);
 
