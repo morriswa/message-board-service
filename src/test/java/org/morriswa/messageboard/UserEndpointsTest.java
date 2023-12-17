@@ -6,12 +6,11 @@ import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
 import org.morriswa.messageboard.enumerated.UserRole;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.User;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.http.HttpMethod;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,15 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserEndpointsTest extends MessageboardTest {
-
-    private final String AUTH_ZERO_ID = "abc|123";
-
-    @Value("testing.email")
-    private String TEST_EMAIL;
-
-    private final String DISPLAY_NAME = "displayName";
-
-    private final String DEFAULT_TOKEN = "Bearer token";
 
     private User getExampleUser() {
         return new User(UUID.randomUUID(),
@@ -57,18 +47,11 @@ public class UserEndpointsTest extends MessageboardTest {
     @Test
     void testGetUserProfileEndpoint() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
-
-
         final User exampleUser = getExampleUser();
 
         when(userProfileDao.getUser(any(String.class))).thenReturn(Optional.of(exampleUser));
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                .get(targetUrl)
-                .header("Authorization",DEFAULT_TOKEN))
+        hit("user-profile","user",HttpMethod.GET)
             .andExpect(status().is(200))
             .andExpect(jsonPath("$.payload.displayName", Matchers.is(exampleUser.getDisplayName())))
             .andExpect(jsonPath("$.payload.userId", Matchers.equalTo(exampleUser.getUserId().toString())))
@@ -79,15 +62,9 @@ public class UserEndpointsTest extends MessageboardTest {
     @Test
     void testGetUserProfileEndpointWithNoRegisteredUser() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
-
         when(userProfileDao.getUser(any(String.class))).thenReturn(Optional.empty());
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN))
+        hit("user-profile","user",HttpMethod.GET)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",Matchers.is(
                         e.getRequiredProperty("user-profile.service.errors.missing-user"))))
@@ -97,81 +74,57 @@ public class UserEndpointsTest extends MessageboardTest {
     @Test
     void testRegisterUserEndpoint() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
-
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(new NewUserRequestBody(DISPLAY_NAME, getMinimumAgeDate(2)))))
-
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.message", Matchers.notNullValue()))
+        hit(
+            "user-profile", "user", HttpMethod.POST,
+            new NewUserRequestBody(DISPLAY_NAME, getMinimumAgeDate(2))
+        )
+        .andExpect(status().is(200))
+        .andExpect(jsonPath("$.message", Matchers.notNullValue()))
         ;
     }
 
     @Test
     void testRegisterUserEndpointWithInvalidDisplayName() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
-
         final String badDisplayName = "display$Name";
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                    .post(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(new NewUserRequestBody(badDisplayName, "2000-1-1"))))
-
-
-                .andExpect(status().is(400))
-                .andExpect(jsonPath("$.description", Matchers.is(
-                        e.getRequiredProperty("common.service.errors.validation-exception-thrown")
-                )))
-                .andExpect(jsonPath("$.stack[0].message", Matchers.is(
-                        e.getRequiredProperty("user-profile.service.errors.bad-display-name")
-                )))
-                .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(
-                        badDisplayName
-                )))
+        hit("user-profile","user",HttpMethod.POST,
+                new NewUserRequestBody(badDisplayName, "2000-1-1")
+        )
+        .andExpect(status().is(400))
+        .andExpect(jsonPath("$.description", Matchers.is(
+                e.getRequiredProperty("common.service.errors.validation-exception-thrown")
+        )))
+        .andExpect(jsonPath("$.stack[0].message", Matchers.is(
+                e.getRequiredProperty("user-profile.service.errors.bad-display-name")
+        )))
+        .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(
+                badDisplayName
+        )))
         ;
     }
 
     @Test
     void testRegisterUserEndpointWithYoungBirthday() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
-
         final String date = getMinimumAgeDate(-1);
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(new NewUserRequestBody("displayName", date))))
-                .andExpect(status().is(400))
-                .andExpect(jsonPath("$.description",
-                        Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown")
-                )))
-                .andExpect(jsonPath("$.stack[0].message",
-                        Matchers.is(String.format(e.getRequiredProperty("user-profile.service.errors.too-young"),
-                                e.getRequiredProperty("common.minimum-age")))))
-                .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(date)))
+        hit(
+        "user-profile","user", HttpMethod.POST, new NewUserRequestBody("displayName", date)
+        )
+        .andExpect(status().is(400))
+        .andExpect(jsonPath("$.description",
+                Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown")
+        )))
+        .andExpect(jsonPath("$.stack[0].message",
+                Matchers.is(String.format(e.getRequiredProperty("user-profile.service.errors.too-young"),
+                        e.getRequiredProperty("common.minimum-age")))))
+        .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(date)))
         ;
     }
 
     @Test
     void testRegisterUserEndpointWithDuplicateDisplayName() throws Exception {
-
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user.path"));
 
         final String duplicateDisplayName = "duplicateDisplayName";
 
@@ -179,40 +132,32 @@ public class UserEndpointsTest extends MessageboardTest {
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")))
         .when(userProfileDao).createNewUser(any());
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(new NewUserRequestBody(DISPLAY_NAME, "2000-1-1"))))
-
-
-                .andExpect(status().is(400))
-                .andExpect(jsonPath("$.description", Matchers.is(
-                        e.getRequiredProperty("common.service.errors.validation-exception-thrown")
-                )))
-                .andExpect(jsonPath("$.stack[0].message", Matchers.is(
-                        e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")
-                )))
-                .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(
-                        duplicateDisplayName
-                )))
+        hit("user-profile","user",HttpMethod.POST,
+                new NewUserRequestBody(DISPLAY_NAME, "2000-1-1")
+        )
+        .andExpect(status().is(400))
+        .andExpect(jsonPath("$.description", Matchers.is(
+                e.getRequiredProperty("common.service.errors.validation-exception-thrown")
+        )))
+        .andExpect(jsonPath("$.stack[0].message", Matchers.is(
+                e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")
+        )))
+        .andExpect(jsonPath("$.stack[0].rejectedValue", Matchers.is(
+                duplicateDisplayName
+        )))
         ;
     }
 
     @Test
     void testUpdateUserDisplayNameEndpointWithInvalidDisplayName() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user-profile-displayname.path"));
-
         final String badDisplayName = "display$Name";
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .param("displayName",badDisplayName))
-
+        hit(
+                "user-profile", "user-profile-displayname",
+                Map.of("displayName",badDisplayName),
+                HttpMethod.PATCH
+        )
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
@@ -229,10 +174,6 @@ public class UserEndpointsTest extends MessageboardTest {
     @Test
     void testUpdateUserDisplayNameEndpointWithDuplicateDisplayName() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user-profile-displayname.path"));
-
         final String newDisplayName = "newDisplayName";
 
         when(userProfileDao.getUserId(any(String.class))).thenReturn(Optional.of(getExampleUser().getUserId()));
@@ -241,11 +182,11 @@ public class UserEndpointsTest extends MessageboardTest {
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")))
         .when(userProfileDao).updateUserDisplayName(any(), any());
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .param("displayName",newDisplayName))
-
+        hit(
+                "user-profile", "user-profile-displayname",
+                Map.of("displayName",newDisplayName),
+                HttpMethod.PATCH
+        )
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
@@ -264,17 +205,13 @@ public class UserEndpointsTest extends MessageboardTest {
     @Test
     void testUpdateUserDisplayNameEndpointWithLongDisplayName() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user-profile-displayname.path"));
-
         final String longDisplayName = "012345678901234567890123456789012345";
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .param("displayName",longDisplayName))
-
+        hit(
+                "user-profile", "user-profile-displayname",
+                Map.of("displayName",longDisplayName),
+                HttpMethod.PATCH
+        )
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")
@@ -294,17 +231,13 @@ public class UserEndpointsTest extends MessageboardTest {
     @Test
     void testUpdateUserDisplayNameEndpointWithShortDisplayName() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("user-profile.service.endpoints.user-profile-displayname.path"));
-
         final String shortDisplayName = "01";
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization",DEFAULT_TOKEN)
-                        .param("displayName",shortDisplayName))
-
+        hit(
+                "user-profile", "user-profile-displayname",
+                Map.of("displayName",shortDisplayName),
+                HttpMethod.PATCH
+        )
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description", Matchers.is(
                         e.getRequiredProperty("common.service.errors.validation-exception-thrown")

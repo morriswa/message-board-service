@@ -28,6 +28,7 @@ aws:
   s3:
     bucket: circlesdevocean
 
+# Only required for local and testing environments, no need to include in deployment configs
 testing:
   email: test@email.com
 

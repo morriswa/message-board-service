@@ -4,16 +4,12 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
 import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
-import org.morriswa.messageboard.enumerated.UserRole;
 import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.Community;
-import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.service.UserProfileService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.http.HttpMethod;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -28,29 +24,8 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
     @MockBean private UserProfileService userProfileService;
 
-    private final String AUTH_ZERO_ID = "abc|123";
-
-    @Value("testing.email")
-    private String TEST_EMAIL;
-
-    private final String DISPLAY_NAME = "displayName";
-
-    private final String DEFAULT_TOKEN = "Bearer token";
-
-    private User getExampleUser() {
-        return new User(UUID.randomUUID(),
-                AUTH_ZERO_ID,
-                TEST_EMAIL,
-                DISPLAY_NAME,
-                UserRole.DEFAULT);
-    }
-
     @Test
     void testUserShouldBeRegisteredToCreateCommunity() throws Exception {
-
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
 
         when(userProfileService.authenticate(any()))
                 .thenThrow(new NoRegisteredUserException(e.getRequiredProperty("user-profile.service.errors.missing-user")));
@@ -58,11 +33,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
         final CreateCommunityRequestBody body
                 = new CreateCommunityRequestBody("hello-world","Hello World!");
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(body)))
+        hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("user-profile.service.errors.missing-user"))))
@@ -74,20 +45,12 @@ public class CommunityEndpointsTest extends MessageboardTest {
     @Test
     void testCreateCommunity() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
-
         when(userProfileService.authenticate(any())).thenReturn(UUID.randomUUID());
 
         final CreateCommunityRequestBody body
                 = new CreateCommunityRequestBody("hello-world","Hello World!");
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(body)))
+        hit("community", "community", HttpMethod.POST, body)
                 .andExpect(status().is(201))
                 .andExpect(jsonPath("$.message",
                         Matchers.is(e.getRequiredProperty("community.service.endpoints.community.messages.post"))))
@@ -97,20 +60,12 @@ public class CommunityEndpointsTest extends MessageboardTest {
     @Test
     void testCreateCommunityBadLocator() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
-
         when(userProfileService.authenticate(any())).thenReturn(UUID.randomUUID());
 
         final CreateCommunityRequestBody body
                 = new CreateCommunityRequestBody("#hello-world","Hello World!");
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(body)))
+        hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
@@ -122,20 +77,12 @@ public class CommunityEndpointsTest extends MessageboardTest {
     @Test
     void testCreateCommunityShortLocator() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
-
         when(userProfileService.authenticate(any())).thenReturn(UUID.randomUUID());
 
         final CreateCommunityRequestBody body =
                 new CreateCommunityRequestBody("hi","Hello World!");
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(body)))
+        hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
@@ -152,10 +99,6 @@ public class CommunityEndpointsTest extends MessageboardTest {
     @Test
     void testCreateCommunityDuplicateLocator() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
-
         final String DUPLICATE_NAME = "hello-world";
 
         when(userProfileService.authenticate(any())).thenReturn(UUID.randomUUID());
@@ -169,11 +112,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
         final CreateCommunityRequestBody body = new CreateCommunityRequestBody(DUPLICATE_NAME,"Hello World!");
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(body)))
+        hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
@@ -184,10 +123,6 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
     @Test
     void testUpdateNoCommunity() throws Exception {
-
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
 
         final UUID ownerId = UUID.randomUUID();
 
@@ -202,11 +137,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 null,
                 null);
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(request)))
+        hit("community","community", HttpMethod.PATCH, request)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
@@ -220,10 +151,6 @@ public class CommunityEndpointsTest extends MessageboardTest {
     @Test
     void testUpdateCommunityNothing() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
-
         final UUID ownerId = UUID.randomUUID();
 
         when(userProfileService.authenticate(any())).thenReturn(ownerId);
@@ -236,11 +163,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 null,
                 null);
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(request)))
+        hit("community","community", HttpMethod.PATCH, request)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
@@ -254,10 +177,6 @@ public class CommunityEndpointsTest extends MessageboardTest {
     @Test
     void testUpdateJustLocator() throws Exception {
 
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
-
         final UUID ownerId = UUID.randomUUID();
 
         when(userProfileService.authenticate(any())).thenReturn(ownerId);
@@ -270,11 +189,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 null,
                 null);
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(request)))
+        hit("community","community", HttpMethod.PATCH, request)
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.message",
                         Matchers.is(e.getRequiredProperty("community.service.endpoints.community.messages.patch"))))
@@ -283,10 +198,6 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
     @Test
     void testUpdateBadLocator() throws Exception {
-
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
 
         final UUID ownerId = UUID.randomUUID();
 
@@ -300,11 +211,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 null,
                 null);
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(request)))
+        hit("community","community", HttpMethod.PATCH, request)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
@@ -315,10 +222,6 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
     @Test
     void testUpdateLongLocator() throws Exception {
-
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
 
         final UUID ownerId = UUID.randomUUID();
 
@@ -332,11 +235,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 null,
                 null);
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(request)))
+        hit("community","community", HttpMethod.PATCH, request)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
@@ -351,10 +250,6 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
     @Test
     void testAttemptDuplicateLocator() throws Exception {
-
-        final String targetUrl = String.format("/%s%s",
-                e.getRequiredProperty("server.path"),
-                e.getRequiredProperty("community.service.endpoints.community.path"));
 
         final UUID ownerId = UUID.randomUUID();
 
@@ -376,11 +271,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 e.getRequiredProperty("community.service.errors.ref-already-taken")
         )).when(communityRepo).updateCommunityAttrs(request.communityId(), request);
 
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch(targetUrl)
-                        .header("Authorization", DEFAULT_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(request)))
+        hit("community","community", HttpMethod.PATCH, request)
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
