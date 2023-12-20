@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.dao;
 
+import org.morriswa.messageboard.enumerated.RequestField;
 import org.morriswa.messageboard.model.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.Community;
@@ -118,6 +119,7 @@ public class CommunityDaoImpl implements CommunityDao {
                     .contains(COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION)) {
 
                 throw new ValidationException("communityLocator",
+                        RequestField.OPTIONAL,
                         attributesToUpdate.communityLocator(),
                         environment.getRequiredProperty("community.service.errors.ref-already-taken")
                 );
@@ -148,6 +150,7 @@ public class CommunityDaoImpl implements CommunityDao {
                     .contains(COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION)) {
 
                 throw new ValidationException("communityLocator",
+                        RequestField.REQUIRED,
                         newCommunity.communityRef(),
                         environment.getRequiredProperty("community.service.errors.ref-already-taken")
                 );

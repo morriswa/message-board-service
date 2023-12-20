@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.validation;
 
+import org.morriswa.messageboard.enumerated.RequestField;
 import org.morriswa.messageboard.model.DraftBody;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.CommentRequest;
@@ -25,45 +26,42 @@ public class ContentServiceValidator extends BasicBeanValidator {
                 e.getRequiredProperty("content.service.rules.description.max-length"));
 
         // defn error messages
-        final String ERROR_MSG =
+        final String MAX_LEN_ERROR_MSG =
                 String.format(e.getRequiredProperty("content.service.errors.bad-comment-length"),
                         MAX_LENGTH);
 
-        final String NULL_ERROR_MSG =
-                String.format(e.getRequiredProperty("content.service.errors.null-comment"),
-                        MAX_LENGTH);
-
-        if (newComment.commentBody().isEmpty()) {
-            errors.add(new ValidationException.ValidationError(
-                    "body",
-                    null,
-                    NULL_ERROR_MSG
-            ));
-        }
-
-        if (newComment.commentBody().length() > MAX_LENGTH) {
-            errors.add(new ValidationException.ValidationError(
-                    "body",
-                    newComment.commentBody(),
-                    ERROR_MSG
-            ));
+        if (newComment.commentBody()==null) {
+            errors.add(missingRequiredField("request-body"));
+        } else {
+            if (newComment.commentBody().length() > MAX_LENGTH) {
+                errors.add(new ValidationException.ValidationError(
+                        "body",
+                        RequestField.REQUIRED,
+                        newComment.commentBody(),
+                        MAX_LEN_ERROR_MSG
+                ));
+            }
         }
 
         if (!errors.isEmpty()) throw new ValidationException(errors);
     }
 
 
-    private List<ValidationException.ValidationError> getPostCaptionErrors(String caption) {
+    private List<ValidationException.ValidationError> getPostCaptionErrors(String caption, RequestField status) {
         final int MIN_LENGTH = Integer.parseInt(
                 e.getRequiredProperty("content.service.rules.caption.min-length"));
         final int MAX_LENGTH = Integer.parseInt(
                 e.getRequiredProperty("content.service.rules.caption.max-length"));
 
-
         var response = new ArrayList<ValidationException.ValidationError>();
 
+        if (status.equals(RequestField.OPTIONAL) && caption == null)
+            return response;
+
         if (caption.length() < MIN_LENGTH || caption.length() > MAX_LENGTH) {
-            response.add(new ValidationException.ValidationError("caption",caption,
+            response.add(new ValidationException.ValidationError("caption",
+                    status,
+                    caption,
                     String.format(
                             e.getRequiredProperty("content.service.errors.bad-caption-length"),
                             e.getRequiredProperty("content.service.rules.caption.min-length"),
@@ -71,19 +69,21 @@ public class ContentServiceValidator extends BasicBeanValidator {
                     )));
         }
 
-       return response;
+        return response;
     }
 
-    private List<ValidationException.ValidationError> getPostDescriptionErrors(String description) {
+    private List<ValidationException.ValidationError> getPostDescriptionErrors(String description, RequestField status) {
+
+        var response = new ArrayList<ValidationException.ValidationError>();
+
+        if (status.equals(RequestField.OPTIONAL) && description == null)
+            return response;
 
         final int MAX_LENGTH = Integer.parseInt(
                 e.getRequiredProperty("content.service.rules.description.max-length"));
 
-
-        var response = new ArrayList<ValidationException.ValidationError>();
-
         if (description.length() > MAX_LENGTH) {
-            response.add(new ValidationException.ValidationError("description",description,
+            response.add(new ValidationException.ValidationError("description",status, description,
                     String.format(
                             e.getRequiredProperty("content.service.errors.bad-desc-length"),
                             e.getRequiredProperty("content.service.rules.description.max-length"))));
@@ -95,33 +95,26 @@ public class ContentServiceValidator extends BasicBeanValidator {
     public void validate(DraftBody draft) throws ValidationException {
         var errors = new ArrayList<ValidationException.ValidationError>();
 
-        if (draft.caption() != null) {
-            errors.addAll(getPostCaptionErrors(draft.caption()));
-        }
-
-        if (draft.description() != null) {
-            errors.addAll(getPostDescriptionErrors(draft.description()));
-        }
+        errors.addAll(getPostCaptionErrors(draft.caption(), RequestField.OPTIONAL));
+        errors.addAll(getPostDescriptionErrors(draft.description(), RequestField.OPTIONAL));
 
         if (!errors.isEmpty()) throw new ValidationException(errors);
     }
 
     public void validateNonNull(DraftBody draft) throws ValidationException {
-
-        if (draft.caption() == null && draft.description() == null)
-             throw new ValidationException(null, null, missingRequiredField("[caption||description]"));
-
-        validate(draft);
+        var errors = requiredOneOptionalField("caption",draft.caption(), "description", draft.description());
+        if (!errors.isEmpty()) throw new ValidationException(errors);
     }
 
     public void validate(CreatePostRequest request) throws ValidationException {
 
-        validateBeanOrThrow(request);
+        var errors = new ArrayList<>(generateConstraintViolations(request));
 
-        var errors = new ArrayList<>(getPostCaptionErrors(request.caption()));
+        if (request.caption() != null)
+            errors.addAll(getPostCaptionErrors(request.caption(), RequestField.REQUIRED));
 
         if (request.description() != null)
-            errors.addAll(getPostDescriptionErrors(request.description()));
+            errors.addAll(getPostDescriptionErrors(request.description(), RequestField.OPTIONAL));
 
         if (!errors.isEmpty()) throw new ValidationException(errors);
     }

@@ -267,8 +267,6 @@ public class CommunityServiceImpl implements CommunityService {
         var newRelationship = new JoinCommunityRequest(userId, communityId,
                 ModerationLevel.NONE, CommunityStanding.HEALTHY);
 
-        validator.validateBeanOrThrow(newRelationship);
-
         communityMemberDao.createNewRelationship(newRelationship);
     }
 

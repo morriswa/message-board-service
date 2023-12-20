@@ -2,6 +2,7 @@ package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.morriswa.messageboard.enumerated.RequestField;
 import org.morriswa.messageboard.model.CreateCommunityRequest;
 import org.morriswa.messageboard.model.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.NoRegisteredUserException;
@@ -105,6 +106,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
         doThrow(new ValidationException(
                 "communityRef",
+                RequestField.REQUIRED,
                 DUPLICATE_NAME
                 ,e.getRequiredProperty("community.service.errors.ref-already-taken")))
             .when(communityRepo)
@@ -142,9 +144,11 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
                 .andExpect(jsonPath("$.stack[0].message",
-                        Matchers.is(
-                                String.format(e.getRequiredProperty("common.service.errors.missing-required-fields"),
-                                        "communityId"))))
+                        Matchers.is(e.getRequiredProperty("common.service.errors.missing-required-field"))))
+                .andExpect(jsonPath("$.stack[0].field",
+                        Matchers.is("communityId")))
+                .andExpect(jsonPath("$.stack[0].status",
+                        Matchers.is("REQUIRED")))
         ;
     }
 
@@ -168,9 +172,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 .andExpect(jsonPath("$.description",
                         Matchers.is(e.getRequiredProperty("common.service.errors.validation-exception-thrown"))))
                 .andExpect(jsonPath("$.stack[0].message",
-                        Matchers.is(
-                            String.format(e.getRequiredProperty("common.service.errors.missing-required-fields"),
-                                    "[communityOwnerUserId OR communityLocator OR communityDisplayName]"))))
+                        Matchers.is(e.getRequiredProperty("common.service.errors.missing-optional-fields"))))
         ;
     }
 
@@ -267,6 +269,7 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 .thenReturn(Optional.of(new Community(request.communityId(), null, null, ownerId, null, 1)));
 
         doThrow(new ValidationException("communityLocator",
+                RequestField.REQUIRED,
                 duplicateLocator,
                 e.getRequiredProperty("community.service.errors.ref-already-taken")
         )).when(communityRepo).updateCommunityAttrs(request.communityId(), request);

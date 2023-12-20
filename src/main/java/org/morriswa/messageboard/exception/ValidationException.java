@@ -1,5 +1,7 @@
 package org.morriswa.messageboard.exception;
 
+import org.morriswa.messageboard.enumerated.RequestField;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class ValidationException extends Exception {
      */
     public record ValidationError (
             String field,
+            RequestField status,
             String rejectedValue,
             String message
     ) { }
@@ -32,10 +35,10 @@ public class ValidationException extends Exception {
      * @param problemValue value passed in request
      * @param errorMessage error message to be provided
      */
-    public ValidationException(String problemField, String problemValue, String errorMessage) {
+    public ValidationException(String problemField, RequestField required, String problemValue, String errorMessage) {
         super();
         this.validationErrors = Collections.singletonList(new ValidationError(
-                problemField, problemValue, errorMessage
+                problemField, required, problemValue, errorMessage
         ));
     }
 

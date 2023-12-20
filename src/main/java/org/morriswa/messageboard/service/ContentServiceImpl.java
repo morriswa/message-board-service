@@ -111,7 +111,7 @@ public class ContentServiceImpl implements ContentService {
                 parentCommentId,
                 comment);
 
-        validator.validateBeanOrThrow(newComment);
+        validator.validate(newComment);
 
         comments.createNewComment(newComment);
     }
@@ -172,6 +172,7 @@ public class ContentServiceImpl implements ContentService {
         var userId = userProfileService.authenticate(token);
 
         validator.validateNonNull(draft);
+        validator.validate(draft);
 
         drafts.edit(userId, draftId, draft);
     }

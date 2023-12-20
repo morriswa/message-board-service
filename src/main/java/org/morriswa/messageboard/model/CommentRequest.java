@@ -1,12 +1,12 @@
 package org.morriswa.messageboard.model;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.UUID;
 
-@Valid
+@Validated
 public record CommentRequest (
     @NotNull UUID userId,
 

@@ -1,5 +1,6 @@
 package org.morriswa.messageboard.validation;
 
+import org.morriswa.messageboard.enumerated.RequestField;
 import org.morriswa.messageboard.model.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.CreateCommunityRequest;
@@ -17,7 +18,7 @@ public class CommunityServiceValidator extends BasicBeanValidator {
         super(e);
     }
 
-    private List<ValidationException.ValidationError> generateLocatorErrors(String ref) {
+    private List<ValidationException.ValidationError> generateLocatorErrors(String ref, RequestField required) {
         // defn rules
         final String communityRefRegexp =
                 e.getRequiredProperty("community.service.rules.community-ref.regexp");
@@ -38,19 +39,21 @@ public class CommunityServiceValidator extends BasicBeanValidator {
         if (MIN_LENGTH>ref.length()||ref.length()>MAX_LENGTH)
             errors.add(new ValidationException.ValidationError(
                     "communityRef",
+                    required,
                     ref,
                     ERROR_BAD_COMMUNITY_REF_LENGTH));
 
         if (!Pattern.matches(communityRefRegexp, ref))
             errors.add(new ValidationException.ValidationError(
                     "communityRef",
+                    required,
                     ref,
                     ERROR_BAD_COMMUNITY_REF));
 
         return errors;
     }
 
-    private List<ValidationException.ValidationError> generateDisplayNameErrors(String displayName) {
+    private List<ValidationException.ValidationError> generateDisplayNameErrors(String displayName, RequestField required) {
         // defn rules
         final int MIN_LENGTH = Integer.parseInt(
                 e.getRequiredProperty("community.service.rules.display-name.min-length"));
@@ -68,6 +71,7 @@ public class CommunityServiceValidator extends BasicBeanValidator {
         if (MIN_LENGTH>displayName.length()||displayName.length()>MAX_LENGTH)
             errors.add(new ValidationException.ValidationError(
                     "communityDisplayName",
+                    required,
                     displayName,
                     ERROR_BAD_COMMUNITY_DISPLAY_NAME_LENGTH));
 
@@ -78,18 +82,16 @@ public class CommunityServiceValidator extends BasicBeanValidator {
         var errors = new ArrayList<ValidationException.ValidationError>();
 
         if (request.communityRef() == null) {
-            var error = new ValidationException.ValidationError("communityLocator", null, "Community Locator must not be null!!!");
-            errors.add(error);
+            errors.add(missingRequiredField("communityRef"));
         } else {
-            var locatorErrors = generateLocatorErrors(request.communityRef());
+            var locatorErrors = generateLocatorErrors(request.communityRef(), RequestField.REQUIRED);
             errors.addAll(locatorErrors);
         }
 
         if (request.communityName() == null) {
-            var error = new ValidationException.ValidationError("communityDisplayName", null, "Community Display Name must not be null!!!");
-            errors.add(error);
+            errors.add( missingRequiredField("communityName"));
         } else {
-            var communityDisplayNameErrors = generateDisplayNameErrors(request.communityName());
+            var communityDisplayNameErrors = generateDisplayNameErrors(request.communityName(), RequestField.REQUIRED);
             errors.addAll(communityDisplayNameErrors);
         }
 
@@ -100,26 +102,22 @@ public class CommunityServiceValidator extends BasicBeanValidator {
         var errors = new ArrayList<ValidationException.ValidationError>();
 
         if (request.communityId() == null) {
-            var error = new ValidationException.ValidationError("communityId", null,
-                    missingRequiredField("communityId"));
-            errors.add(error);
+            errors.add(missingRequiredField("communityId"));
         }
 
+        errors.addAll(requiredOneOptionalField(
+                "communityOwnerUserId",request.communityOwnerUserId(),
+                "communityLocator",request.communityLocator(),
+                "communityDisplayName",request.communityDisplayName()));
+
         if (request.communityLocator() != null) {
-            var locatorErrors = generateLocatorErrors(request.communityLocator());
+            var locatorErrors = generateLocatorErrors(request.communityLocator(), RequestField.OPTIONAL);
             errors.addAll(locatorErrors);
         }
 
         if (request.communityDisplayName() != null) {
-            var communityDisplayNameErrors = generateDisplayNameErrors(request.communityDisplayName());
+            var communityDisplayNameErrors = generateDisplayNameErrors(request.communityDisplayName(), RequestField.OPTIONAL);
             errors.addAll(communityDisplayNameErrors);
-        }
-
-        if (request.communityOwnerUserId() == null && request.communityLocator() == null && request.communityDisplayName() == null) {
-            var error = new ValidationException.ValidationError(null, null,
-                    missingRequiredField("[communityOwnerUserId OR communityLocator OR communityDisplayName]"));
-
-            errors.add(error);
         }
 
         if (!errors.isEmpty()) throw new ValidationException(errors);

@@ -1,15 +1,10 @@
 package org.morriswa.messageboard.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.morriswa.messageboard.exception.NoRegisteredUserException;
-import org.morriswa.messageboard.model.User;
-import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.dao.UserProfileDao;
-import org.morriswa.messageboard.model.UserUiProfile;
 import org.morriswa.messageboard.enumerated.UserRole;
-import org.morriswa.messageboard.model.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.UploadImageRequest;
-import org.morriswa.messageboard.model.CreateUserRequest;
+import org.morriswa.messageboard.exception.NoRegisteredUserException;
+import org.morriswa.messageboard.exception.ValidationException;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.store.ProfileImageStoreImpl;
 import org.morriswa.messageboard.validation.UserProfileServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +79,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public String registerUser(JwtAuthenticationToken token, CreateUserRequest.Body request) throws ValidationException, JsonProcessingException {
+    public String registerUser(JwtAuthenticationToken token, CreateUserRequest.Body request) throws Exception {
 
         validator.validate(request);
 
@@ -101,26 +96,23 @@ public class UserProfileServiceImpl implements UserProfileService {
                 request.displayName(),
                 UserRole.DEFAULT);
 
-        validator.validateBeanOrThrow(newUser);
-
         userProfileDao.createNewUser(newUser);
 
         return newUser.displayName();
     }
 
     @Override
-    public void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws NoRegisteredUserException, IOException {
+    public void updateUserProfileImage(JwtAuthenticationToken token, MultipartFile image) throws NoRegisteredUserException, IOException, ValidationException {
 
         var userId = authenticate(token);
 
-        validator.validateBeanOrThrow(image);
-
-        Objects.requireNonNull(image.getContentType());
-
-        profileImageStoreImpl.updateUserProfileImage(userId,
-            new UploadImageRequest(
+        var request = new UploadImageRequest(
                 image.getBytes(),
-                blobTypeToImageFormat(image.getContentType())));
+                blobTypeToImageFormat(image.getContentType()));
+
+        validator.validate(request);
+
+        profileImageStoreImpl.updateUserProfileImage(userId, request);
     }
 
     @Override

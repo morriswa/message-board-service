@@ -2,6 +2,7 @@ package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.morriswa.messageboard.enumerated.RequestField;
 import org.morriswa.messageboard.model.CreateUserRequest;
 import org.morriswa.messageboard.enumerated.UserRole;
 import org.morriswa.messageboard.exception.ValidationException;
@@ -128,7 +129,7 @@ public class UserEndpointsTest extends MessageboardTest {
 
         final String duplicateDisplayName = "duplicateDisplayName";
 
-        doThrow(new ValidationException("displayName", duplicateDisplayName,
+        doThrow(new ValidationException("displayName", RequestField.REQUIRED, duplicateDisplayName,
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")))
         .when(userProfileDao).createNewUser(any());
 
@@ -178,7 +179,7 @@ public class UserEndpointsTest extends MessageboardTest {
 
         when(userProfileDao.getUserId(any(String.class))).thenReturn(Optional.of(getExampleUser().userId()));
 
-        doThrow(new ValidationException("displayName",newDisplayName,
+        doThrow(new ValidationException("displayName", RequestField.REQUIRED, newDisplayName,
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")))
         .when(userProfileDao).updateUserDisplayName(any(), any());
 

@@ -1,9 +1,9 @@
 package org.morriswa.messageboard.model;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.validation.annotation.Validated;
 
-@Valid
+@Validated
 public record UploadImageRequest (
     @NotBlank byte[] baseEncodedImage,
 

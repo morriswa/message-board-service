@@ -1,6 +1,8 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
+import org.morriswa.messageboard.enumerated.RequestField;
+import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.UserUiProfile;
 import org.morriswa.messageboard.model.UpdateUIProfileRequest;
@@ -74,7 +76,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public void createNewUser(@Valid CreateUserRequest user) throws ValidationException {
+    public void createNewUser(@Valid CreateUserRequest user) throws BadRequestException, ValidationException {
         final String query = """
             insert into user_profile(id, auth_zero_id, display_name, email, birthdate, role)
             values (gen_random_uuid(), :authZeroId, :displayName, :email, :birthdate, :role)
@@ -92,11 +94,14 @@ public class UserProfileDaoImpl implements UserProfileDao {
             jdbc.update(query, params);
         } catch (DuplicateKeyException e) {
             if (e.getMostSpecificCause().getMessage().contains(AUTH0_UNIQUE_CONSTRAINT_VIOLATION)) {
-                throw new ValidationException("user",user.getClass().getSimpleName(), "User is already registered!");
+                // TODO
+                throw new BadRequestException("User is already registered!");
             }
 
             if (e.getMostSpecificCause().getMessage().contains(DISPLAY_NAME_UNIQUE_CONSTRAINT_VIOLATION)) {
-                throw new ValidationException("displayName",user.displayName(),
+                throw new ValidationException("displayName",
+                        RequestField.REQUIRED,
+                        user.displayName(),
                         environment.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
             }
 
@@ -122,7 +127,9 @@ public class UserProfileDaoImpl implements UserProfileDao {
             jdbc.update(query, params);
         } catch (DuplicateKeyException e) {
             if (e.getMostSpecificCause().getMessage().contains(DISPLAY_NAME_UNIQUE_CONSTRAINT_VIOLATION)) {
-                throw new ValidationException("displayName",requestedDisplayName,
+                throw new ValidationException("displayName",
+                        RequestField.REQUIRED,
+                        requestedDisplayName,
                         environment.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
             }
 
