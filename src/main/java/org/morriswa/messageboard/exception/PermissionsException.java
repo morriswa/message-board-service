@@ -11,11 +11,6 @@ public class PermissionsException extends Exception {
 
     private final List<String> permissionViolations;
 
-    public List<String> getPermissionViolations() {
-        return this.permissionViolations;
-    }
-
-
     /**
      * Creates a Permissions Exception when only one error needs to be returned
      *
@@ -40,9 +35,13 @@ public class PermissionsException extends Exception {
      *
      * @param permissionViolations to be included in response
      */
-    public PermissionsException(List<String> permissionViolations) {
+    public PermissionsException(String... permissionViolations) {
         super();
-        this.permissionViolations = permissionViolations;
+        this.permissionViolations = List.of(permissionViolations);
+    }
+
+    public List<String> getPermissionViolations() {
+        return this.permissionViolations;
     }
 
 }

@@ -8,11 +8,22 @@ import java.util.List;
  */
 public class ValidationException extends Exception {
 
-    private final List<ValidationError> validationErrors;
+    /**
+     * Creates an individual Validation Error to be thrown as part of Validation Exception
+     *
+     * @param field name of the request field that failed validation
+     * @param rejectedValue value passed in request
+     * @param message error message to be provided
+     */
+    public record ValidationError (
+            String field,
+            String rejectedValue,
+            String message
+    ) { }
 
-    public List<ValidationError> getValidationErrors() {
-        return this.validationErrors;
-    }
+
+
+    private final List<ValidationError> validationErrors;
 
     /**
      * Creates a Validation Exception when only one error needs to be returned
@@ -38,17 +49,8 @@ public class ValidationException extends Exception {
         this.validationErrors = validationErrors;
     }
 
-    /**
-     * Creates an individual Validation Error to be thrown as part of Validation Exception
-     *
-     * @param field name of the request field that failed validation
-     * @param rejectedValue value passed in request
-     * @param message error message to be provided
-     */
-     public record ValidationError (
-        String field,
-        String rejectedValue,
-        String message
-     ) { }
+    public List<ValidationError> getValidationErrors() {
+        return this.validationErrors;
+    }
 
 }
