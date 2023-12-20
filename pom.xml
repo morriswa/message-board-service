@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.morriswa</groupId>
     <artifactId>message-board-service</artifactId>
-    <version>0.0.13-SNAPSHOT</version>
+    <version>0.0.14-SNAPSHOT</version>
     <name>message-board-service</name>
     <description>A FOSS Online Messageboard API</description>
     <packaging>jar</packaging>
@@ -53,13 +53,6 @@
             <scope>runtime</scope>
         </dependency>
 
-<!--        Required to compile with annotations -->
-<!--        <dependency>-->
-<!--            <groupId>org.projectlombok</groupId>-->
-<!--            <artifactId>lombok</artifactId>-->
-<!--            <version>1.18.30</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
 
 <!--        Required to test the application-->
         <dependency>
