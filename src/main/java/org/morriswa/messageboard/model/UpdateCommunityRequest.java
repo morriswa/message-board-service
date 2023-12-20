@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.control.requestbody;
+package org.morriswa.messageboard.model;
 
 import java.util.UUID;
 

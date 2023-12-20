@@ -1,29 +1,22 @@
-package org.morriswa.messageboard.validation.request;
+package org.morriswa.messageboard.model;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.util.UUID;
 
 @Valid
-@AllArgsConstructor @Getter
-public class CommentRequest {
+public record CommentRequest (
+    @NotNull UUID userId,
 
-    @NotNull
-    private final UUID userId;
+    @NotNull Long postId,
 
-    @NotNull
-    private final Long postId;
+    @NotNull Long parentCommentId,
 
-    @NotNull
-    private final Long parentCommentId;
+    @NotBlank String commentBody
 
-    @NotBlank
-    private final String commentBody;
-
+) {
     public static CommentRequest buildSubCommentRequest(UUID userId, Long postId, Long parentCommentId, String commentBody) {
         return new CommentRequest(userId, postId, parentCommentId, commentBody);
     }

@@ -1,7 +1,8 @@
 package org.morriswa.messageboard;
 
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.config.AppConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -9,10 +10,11 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import java.util.Properties;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class }) @Slf4j
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 public class MessageboardServiceRunner {
 
     public static void main(String[] args) {
+        final Logger log = LoggerFactory.getLogger(MessageboardServiceRunner.class);
 
         new SpringApplicationBuilder()
                 .sources(MessageboardServiceRunner.class)

@@ -1,18 +1,19 @@
 package org.morriswa.messageboard.exception;
 
-import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Validation Exception to throw when the server cannot complete a request due to user input error
  */
-@Getter
 public class PermissionsException extends Exception {
 
     private final List<String> permissionViolations;
+
+    public List<String> getPermissionViolations() {
+        return this.permissionViolations;
+    }
 
 
     /**

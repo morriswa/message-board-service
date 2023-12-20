@@ -2,7 +2,6 @@ package org.morriswa.messageboard.dao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.ResourceException;
 import org.morriswa.messageboard.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Component @Slf4j
+@Component
 public class ResourceDaoImpl implements ResourceDao{
     private final NamedParameterJdbcTemplate jdbc;
     private final ObjectMapper om;

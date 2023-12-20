@@ -1,9 +1,8 @@
 package org.morriswa.messageboard.store;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.model.CommunityResponse;
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.Community;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3UtilImpl;
 import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URL;
 
-@Component @Slf4j
+@Component
 public class CommunityResourceStoreImpl implements CommunityResourceStore {
 
     private final String DEFAULT_COMMUNITY_ICON;
@@ -60,23 +59,21 @@ public class CommunityResourceStoreImpl implements CommunityResourceStore {
     }
 
     @Override
-    public CommunityResponse.AllCommunityResourceURLs getAllCommunityResources(Long communityId) {
-        var response = new CommunityResponse.AllCommunityResourceURLs();
+    public Community.Response.AllCommunityResourceURLs getAllCommunityResources(Long communityId) {
+        final URL banner;
+        final URL icon;
 
         if (s3Store.doesObjectExist(COMMUNITY_BANNER_PATH+communityId)) {
-            var bannerUrl = s3Store.getSignedObjectUrl(COMMUNITY_BANNER_PATH+communityId, SIGNED_URL_EXPIRATION_MINUTES);
-            response.setBanner(bannerUrl);
-        } else response.setBanner(null);
+            banner = s3Store.getSignedObjectUrl(COMMUNITY_BANNER_PATH+communityId, SIGNED_URL_EXPIRATION_MINUTES);
+        } else banner = null;
 
         if (s3Store.doesObjectExist(COMMUNITY_ICON_PATH+communityId)) {
-            var iconUrl = s3Store.getSignedObjectUrl(COMMUNITY_ICON_PATH+communityId, SIGNED_URL_EXPIRATION_MINUTES);
-            response.setIcon(iconUrl);
+            icon = s3Store.getSignedObjectUrl(COMMUNITY_ICON_PATH+communityId, SIGNED_URL_EXPIRATION_MINUTES);
         } else {
-            var iconUrl = s3Store.getSignedObjectUrl(DEFAULT_COMMUNITY_ICON, SIGNED_URL_EXPIRATION_MINUTES);
-            response.setIcon(iconUrl);
+            icon = s3Store.getSignedObjectUrl(DEFAULT_COMMUNITY_ICON, SIGNED_URL_EXPIRATION_MINUTES);
         }
 
-        return response;
+        return new Community.Response.AllCommunityResourceURLs(icon,banner);
     }
 
     @Override

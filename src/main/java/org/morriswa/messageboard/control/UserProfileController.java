@@ -1,9 +1,6 @@
 package org.morriswa.messageboard.control;
 
-import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
-import org.morriswa.messageboard.model.UserUiProfile;
-import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.UserProfileResponse;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.service.UserProfileService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +30,7 @@ public class UserProfileController {
 
     @GetMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> getUserProfile(JwtAuthenticationToken jwt) throws Exception {
-        UserProfileResponse user = userProfileService.authenticateAndGetUserProfile(jwt);
+        User.Response user = userProfileService.authenticateAndGetUserProfile(jwt);
         return responseFactory.build(
             HttpStatus.OK,
             e.getRequiredProperty("user-profile.service.endpoints.user.messages.get"),
@@ -42,7 +39,7 @@ public class UserProfileController {
 
     @PostMapping("${user-profile.service.endpoints.user.path}")
     public ResponseEntity<?> createNewUser(JwtAuthenticationToken jwt,
-                                           @RequestBody NewUserRequestBody request) throws Exception {
+                                           @RequestBody CreateUserRequest.Body request) throws Exception {
         String newUserDisplayName = userProfileService.registerUser(jwt, request);
         return responseFactory.build(
             HttpStatus.OK,

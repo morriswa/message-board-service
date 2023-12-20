@@ -1,6 +1,5 @@
 package org.morriswa.messageboard.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -10,7 +9,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 import java.util.Properties;
 
-@TestConfiguration @Slf4j
+@TestConfiguration
 public class TestConfig {
 
     private final JwtTestUtils utils;

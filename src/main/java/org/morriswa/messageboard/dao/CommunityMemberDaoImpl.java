@@ -1,12 +1,11 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.model.CommunityWatcherStatus;
-import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
+import org.morriswa.messageboard.model.JoinCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
 
-@Component @Slf4j
+@Component
 public class CommunityMemberDaoImpl implements CommunityMemberDao{
 
     private final NamedParameterJdbcTemplate jdbc;
@@ -74,10 +73,10 @@ public class CommunityMemberDaoImpl implements CommunityMemberDao{
             """;
 
         Map<String, Object> params = new HashMap<>(){{
-            put("communityId", newRelationship.getCommunityId());
-            put("userId", newRelationship.getUserId());
-            put("moderationLevel", newRelationship.getModerationLevel().toString());
-            put("standing", newRelationship.getCommunityStanding().toString());
+            put("communityId", newRelationship.communityId());
+            put("userId", newRelationship.userId());
+            put("moderationLevel", newRelationship.moderationLevel().toString());
+            put("standing", newRelationship.communityStanding().toString());
         }};
 
         jdbc.update(query, params);

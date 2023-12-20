@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.messageboard.control.requestbody.DraftBody;
+import org.morriswa.messageboard.model.DraftBody;
 import org.morriswa.messageboard.enumerated.Vote;
 import org.morriswa.messageboard.model.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public interface ContentService {
 
-    List<PostResponse> getFeedForCommunity(Long communityId) throws Exception;
+    List<Post.Response> getFeedForCommunity(Long communityId) throws Exception;
 
-    List<PostCommunityResponse> getRecentPosts() throws Exception;
+    List<Post.PostCommunityResponse> getRecentPosts() throws Exception;
 
     List<Comment> getComments(Long postId);
 
@@ -33,11 +33,11 @@ public interface ContentService {
 
     void addContentToDraft(JwtAuthenticationToken token, UUID draftId, MultipartFile file) throws Exception;
 
-    PostDraftResponse getPostDraft(JwtAuthenticationToken token, UUID draftId) throws Exception;
+    PostDraft.Response getPostDraft(JwtAuthenticationToken token, UUID draftId) throws Exception;
 
     void createPostFromDraft(JwtAuthenticationToken token, UUID draftId) throws Exception;
 
-    PostCommentResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception;
+    Post.PostCommentResponse retrievePostDetails(JwtAuthenticationToken token, Long postId) throws Exception;
 
     void deletePost(JwtAuthenticationToken token, Long postId) throws Exception;
 

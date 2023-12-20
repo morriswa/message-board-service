@@ -9,7 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.vault.support.JsonMapFlattener;
 
@@ -26,7 +27,6 @@ import java.util.Properties;
  *  APPCONFIG_PROFILE_ID
  *  APPCONFIG_ENV_ID
  */
-@Slf4j
 public class AppConfig {
     /**
      * Get the latest Property Source for currently configured application
@@ -35,6 +35,8 @@ public class AppConfig {
      * @throws JsonProcessingException if YAML file cannot be read
      */
     public static PropertiesPropertySource build() {
+        final Logger log = LoggerFactory.getLogger(AppConfig.class);
+
         // retrieve latest config from AWS
         final GetLatestConfigurationResult configurationResponse;
         {

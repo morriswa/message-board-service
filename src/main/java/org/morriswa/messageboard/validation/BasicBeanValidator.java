@@ -2,7 +2,7 @@ package org.morriswa.messageboard.validation;
 
 import jakarta.validation.*;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
@@ -31,27 +31,27 @@ public abstract class BasicBeanValidator {
     public void validate(UploadImageRequest uploadRequest) throws org.morriswa.messageboard.exception.ValidationException {
         var errors = new ArrayList<org.morriswa.messageboard.exception.ValidationException.ValidationError>();
 
-        if (uploadRequest.getImageFormat().isBlank())
+        if (uploadRequest.imageFormat().isBlank())
             errors.add(new org.morriswa.messageboard.exception.ValidationException.ValidationError(
                     "imageFormat",
-                    uploadRequest.getImageFormat(),
+                    uploadRequest.imageFormat(),
                     e.getRequiredProperty("common.service.errors.upload-image-request.empty-image-format")));
 
-        if (uploadRequest.getBaseEncodedImage() == null)
+        if (uploadRequest.baseEncodedImage() == null)
             errors.add(new org.morriswa.messageboard.exception.ValidationException.ValidationError(
                     "baseEncodedImage",
                     null,
                     e.getRequiredProperty("common.service.errors.upload-image-request.bad-image-repr")));
 
-        switch (uploadRequest.getImageFormat().toLowerCase()) {
+        switch (uploadRequest.imageFormat().toLowerCase()) {
             case "jpg", "jpeg", "png", "gif":
                 break;
             default:
                 errors.add(new org.morriswa.messageboard.exception.ValidationException.ValidationError(
                         "imageFormat",
-                        uploadRequest.getImageFormat(), String.format(
+                        uploadRequest.imageFormat(), String.format(
                         e.getRequiredProperty("common.service.errors.upload-image-request.bad-image-format"),
-                        uploadRequest.getImageFormat())));
+                        uploadRequest.imageFormat())));
         }
 
         if (!errors.isEmpty()) throw new ValidationException(errors);

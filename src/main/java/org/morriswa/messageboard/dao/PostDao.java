@@ -1,9 +1,9 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import org.morriswa.messageboard.dao.model.PostWithCommunityInfoRow;
+import org.morriswa.messageboard.model.PostWithCommunityInfo;
 import org.morriswa.messageboard.enumerated.Vote;
-import org.morriswa.messageboard.validation.request.CreatePostRequest;
+import org.morriswa.messageboard.model.CreatePostRequest;
 import org.morriswa.messageboard.model.Post;
 
 import java.util.List;
@@ -16,11 +16,11 @@ public interface PostDao {
 
     List<Post> findAllPostsByCommunityId(Long communityId);
 
-    List<PostWithCommunityInfoRow> getMostRecent();
+    List<PostWithCommunityInfo> getMostRecent();
 
-    List<PostWithCommunityInfoRow> getMostRecent(int endSlice);
+    List<PostWithCommunityInfo> getMostRecent(int endSlice);
 
-    List<PostWithCommunityInfoRow> getMostRecent(int startSlice, int endSlice);
+    List<PostWithCommunityInfo> getMostRecent(int startSlice, int endSlice);
 
     void createNewPost(@Valid CreatePostRequest newCreatePostRequest);
 

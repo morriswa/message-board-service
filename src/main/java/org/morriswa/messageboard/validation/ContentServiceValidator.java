@@ -1,9 +1,9 @@
 package org.morriswa.messageboard.validation;
 
-import org.morriswa.messageboard.control.requestbody.DraftBody;
+import org.morriswa.messageboard.model.DraftBody;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.validation.request.CommentRequest;
-import org.morriswa.messageboard.validation.request.CreatePostRequest;
+import org.morriswa.messageboard.model.CommentRequest;
+import org.morriswa.messageboard.model.CreatePostRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ public class ContentServiceValidator extends BasicBeanValidator {
                 String.format(e.getRequiredProperty("content.service.errors.null-comment"),
                         MAX_LENGTH);
 
-        if (newComment.getCommentBody().isEmpty()) {
+        if (newComment.commentBody().isEmpty()) {
             errors.add(new ValidationException.ValidationError(
                     "body",
                     null,
@@ -41,10 +41,10 @@ public class ContentServiceValidator extends BasicBeanValidator {
             ));
         }
 
-        if (newComment.getCommentBody().length() > MAX_LENGTH) {
+        if (newComment.commentBody().length() > MAX_LENGTH) {
             errors.add(new ValidationException.ValidationError(
                     "body",
-                    newComment.getCommentBody(),
+                    newComment.commentBody(),
                     ERROR_MSG
             ));
         }
@@ -118,12 +118,10 @@ public class ContentServiceValidator extends BasicBeanValidator {
 
         validateBeanOrThrow(request);
 
-        var errors = new ArrayList<ValidationException.ValidationError>();
+        var errors = new ArrayList<>(getPostCaptionErrors(request.caption()));
 
-        errors.addAll(getPostCaptionErrors(request.getCaption()));
-
-        if (request.getDescription() != null)
-            errors.addAll(getPostDescriptionErrors(request.getDescription()));
+        if (request.description() != null)
+            errors.addAll(getPostDescriptionErrors(request.description()));
 
         if (!errors.isEmpty()) throw new ValidationException(errors);
     }

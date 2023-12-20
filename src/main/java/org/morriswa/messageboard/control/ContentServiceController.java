@@ -1,13 +1,8 @@
 package org.morriswa.messageboard.control;
 
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.control.requestbody.DraftBody;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.enumerated.Vote;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.model.Comment;
-import org.morriswa.messageboard.model.PostCommentResponse;
-import org.morriswa.messageboard.model.PostDraftResponse;
-import org.morriswa.messageboard.model.PostResponse;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 
-@RestController @CrossOrigin @Slf4j
+@RestController @CrossOrigin
 @RequestMapping("${server.path}")
 public class ContentServiceController {
     private final Environment e;
@@ -40,7 +35,7 @@ public class ContentServiceController {
             JwtAuthenticationToken token,
             @PathVariable UUID draftId) throws Exception {
 
-        PostDraftResponse draft = contentService.getPostDraft(token, draftId);
+        PostDraft.Response draft = contentService.getPostDraft(token, draftId);
 
         return responseFactory.build(
                 HttpStatus.OK,
@@ -108,7 +103,7 @@ public class ContentServiceController {
     @GetMapping("${content.service.endpoints.community-feed.path}")
     public ResponseEntity<?> getCommunityFeed(@PathVariable Long communityId) throws Exception {
 
-        List<PostResponse> feed = contentService.getFeedForCommunity(communityId);
+        List<Post.Response> feed = contentService.getFeedForCommunity(communityId);
 
         return responseFactory.build(
                 HttpStatus.OK,
@@ -119,7 +114,7 @@ public class ContentServiceController {
     @GetMapping("${content.service.endpoints.post-details.path}")
     public ResponseEntity<?> getPostDetails(JwtAuthenticationToken token,
                                         @PathVariable Long postId) throws Exception {
-        PostCommentResponse post = contentService.retrievePostDetails(token, postId);
+        Post.PostCommentResponse post = contentService.retrievePostDetails(token, postId);
 
         return responseFactory.build(
                 HttpStatus.OK,

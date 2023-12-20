@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +34,7 @@ import java.util.List;
  *
  * @author William A. Morris [william@morriswa.org]
  */
-@Configuration @Slf4j 
+@Configuration
 @EnableWebSecurity // Enables Spring Security for Web Services importing this config
 public class WebSecurityConfig
 {

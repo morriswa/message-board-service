@@ -1,4 +1,4 @@
-package org.morriswa.messageboard.dao.model;
+package org.morriswa.messageboard.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.morriswa.messageboard.enumerated.PostContentType;
@@ -6,7 +6,7 @@ import org.morriswa.messageboard.enumerated.PostContentType;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-public record PostWithCommunityInfoRow(
+public record PostWithCommunityInfo (
         Long postId,
         UUID userId,
         String displayName,

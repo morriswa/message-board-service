@@ -2,8 +2,8 @@ package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
-import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
+import org.morriswa.messageboard.model.CreateCommunityRequest;
+import org.morriswa.messageboard.model.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.NoRegisteredUserException;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.Community;
@@ -30,8 +30,8 @@ public class CommunityEndpointsTest extends MessageboardTest {
         when(userProfileService.authenticate(any()))
                 .thenThrow(new NoRegisteredUserException(e.getRequiredProperty("user-profile.service.errors.missing-user")));
 
-        final CreateCommunityRequestBody body
-                = new CreateCommunityRequestBody("hello-world","Hello World!");
+        final CreateCommunityRequest body
+                = new CreateCommunityRequest("hello-world","Hello World!");
 
         hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))
@@ -47,8 +47,8 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
         when(userProfileService.authenticate(any())).thenReturn(UUID.randomUUID());
 
-        final CreateCommunityRequestBody body
-                = new CreateCommunityRequestBody("hello-world","Hello World!");
+        final CreateCommunityRequest body
+                = new CreateCommunityRequest("hello-world","Hello World!");
 
         hit("community", "community", HttpMethod.POST, body)
                 .andExpect(status().is(201))
@@ -62,8 +62,8 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
         when(userProfileService.authenticate(any())).thenReturn(UUID.randomUUID());
 
-        final CreateCommunityRequestBody body
-                = new CreateCommunityRequestBody("#hello-world","Hello World!");
+        final CreateCommunityRequest body
+                = new CreateCommunityRequest("#hello-world","Hello World!");
 
         hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))
@@ -79,8 +79,8 @@ public class CommunityEndpointsTest extends MessageboardTest {
 
         when(userProfileService.authenticate(any())).thenReturn(UUID.randomUUID());
 
-        final CreateCommunityRequestBody body =
-                new CreateCommunityRequestBody("hi","Hello World!");
+        final CreateCommunityRequest body =
+                new CreateCommunityRequest("hi","Hello World!");
 
         hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))
@@ -108,9 +108,9 @@ public class CommunityEndpointsTest extends MessageboardTest {
                 DUPLICATE_NAME
                 ,e.getRequiredProperty("community.service.errors.ref-already-taken")))
             .when(communityRepo)
-            .createNewCommunity(any());
+            .createNewCommunity(any(),any());
 
-        final CreateCommunityRequestBody body = new CreateCommunityRequestBody(DUPLICATE_NAME,"Hello World!");
+        final CreateCommunityRequest body = new CreateCommunityRequest(DUPLICATE_NAME,"Hello World!");
 
         hit("community","community", HttpMethod.POST, body)
                 .andExpect(status().is(400))

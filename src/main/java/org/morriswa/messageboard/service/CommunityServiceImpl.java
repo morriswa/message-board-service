@@ -1,22 +1,13 @@
 package org.morriswa.messageboard.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.dao.CommunityDao;
 import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.exception.PermissionsException;
-import org.morriswa.messageboard.model.CommunityWatcherStatus;
-import org.morriswa.messageboard.model.Community;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.exception.BadRequestException;
 import org.morriswa.messageboard.dao.CommunityMemberDao;
-import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
-import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
-import org.morriswa.messageboard.model.CommunityMemberResponse;
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
-import org.morriswa.messageboard.model.CommunityResponse;
-import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
-import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
 import org.morriswa.messageboard.store.CommunityResourceStore;
 import org.morriswa.messageboard.validation.CommunityServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +21,7 @@ import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.blobTypeToImageFormat;
 
-@Service @Slf4j
+@Service
 public class CommunityServiceImpl implements CommunityService {
 
     private final Environment e;
@@ -55,20 +46,20 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     private void userCanPromoteOrThrow(Community community, UUID requesterUserId, UUID requestedUserId) throws PermissionsException {
-        if (community.getOwnerId().equals(requesterUserId))
+        if (community.ownerId().equals(requesterUserId))
             return;
 
-        if (community.getOwnerId().equals(requestedUserId))
+        if (community.ownerId().equals(requestedUserId))
             throw new PermissionsException(e.getRequiredProperty("community.service.errors.edit-owner"));
 
         var requestedMembership =
-                communityMemberDao.getWatcherStatus(requestedUserId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(requestedUserId, community.communityId());
 
         if (requestedMembership.moderationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
             throw new PermissionsException(e.getRequiredProperty("community.service.errors.edit-promoter"));
 
         var requesterMembership =
-                communityMemberDao.getWatcherStatus(requesterUserId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(requesterUserId, community.communityId());
 
         if (requesterMembership.moderationLevel().weight >= ModerationLevel.PROMOTE_MOD.weight)
             return;
@@ -77,7 +68,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     private boolean userIsCommunityOwner(Community community, UUID requesterUserId) {
-        return community.getOwnerId().equals(requesterUserId);
+        return community.ownerId().equals(requesterUserId);
     }
 
 
@@ -96,10 +87,10 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void assertUserHasPrivilegeInCommunity(UUID userId, ModerationLevel privilege, Community community) throws PermissionsException, BadRequestException {
-        if (community.getOwnerId().equals(userId)) return;
+        if (community.ownerId().equals(userId)) return;
 
         var requesterMembership =
-                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(userId, community.communityId());
 
         if (requesterMembership.moderationLevel().weight >= privilege.weight)
             return;
@@ -109,7 +100,7 @@ public class CommunityServiceImpl implements CommunityService {
                         e.getRequiredProperty("community.service.errors.user-cannot-moderate"),
                         userId,
                         privilege,
-                        community.getCommunityId()
+                        community.communityId()
                 ));
     }
 
@@ -122,10 +113,10 @@ public class CommunityServiceImpl implements CommunityService {
                     communityId)
                 ));
 
-        if (community.getOwnerId().equals(userId)) return;
+        if (community.ownerId().equals(userId)) return;
 
         var requesterMembership =
-                communityMemberDao.getWatcherStatus(userId, community.getCommunityId());
+                communityMemberDao.getWatcherStatus(userId, community.communityId());
 
         if (!requesterMembership.exists())
             throw new PermissionsException(
@@ -139,7 +130,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<CommunityMemberResponse> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception {
+    public List<CommunityMember.Response> getCommunityModerators(JwtAuthenticationToken jwt, Long communityId) throws Exception {
 
         var userId = userProfileService.authenticate(jwt);
 
@@ -153,17 +144,17 @@ public class CommunityServiceImpl implements CommunityService {
 
         var members = communityMemberDao.getCommunityModerators(communityId);
 
-        var membersResponse = new ArrayList<CommunityMemberResponse>(members.size());
+        var membersResponse = new ArrayList<CommunityMember.Response>(members.size());
         members.forEach(member->{
-            var profileImage = userProfileService.getProfileImage(member.getUserId());
-            membersResponse.add(CommunityMemberResponse.buildMemberResponse(member, profileImage));
+            var profileImage = userProfileService.getProfileImage(member.userId());
+            membersResponse.add(CommunityMember.buildMemberResponse(member, profileImage));
         });
 
         return membersResponse;
     }
 
     @Override
-    public CommunityMemberResponse getCommunityMemberInfo(JwtAuthenticationToken jwt, Long communityId, UUID userId) throws Exception {
+    public CommunityMember.Response getCommunityMemberInfo(JwtAuthenticationToken jwt, Long communityId, UUID userId) throws Exception {
         var requester = userProfileService.authenticate(jwt);
 
         var community = communityDao.findCommunity(communityId)
@@ -174,11 +165,11 @@ public class CommunityServiceImpl implements CommunityService {
 
         assertUserHasPrivilegeInCommunity(requester, ModerationLevel.COMMENT_MOD, community);
 
-        CommunityMemberResponse member;
-        if (userId.equals(community.getOwnerId()))
+        CommunityMember.Response member;
+        if (userId.equals(community.ownerId()))
         {
             var profile = userProfileService.getUserProfile(userId);
-            member = CommunityMemberResponse.buildOwnerResponse(profile);
+            member = CommunityMember.buildOwnerResponse(profile);
         }
         else
         {
@@ -187,9 +178,9 @@ public class CommunityServiceImpl implements CommunityService {
                             e.getRequiredProperty("community.service.errors.user-not-in-community")
                     ));
 
-            var profileImage = userProfileService.getProfileImage(profile.getUserId());
+            var profileImage = userProfileService.getProfileImage(profile.userId());
 
-            member = CommunityMemberResponse.buildMemberResponse(profile, profileImage);
+            member = CommunityMember.buildMemberResponse(profile, profileImage);
         }
         return member;
     }
@@ -199,19 +190,17 @@ public class CommunityServiceImpl implements CommunityService {
             throw new PermissionsException(String.format(
                     e.getRequiredProperty("community.service.errors.user-cannot-edit"),
                     requesterId,
-                    community.getCommunityId()
+                    community.communityId()
             ));
     }
 
     @Override
-    public void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequestBody request) throws Exception {
+    public void createNewCommunity(JwtAuthenticationToken token, CreateCommunityRequest request) throws Exception {
         var userId = userProfileService.authenticate(token);
 
-        var newCommunity = new CreateCommunityRequest(request.communityRef(), request.communityName(), userId);
+        validator.validate(request);
 
-        validator.validate(newCommunity);
-
-        communityDao.createNewCommunity(newCommunity);
+        communityDao.createNewCommunity(userId, request);
     }
 
     @Override
@@ -237,7 +226,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public CommunityResponse getAllCommunityInfo(String communityLocator) throws Exception {
+    public Community.Response getAllCommunityInfo(String communityLocator) throws Exception {
 
         Community community = communityDao
                 .findCommunity(communityLocator)
@@ -247,13 +236,13 @@ public class CommunityServiceImpl implements CommunityService {
                                 communityLocator)));
 
         var communityResources =
-                resources.getAllCommunityResources(community.getCommunityId());
+                resources.getAllCommunityResources(community.communityId());
 
-        return new CommunityResponse(community, communityResources);
+        return new Community.Response(community, communityResources);
     }
 
     @Override
-    public CommunityResponse getAllCommunityInfo(Long communityId) throws Exception {
+    public Community.Response getAllCommunityInfo(Long communityId) throws Exception {
 
         var community = communityDao
                 .findCommunity(communityId)
@@ -263,9 +252,9 @@ public class CommunityServiceImpl implements CommunityService {
                                 communityId.toString())));
 
         var communityResources =
-                resources.getAllCommunityResources(community.getCommunityId());
+                resources.getAllCommunityResources(community.communityId());
 
-        return new CommunityResponse(community, communityResources);
+        return new Community.Response(community, communityResources);
     }
 
     @Override
@@ -275,7 +264,8 @@ public class CommunityServiceImpl implements CommunityService {
         if (communityMemberDao.relationshipExists(userId,communityId))
             return;
 
-        var newRelationship = new JoinCommunityRequest(userId, communityId);
+        var newRelationship = new JoinCommunityRequest(userId, communityId,
+                ModerationLevel.NONE, CommunityStanding.HEALTHY);
 
         validator.validateBeanOrThrow(newRelationship);
 
@@ -290,7 +280,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<CommunityResponse> getAllUsersCommunities(JwtAuthenticationToken token) throws Exception {
+    public List<Community.Response> getAllUsersCommunities(JwtAuthenticationToken token) throws Exception {
 
         var userId = userProfileService.authenticate(token);
 
@@ -298,18 +288,18 @@ public class CommunityServiceImpl implements CommunityService {
 
         return new ArrayList<>() {{
             for (var community : communities)
-                add(new CommunityResponse(community, resources.getAllCommunityResources(community.getCommunityId())));
+                add(new Community.Response(community, resources.getAllCommunityResources(community.communityId())));
         }};
     }
 
     @Override
-    public List<CommunityResponse> searchForCommunities(String searchText) {
+    public List<Community.Response> searchForCommunities(String searchText) {
 
         var communities = communityDao.searchForCommunities(searchText);
 
         return new ArrayList<>() {{
             for (var community : communities)
-                add(new CommunityResponse(community, resources.getAllCommunityResources(community.getCommunityId())));
+                add(new Community.Response(community, resources.getAllCommunityResources(community.communityId())));
         }};
     }
 
@@ -333,7 +323,7 @@ public class CommunityServiceImpl implements CommunityService {
             verifyUserIsOwnerOrThrow(requesterId, community);
         else assertUserHasPrivilegeInCommunity(requesterId, ModerationLevel.EDIT_MOD, community);
 
-        communityDao.updateCommunityAttrs(community.getCommunityId(), request);
+        communityDao.updateCommunityAttrs(community.communityId(), request);
     }
 
 
@@ -357,10 +347,10 @@ public class CommunityServiceImpl implements CommunityService {
 
         userCanPromoteOrThrow(communityInfo, requesterUserId, userId);
 
-        if (!communityMemberDao.relationshipExists(userId, communityInfo.getCommunityId()))
+        if (!communityMemberDao.relationshipExists(userId, communityInfo.communityId()))
             throw new BadRequestException(e.getRequiredProperty("community.service.errors.user-not-in-community"));
 
-        communityMemberDao.updateCommunityMemberModerationLevel(userId, communityInfo.getCommunityId(), level);
+        communityMemberDao.updateCommunityMemberModerationLevel(userId, communityInfo.communityId(), level);
     }
 
     @Override

@@ -1,16 +1,10 @@
 package org.morriswa.messageboard.service;
 
-import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
+import org.morriswa.messageboard.model.*;
 import org.morriswa.messageboard.exception.BadRequestException;
-import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.model.User;
-import org.morriswa.messageboard.model.UserUiProfile;
-import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.model.UserProfileResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 
@@ -26,7 +20,7 @@ public interface UserProfileService {
      * @param token to authenticate with
      * @return a full User Profile Response
      */
-    UserProfileResponse authenticateAndGetUserProfile(JwtAuthenticationToken token) throws Exception;
+    User.Response authenticateAndGetUserProfile(JwtAuthenticationToken token) throws Exception;
 
     /**
      * Authenticates an Oauth2 user with provided token
@@ -52,7 +46,7 @@ public interface UserProfileService {
      * @return a full User Profile Response
      * @throws BadRequestException if the user cannot be found
      */
-    UserProfileResponse getUserProfile(UUID userId) throws Exception;
+    User.Response getUserProfile(UUID userId) throws Exception;
 
     /**
      * Creates a new Messageboard User
@@ -61,7 +55,7 @@ public interface UserProfileService {
      * @param request containing important registration info
      * @return the display name that the user was registered with
      */
-    String registerUser(JwtAuthenticationToken token, NewUserRequestBody request) throws Exception;
+    String registerUser(JwtAuthenticationToken token, CreateUserRequest.Body request) throws Exception;
 
     /**
      * Updates a User's profile image

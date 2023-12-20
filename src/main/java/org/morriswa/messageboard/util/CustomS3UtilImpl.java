@@ -7,8 +7,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -22,7 +21,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
-@Component @Slf4j
+@Component
 public class CustomS3UtilImpl implements CustomS3Util {
     private final String INTERNAL_FILE_CACHE_PATH;
     private final Environment e;
@@ -45,7 +44,7 @@ public class CustomS3UtilImpl implements CustomS3Util {
         File temp = new File(this.INTERNAL_FILE_CACHE_PATH + cachePath);
 
         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(temp));
-        outputStream.write(originalRequest.getBaseEncodedImage());
+        outputStream.write(originalRequest.baseEncodedImage());
 
         if (!temp.exists())
             throw new FileSystemException(
@@ -68,7 +67,7 @@ public class CustomS3UtilImpl implements CustomS3Util {
 
         File temp = new File(this.INTERNAL_FILE_CACHE_PATH + cachePath);
 
-        ImageIO.write(scaledImageToUpload, originalRequest.getImageFormat(), temp);
+        ImageIO.write(scaledImageToUpload, originalRequest.imageFormat(), temp);
 
         if (!temp.exists())
             throw new FileSystemException(

@@ -1,19 +1,10 @@
 package org.morriswa.messageboard.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-@AllArgsConstructor @Getter
-public class Comment {
-    private final Long commentId;
-    private final UUID userId;
-    private final String displayName;
-    private final Long postId;
-    private final Long parentId;
-    private final String body;
-    private final int vote;
-    private final GregorianCalendar dateCreated;
-}
+public record Comment(
+        Long commentId, UUID userId, String displayName,
+        Long postId, Long parentId, String body,
+        int vote, GregorianCalendar dateCreated
+) { }

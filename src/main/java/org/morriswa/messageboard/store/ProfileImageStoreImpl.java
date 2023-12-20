@@ -1,8 +1,7 @@
 package org.morriswa.messageboard.store;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3UtilImpl;
 import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 
-@Component @Slf4j
+@Component
 public class ProfileImageStoreImpl implements ProfileImageStore {
     private final int SIGNED_URL_EXPIRATION_MINUTES;
     private final int IMAGE_SIZE;

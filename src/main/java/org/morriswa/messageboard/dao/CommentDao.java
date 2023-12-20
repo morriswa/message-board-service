@@ -1,7 +1,8 @@
 package org.morriswa.messageboard.dao;
 
+import jakarta.validation.Valid;
 import org.morriswa.messageboard.enumerated.Vote;
-import org.morriswa.messageboard.validation.request.CommentRequest;
+import org.morriswa.messageboard.model.CommentRequest;
 import org.morriswa.messageboard.model.Comment;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public interface CommentDao {
 
     List<Comment> findComments(Long postId, Long parentId);
 
-    void createNewComment(CommentRequest newCommentRequest);
+    void createNewComment(@Valid CommentRequest newCommentRequest);
 
     Integer vote(UUID userId, Long postId, Long commentId, Vote vote);
 

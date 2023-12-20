@@ -2,7 +2,7 @@ package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
+import org.morriswa.messageboard.model.CreateUserRequest;
 import org.morriswa.messageboard.enumerated.UserRole;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.User;
@@ -53,8 +53,8 @@ public class UserEndpointsTest extends MessageboardTest {
 
         hit("user-profile","user",HttpMethod.GET)
             .andExpect(status().is(200))
-            .andExpect(jsonPath("$.payload.displayName", Matchers.is(exampleUser.getDisplayName())))
-            .andExpect(jsonPath("$.payload.userId", Matchers.equalTo(exampleUser.getUserId().toString())))
+            .andExpect(jsonPath("$.payload.displayName", Matchers.is(exampleUser.displayName())))
+            .andExpect(jsonPath("$.payload.userId", Matchers.equalTo(exampleUser.userId().toString())))
             .andExpect(jsonPath("$.payload.userProfileImage", Matchers.notNullValue()))
         ;
     }
@@ -76,7 +76,7 @@ public class UserEndpointsTest extends MessageboardTest {
 
         hit(
             "user-profile", "user", HttpMethod.POST,
-            new NewUserRequestBody(DISPLAY_NAME, getMinimumAgeDate(2))
+            new CreateUserRequest.Body(DISPLAY_NAME, getMinimumAgeDate(2))
         )
         .andExpect(status().is(200))
         .andExpect(jsonPath("$.message", Matchers.notNullValue()))
@@ -89,7 +89,7 @@ public class UserEndpointsTest extends MessageboardTest {
         final String badDisplayName = "display$Name";
 
         hit("user-profile","user",HttpMethod.POST,
-                new NewUserRequestBody(badDisplayName, "2000-1-1")
+                new CreateUserRequest.Body(badDisplayName, "2000-1-1")
         )
         .andExpect(status().is(400))
         .andExpect(jsonPath("$.description", Matchers.is(
@@ -110,7 +110,7 @@ public class UserEndpointsTest extends MessageboardTest {
         final String date = getMinimumAgeDate(-1);
 
         hit(
-        "user-profile","user", HttpMethod.POST, new NewUserRequestBody("displayName", date)
+        "user-profile","user", HttpMethod.POST, new CreateUserRequest.Body("displayName", date)
         )
         .andExpect(status().is(400))
         .andExpect(jsonPath("$.description",
@@ -133,7 +133,7 @@ public class UserEndpointsTest extends MessageboardTest {
         .when(userProfileDao).createNewUser(any());
 
         hit("user-profile","user",HttpMethod.POST,
-                new NewUserRequestBody(DISPLAY_NAME, "2000-1-1")
+                new CreateUserRequest.Body(DISPLAY_NAME, "2000-1-1")
         )
         .andExpect(status().is(400))
         .andExpect(jsonPath("$.description", Matchers.is(
@@ -176,7 +176,7 @@ public class UserEndpointsTest extends MessageboardTest {
 
         final String newDisplayName = "newDisplayName";
 
-        when(userProfileDao.getUserId(any(String.class))).thenReturn(Optional.of(getExampleUser().getUserId()));
+        when(userProfileDao.getUserId(any(String.class))).thenReturn(Optional.of(getExampleUser().userId()));
 
         doThrow(new ValidationException("displayName",newDisplayName,
                 e.getRequiredProperty("user-profile.service.errors.display-name-already-exists")))

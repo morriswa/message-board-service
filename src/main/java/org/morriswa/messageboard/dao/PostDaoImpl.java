@@ -1,10 +1,9 @@
 package org.morriswa.messageboard.dao;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.dao.model.PostWithCommunityInfoRow;
+import org.morriswa.messageboard.model.PostWithCommunityInfo;
 import org.morriswa.messageboard.enumerated.Vote;
-import org.morriswa.messageboard.validation.request.CreatePostRequest;
+import org.morriswa.messageboard.model.CreatePostRequest;
 import org.morriswa.messageboard.model.Post;
 import org.morriswa.messageboard.enumerated.PostContentType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,7 @@ import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
 
-@Component @Slf4j
+@Component
 public class PostDaoImpl implements PostDao{
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -113,12 +112,12 @@ public class PostDaoImpl implements PostDao{
     }
 
     @Override
-    public List<PostWithCommunityInfoRow> getMostRecent() {
+    public List<PostWithCommunityInfo> getMostRecent() {
         return this.getMostRecent(10);
     }
 
     @Override
-    public List<PostWithCommunityInfoRow> getMostRecent(int endSlice) {
+    public List<PostWithCommunityInfo> getMostRecent(int endSlice) {
         final String query = """
              select
                     posts.id id,
@@ -144,10 +143,10 @@ public class PostDaoImpl implements PostDao{
         }};
 
         return jdbcTemplate.query(query, params, rs -> {
-            List<PostWithCommunityInfoRow> createPostRequests = new ArrayList<>();
+            List<PostWithCommunityInfo> createPostRequests = new ArrayList<>();
 
             while (rs.next()) {
-                createPostRequests.add(new PostWithCommunityInfoRow(
+                createPostRequests.add(new PostWithCommunityInfo(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
                         rs.getString("display_name"),
@@ -168,7 +167,7 @@ public class PostDaoImpl implements PostDao{
     }
 
     @Override
-    public List<PostWithCommunityInfoRow> getMostRecent(int startSlice, int endSlice) {
+    public List<PostWithCommunityInfo> getMostRecent(int startSlice, int endSlice) {
         final String query = """
              select
                     posts.id id,
@@ -195,10 +194,10 @@ public class PostDaoImpl implements PostDao{
         }};
 
         return jdbcTemplate.query(query, params, rs -> {
-            List<PostWithCommunityInfoRow> createPostRequests = new ArrayList<>();
+            List<PostWithCommunityInfo> createPostRequests = new ArrayList<>();
 
             while (rs.next()) {
-                createPostRequests.add(new PostWithCommunityInfoRow(
+                createPostRequests.add(new PostWithCommunityInfo(
                         rs.getLong("id"),
                         rs.getObject("user_id", UUID.class),
                         rs.getString("display_name"),
@@ -228,12 +227,12 @@ public class PostDaoImpl implements PostDao{
             """;
 
         Map<String, Object> params = new HashMap<>(){{
-            put("userId", newCreatePostRequest.getUserId());
-            put("communityId", newCreatePostRequest.getCommunityId());
-            put("caption", newCreatePostRequest.getCaption());
-            put("description", newCreatePostRequest.getDescription());
-            put("contentType", newCreatePostRequest.getPostContentType().toString());
-            put("resourceId", newCreatePostRequest.getResourceId());
+            put("userId", newCreatePostRequest.userId());
+            put("communityId", newCreatePostRequest.communityId());
+            put("caption", newCreatePostRequest.caption());
+            put("description", newCreatePostRequest.description());
+            put("contentType", newCreatePostRequest.postContentType().toString());
+            put("resourceId", newCreatePostRequest.resourceId());
         }};
 
         jdbcTemplate.update(query, params);

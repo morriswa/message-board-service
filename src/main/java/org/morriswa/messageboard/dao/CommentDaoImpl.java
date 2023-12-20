@@ -1,7 +1,7 @@
 package org.morriswa.messageboard.dao;
 
 import org.morriswa.messageboard.enumerated.Vote;
-import org.morriswa.messageboard.validation.request.CommentRequest;
+import org.morriswa.messageboard.model.CommentRequest;
 import org.morriswa.messageboard.model.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -112,10 +112,10 @@ public class CommentDaoImpl implements CommentDao{
         """;
 
         Map<String, Object> params = new HashMap<>(){{
-            put("userId", newCommentRequest.getUserId());
-            put("postId", newCommentRequest.getPostId());
-            put("parentId", newCommentRequest.getParentCommentId());
-            put("body", newCommentRequest.getCommentBody());
+            put("userId", newCommentRequest.userId());
+            put("postId", newCommentRequest.postId());
+            put("parentId", newCommentRequest.parentCommentId());
+            put("body", newCommentRequest.commentBody());
         }};
 
         jdbc.update(query, params);

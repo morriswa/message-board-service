@@ -1,20 +1,24 @@
 package org.morriswa.messageboard.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import java.net.URL;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-@Getter @AllArgsConstructor
-public class Community {
-    private final Long communityId;
-    private final String communityLocator;
-    private final String displayName;
-    private final UUID ownerId;
-    private final GregorianCalendar dateCreated;
-    private final int communityMemberCount;
+
+public record Community(
+        Long communityId, String communityLocator,
+        String displayName, UUID ownerId,
+        GregorianCalendar dateCreated, int communityMemberCount
+) {
+    public record Response(
+            @JsonUnwrapped Community community,
+            AllCommunityResourceURLs resourceUrls
+    ) {
+        public record AllCommunityResourceURLs (
+                URL icon,
+                URL banner
+        ) { }
+    }
 }

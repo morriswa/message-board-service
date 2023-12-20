@@ -1,17 +1,20 @@
 package org.morriswa.messageboard.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.morriswa.messageboard.enumerated.PostContentType;
 
+import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 
-@AllArgsConstructor
-@Getter
-public class PostDraft {
-    private final UUID sessionId;
-    private final UUID userId;
-    private final Long communityId;
-    private final UUID resourceId;
-    private final String caption;
-    private final String description;
+
+public record PostDraft(
+        UUID draftId, UUID userId, Long communityId,
+        UUID resourceId, String caption, String description
+) {
+    public record Response(
+        @JsonUnwrapped PostDraft draft,
+        PostContentType contentType,
+        List<URL> resources
+    ) { }
 }

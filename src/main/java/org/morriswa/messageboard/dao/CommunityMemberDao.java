@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 import org.morriswa.messageboard.model.CommunityMember;
 import org.morriswa.messageboard.model.CommunityWatcherStatus;
-import org.morriswa.messageboard.validation.request.JoinCommunityRequest;
+import org.morriswa.messageboard.model.JoinCommunityRequest;
 
 import java.util.List;
 import java.util.Optional;

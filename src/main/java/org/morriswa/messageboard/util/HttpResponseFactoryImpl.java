@@ -1,6 +1,5 @@
 package org.morriswa.messageboard.util;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
@@ -14,61 +13,28 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
     private final String APPLICATION_NAME;
     private final String APPLICATION_VERSION;
 
-    @Getter
-    public class DefaultResponse<T> {
-        private final String message;
-        private final GregorianCalendar timestamp;
-        private final String applicationName;
-        private final String version;
-        private final T payload;
-
-        public DefaultResponse(String message) {
-            this.message = message;
-            this.timestamp = new GregorianCalendar();
-            this.applicationName = APPLICATION_NAME;
-            this.version = APPLICATION_VERSION;
-            this.payload = null;
-        };
-
-        public DefaultResponse(String message, T payload) {
-            this.message = message;
-            this.timestamp = new GregorianCalendar();
-            this.applicationName = APPLICATION_NAME;
-            this.version = APPLICATION_VERSION;
-            this.payload = payload;
-        };
-    }
+    private record DefaultResponse<T> (
+        String message,
+        GregorianCalendar timestamp,
+        String applicationName,
+        String version,
+        T payload
+    ) { }
 
     /**
      * Default Response to send when an Exception needs to be returned
      */
-    @Getter
-    public class DefaultErrorResponse {
-        private final String error;
-        private final String description;
-        private final GregorianCalendar timestamp;
-        private final String applicationName;
-        private final String version;
-        private final Object stack;
+    private record DefaultErrorResponse (
+        String error,
+        String description,
+        GregorianCalendar timestamp,
+        String applicationName,
+        String version,
+        Object stack
+    ){
 
-        public DefaultErrorResponse(String error, String description) {
-            this.error = error;
-            this.description = description;
-            this.timestamp = new GregorianCalendar();
-            this.applicationName = APPLICATION_NAME;
-            this.version = APPLICATION_VERSION;
-            this.stack = null;
-        }
-
-        public DefaultErrorResponse(String error, String description, Object stack) {
-            this.error = error;
-            this.description = description;
-            this.timestamp = new GregorianCalendar();
-            this.applicationName = APPLICATION_NAME;
-            this.version = APPLICATION_VERSION;
-            this.stack = stack;
-        }
     }
+
 
     @Autowired
     public HttpResponseFactoryImpl(BuildProperties build) {
@@ -79,24 +45,30 @@ public class HttpResponseFactoryImpl implements HttpResponseFactory {
     public ResponseEntity<?> build(HttpStatus status, String message) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultResponse<>(message));
+                .body(new DefaultResponse<>(
+                    message, new GregorianCalendar(), this.APPLICATION_NAME, this.APPLICATION_VERSION, null)
+                );
     }
 
     public ResponseEntity<?> build(HttpStatus status, String message, Object payload) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultResponse<>(message, payload));
+                .body(new DefaultResponse<>(
+                        message, new GregorianCalendar(), this.APPLICATION_NAME, this.APPLICATION_VERSION, payload
+                ));
     }
 
     public ResponseEntity<?> error(HttpStatus status, String message, String description) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultErrorResponse(message, description));
+                .body(new DefaultErrorResponse(message, description, new GregorianCalendar(),
+                        APPLICATION_NAME, APPLICATION_VERSION, null));
     }
 
     public ResponseEntity<?> error(HttpStatus status, String message, String description, Object stack) {
         return ResponseEntity
                 .status(status)
-                .body(new DefaultErrorResponse(message, description, stack));
+                .body(new DefaultErrorResponse(message, description, new GregorianCalendar(),
+                        APPLICATION_NAME, APPLICATION_VERSION, stack));
     }
 }

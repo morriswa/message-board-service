@@ -1,20 +1,36 @@
 package org.morriswa.messageboard.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import org.morriswa.messageboard.enumerated.CommunityStanding;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
 
+import java.net.URL;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-@AllArgsConstructor @Getter
-public class CommunityMember {
-    private final UUID userId;
-    private final String displayName;
-    private final String email;
-    private final ModerationLevel moderationLevel;
-    private final CommunityStanding communityStanding;
-    private final GregorianCalendar dateUpdated;
-    private final GregorianCalendar dateJoined;
+
+public record CommunityMember(
+    UUID userId, String displayName, String email, ModerationLevel moderationLevel,
+    CommunityStanding communityStanding, GregorianCalendar dateUpdated,
+    GregorianCalendar dateJoined
+) {
+    public record Response (
+        @JsonUnwrapped CommunityMember cm,
+        URL profileImage,
+        boolean isOwner
+    ) { }
+
+    public static CommunityMember.Response buildMemberResponse(CommunityMember member, URL profileImage) {
+        return new CommunityMember.Response(member, profileImage, false);
+    }
+
+    public static CommunityMember.Response buildOwnerResponse(User.Response owner) {
+        return new CommunityMember.Response(
+                new CommunityMember(owner.user().userId(), owner.user().displayName(), owner.user().email(),
+                        null, null, null, null),
+                owner.userProfileImage(),
+                true
+        );
+    }
 }
+

@@ -5,8 +5,8 @@ import jakarta.validation.Valid;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.model.UserUiProfile;
-import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.validation.request.CreateUserRequest;
+import org.morriswa.messageboard.model.UpdateUIProfileRequest;
+import org.morriswa.messageboard.model.CreateUserRequest;
 
 import java.util.Optional;
 import java.util.UUID;

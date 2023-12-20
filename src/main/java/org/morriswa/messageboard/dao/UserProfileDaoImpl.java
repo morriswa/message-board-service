@@ -1,14 +1,14 @@
 package org.morriswa.messageboard.dao;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.UserUiProfile;
-import org.morriswa.messageboard.control.requestbody.UpdateUIProfileRequest;
-import org.morriswa.messageboard.validation.request.CreateUserRequest;
+import org.morriswa.messageboard.model.UpdateUIProfileRequest;
+import org.morriswa.messageboard.model.CreateUserRequest;
 import org.morriswa.messageboard.model.User;
 import org.morriswa.messageboard.enumerated.UserRole;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DuplicateKeyException;
@@ -22,11 +22,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component @Slf4j
+@Component
 public class UserProfileDaoImpl implements UserProfileDao {
 
+    private final Logger log = LoggerFactory.getLogger(UserProfileDaoImpl.class);
     private final Environment environment;
     private final NamedParameterJdbcTemplate jdbc;
+
 
     private static final String AUTH0_UNIQUE_CONSTRAINT_VIOLATION = "duplicate key value violates unique constraint \"user_profile_auth_zero_id_key\"";
     private static final String DISPLAY_NAME_UNIQUE_CONSTRAINT_VIOLATION = "duplicate key value violates unique constraint \"user_profile_display_name_key\"";
@@ -79,11 +81,11 @@ public class UserProfileDaoImpl implements UserProfileDao {
         """;
 
         Map<String, Object> params = new HashMap<>(){{
-            put("authZeroId", user.getAuthZeroId());
-            put("displayName", user.getDisplayName());
-            put("email", user.getEmail());
-            put("birthdate", user.getBirthdate());
-            put("role", user.getRole().toString());
+            put("authZeroId", user.authZeroId());
+            put("displayName", user.displayName());
+            put("email", user.email());
+            put("birthdate", user.birthdate());
+            put("role", user.role().toString());
         }};
 
         try {
@@ -94,7 +96,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
             }
 
             if (e.getMostSpecificCause().getMessage().contains(DISPLAY_NAME_UNIQUE_CONSTRAINT_VIOLATION)) {
-                throw new ValidationException("displayName",user.getDisplayName(),
+                throw new ValidationException("displayName",user.displayName(),
                         environment.getRequiredProperty("user-profile.service.errors.display-name-already-exists"));
             }
 

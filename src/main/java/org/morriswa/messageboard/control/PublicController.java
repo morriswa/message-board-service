@@ -1,6 +1,5 @@
 package org.morriswa.messageboard.control;
 
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.service.ContentService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 
-@RestController @CrossOrigin @Slf4j
+@RestController @CrossOrigin
 public class PublicController {
     private final Environment e;
     private final ContentService contentService;

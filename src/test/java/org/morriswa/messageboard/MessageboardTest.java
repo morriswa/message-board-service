@@ -25,7 +25,10 @@ import java.util.Map;
 
 @SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
-@TestPropertySource(properties = {"testing.email=test@email.com"})
+@TestPropertySource(properties = {
+        "testing.email=test@email.com",
+        "common.secured-permissions=testone testtwo testthree"
+})
 @AutoConfigureMockMvc
 public class MessageboardTest {
 

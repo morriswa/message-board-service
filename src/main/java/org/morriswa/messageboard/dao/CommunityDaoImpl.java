@@ -1,10 +1,11 @@
 package org.morriswa.messageboard.dao;
 
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
+import org.morriswa.messageboard.model.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.model.Community;
-import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
+import org.morriswa.messageboard.model.CreateCommunityRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DuplicateKeyException;
@@ -17,10 +18,11 @@ import java.util.*;
 
 import static org.morriswa.messageboard.util.Functions.timestampToGregorian;
 
-@Component @Slf4j
+@Component
 public class CommunityDaoImpl implements CommunityDao {
 
     private final Environment environment;
+    private final Logger log = LoggerFactory.getLogger(CommunityDaoImpl.class);
     private final NamedParameterJdbcTemplate jdbc;
     private static final String COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION = "duplicate key value violates unique constraint \"community_community_ref_key\"";
 
@@ -81,36 +83,6 @@ public class CommunityDaoImpl implements CommunityDao {
     }
 
     @Override
-    public void createNewCommunity(CreateCommunityRequest newCreateCommunityRequest) throws ValidationException {
-        final String query = """
-            insert into community(id, community_ref, display_name, owner, date_created)
-            values (DEFAULT, :communityRef, :displayName, :owner, current_timestamp)
-        """;
-
-        Map<String, Object> params = new HashMap<>(){{
-            put("communityRef", newCreateCommunityRequest.getCommunityLocator());
-            put("displayName", newCreateCommunityRequest.getCommunityDisplayName());
-            put("owner", newCreateCommunityRequest.getCommunityOwnerUserId());
-        }};
-
-        try {
-            jdbc.update(query, params);
-        } catch (DuplicateKeyException dke) {
-            if (dke.getMostSpecificCause().getMessage()
-                    .contains(COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION)) {
-
-                throw new ValidationException("communityLocator",
-                        newCreateCommunityRequest.getCommunityLocator(),
-                        environment.getRequiredProperty("community.service.errors.ref-already-taken")
-                );
-            }
-
-            log.error("encountered unexpected error ", dke);
-            throw dke;
-        }
-    }
-
-    @Override
     public void updateCommunityAttrs(Long communityId, UpdateCommunityRequest attributesToUpdate) throws ValidationException {
         StringBuilder queryBuilder = new StringBuilder("update community set ");
 
@@ -152,6 +124,36 @@ public class CommunityDaoImpl implements CommunityDao {
             }
 
             log.error("encountered unexpected error!!!", dke);
+            throw dke;
+        }
+    }
+
+    @Override
+    public void createNewCommunity(UUID userId, CreateCommunityRequest newCommunity) throws ValidationException {
+        final String query = """
+            insert into community(id, community_ref, display_name, owner, date_created)
+            values (DEFAULT, :communityRef, :displayName, :owner, current_timestamp)
+        """;
+
+        Map<String, Object> params = new HashMap<>(){{
+            put("communityRef", newCommunity.communityRef());
+            put("displayName", newCommunity.communityName());
+            put("owner", userId);
+        }};
+
+        try {
+            jdbc.update(query, params);
+        } catch (DuplicateKeyException dke) {
+            if (dke.getMostSpecificCause().getMessage()
+                    .contains(COMMUNITY_REF_UNIQUE_CONSTRAINT_VIOLATION)) {
+
+                throw new ValidationException("communityLocator",
+                        newCommunity.communityRef(),
+                        environment.getRequiredProperty("community.service.errors.ref-already-taken")
+                );
+            }
+
+            log.error("encountered unexpected error ", dke);
             throw dke;
         }
     }

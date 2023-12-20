@@ -6,16 +6,15 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 import org.morriswa.messageboard.model.Resource;
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.morriswa.messageboard.util.CustomS3Util;
 import org.morriswa.messageboard.util.ImageScaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
 
-@Component @Slf4j
+@Component
 public class ContentStoreImpl implements ContentStore {
 
     private final int SIGNED_URL_EXPIRATION_MINUTES;
@@ -42,7 +41,7 @@ public class ContentStoreImpl implements ContentStore {
     @Override
     public void uploadIndividualImage(UUID resourceID, @Valid UploadImageRequest request) throws IOException {
 
-        if (request.getImageFormat().equals("gif")) {
+        if (request.imageFormat().equals("gif")) {
             s3Store.uploadToS3(request, POST_RESOURCE_IMAGE_STORE+resourceID);
             return;
         }

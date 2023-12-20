@@ -2,7 +2,7 @@ package org.morriswa.messageboard;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.morriswa.messageboard.control.requestbody.DraftBody;
+import org.morriswa.messageboard.model.DraftBody;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.service.UserProfileService;

@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.util;
 
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -10,7 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Base64;
 
-@Component @Slf4j
+@Component
 public class ImageScaleUtilImpl implements ImageScaleUtil {
 
     private final Base64.Decoder b64decoder;
@@ -25,7 +24,7 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
 
 //        final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
 
-        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRequest.getBaseEncodedImage()));
+        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRequest.baseEncodedImage()));
 
         java.awt.Image scaledImage = retrievedImage.getScaledInstance(
                 IMAGE_X,
@@ -45,7 +44,7 @@ public class ImageScaleUtilImpl implements ImageScaleUtil {
 
 //        final byte[] imageRepr = b64decoder.decode(imageRequest.getBaseEncodedImage());
 
-        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRequest.getBaseEncodedImage()));
+        BufferedImage retrievedImage = ImageIO.read(new ByteArrayInputStream(imageRequest.baseEncodedImage()));
 
         final int IMAGE_X = (int) (retrievedImage.getWidth() * scale);
         final int IMAGE_Y = (int) (retrievedImage.getHeight() * scale);

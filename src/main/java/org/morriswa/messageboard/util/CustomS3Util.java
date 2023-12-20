@@ -1,6 +1,6 @@
 package org.morriswa.messageboard.util;
 
-import org.morriswa.messageboard.validation.request.UploadImageRequest;
+import org.morriswa.messageboard.model.UploadImageRequest;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;

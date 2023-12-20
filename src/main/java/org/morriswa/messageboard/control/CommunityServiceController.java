@@ -1,12 +1,12 @@
 package org.morriswa.messageboard.control;
 
-import org.morriswa.messageboard.control.requestbody.CreateCommunityRequestBody;
+import org.morriswa.messageboard.model.Community;
+import org.morriswa.messageboard.model.CreateCommunityRequest;
 import org.morriswa.messageboard.enumerated.CommunityResourceType;
 import org.morriswa.messageboard.enumerated.ModerationLevel;
-import org.morriswa.messageboard.model.CommunityResponse;
 import org.morriswa.messageboard.service.CommunityService;
 import org.morriswa.messageboard.util.HttpResponseFactoryImpl;
-import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
+import org.morriswa.messageboard.model.UpdateCommunityRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -34,7 +34,7 @@ public class CommunityServiceController {
 
     @PostMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> createCommunity(JwtAuthenticationToken jwt,
-                                             @RequestBody CreateCommunityRequestBody request) throws Exception {
+                                             @RequestBody CreateCommunityRequest request) throws Exception {
         this.community.createNewCommunity(jwt, request);
 
         return responseFactory.build(
@@ -44,7 +44,7 @@ public class CommunityServiceController {
 
     @GetMapping("${community.service.endpoints.community.path}")
     public ResponseEntity<?> getAllCommunityInformation(@RequestParam String communityLocator) throws Exception {
-        CommunityResponse response = this.community.getAllCommunityInfo(communityLocator);
+        Community.Response response = this.community.getAllCommunityInfo(communityLocator);
 
         return responseFactory.build(
                 HttpStatus.OK,
@@ -140,7 +140,7 @@ public class CommunityServiceController {
 
     @GetMapping("${community.service.endpoints.get-users-communities.path}")
     public ResponseEntity<?> getUsersCommunities(JwtAuthenticationToken jwtAuthenticationToken) throws Exception {
-        List<CommunityResponse> communities = this.community.getAllUsersCommunities(jwtAuthenticationToken);
+        List<Community.Response> communities = this.community.getAllUsersCommunities(jwtAuthenticationToken);
 
         return responseFactory.build(
             HttpStatus.OK,
@@ -150,7 +150,7 @@ public class CommunityServiceController {
 
     @GetMapping("${community.service.endpoints.search-communities.path}")
     public ResponseEntity<?> findCommunities(@RequestParam String searchText) {
-        List<CommunityResponse> communities = this.community.searchForCommunities(searchText);
+        List<Community.Response> communities = this.community.searchForCommunities(searchText);
 
         return responseFactory.build(
                 HttpStatus.OK,

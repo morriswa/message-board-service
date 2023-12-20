@@ -1,6 +1,5 @@
 package org.morriswa.messageboard.control;
 
-import lombok.extern.slf4j.Slf4j;
 import org.morriswa.messageboard.util.HttpResponseFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
-@Slf4j
 @RequestMapping("${common.service.endpoints.developer.path}")
 public class DeveloperToolsController {
 

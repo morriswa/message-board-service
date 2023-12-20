@@ -1,8 +1,8 @@
 package org.morriswa.messageboard.validation;
 
-import org.morriswa.messageboard.control.requestbody.UpdateCommunityRequest;
+import org.morriswa.messageboard.model.UpdateCommunityRequest;
 import org.morriswa.messageboard.exception.ValidationException;
-import org.morriswa.messageboard.validation.request.CreateCommunityRequest;
+import org.morriswa.messageboard.model.CreateCommunityRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -77,19 +77,19 @@ public class CommunityServiceValidator extends BasicBeanValidator {
     public void validate(CreateCommunityRequest request) throws ValidationException {
         var errors = new ArrayList<ValidationException.ValidationError>();
 
-        if (request.getCommunityLocator() == null) {
-            var error = new ValidationException.ValidationError("communityId", null, "Community ID must not be null!!!");
+        if (request.communityRef() == null) {
+            var error = new ValidationException.ValidationError("communityLocator", null, "Community Locator must not be null!!!");
             errors.add(error);
         } else {
-            var locatorErrors = generateLocatorErrors(request.getCommunityLocator());
+            var locatorErrors = generateLocatorErrors(request.communityRef());
             errors.addAll(locatorErrors);
         }
 
-        if (request.getCommunityDisplayName() == null) {
+        if (request.communityName() == null) {
             var error = new ValidationException.ValidationError("communityDisplayName", null, "Community Display Name must not be null!!!");
             errors.add(error);
         } else {
-            var communityDisplayNameErrors = generateDisplayNameErrors(request.getCommunityDisplayName());
+            var communityDisplayNameErrors = generateDisplayNameErrors(request.communityName());
             errors.addAll(communityDisplayNameErrors);
         }
 

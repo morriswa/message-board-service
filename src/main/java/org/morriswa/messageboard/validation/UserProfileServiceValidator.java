@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.validation;
 
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.control.requestbody.NewUserRequestBody;
+import org.morriswa.messageboard.model.CreateUserRequest;
 import org.morriswa.messageboard.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@Component @Slf4j
+@Component
 public class UserProfileServiceValidator extends BasicBeanValidator {
 
     private final Environment e;
@@ -60,7 +59,7 @@ public class UserProfileServiceValidator extends BasicBeanValidator {
         return errors;
     }
 
-    public void validate(NewUserRequestBody request) throws ValidationException {
+    public void validate(CreateUserRequest.Body request) throws ValidationException {
 
         final int MINIMUM_AGE = Integer.parseInt(e.getRequiredProperty("common.minimum-age"));
 

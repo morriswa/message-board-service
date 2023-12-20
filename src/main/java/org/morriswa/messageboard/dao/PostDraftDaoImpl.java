@@ -1,7 +1,6 @@
 package org.morriswa.messageboard.dao;
 
-import lombok.extern.slf4j.Slf4j;
-import org.morriswa.messageboard.control.requestbody.DraftBody;
+import org.morriswa.messageboard.model.DraftBody;
 import org.morriswa.messageboard.model.PostDraft;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -12,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component @Slf4j
+@Component
 public class PostDraftDaoImpl implements PostDraftDao {
     private final NamedParameterJdbcTemplate jdbc;
 

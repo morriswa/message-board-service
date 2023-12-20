@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 public class WebSecurityTest extends MessageboardTest {
 
     @Value("${common.secured-permissions}")
@@ -89,7 +88,7 @@ public class WebSecurityTest extends MessageboardTest {
     void testMissingOneRequiredPermissions() throws Exception {
         var claims = new HashMap<String, Object>(){{
             put("sub", "sms|12345678");
-            put("permissions", List.of(PERMISSIONS.split(" ")[0]));
+            put("permissions", List.of(PERMISSIONS.split("\\s")[0]));
             put("email", "test@email.com");
         }};
 
