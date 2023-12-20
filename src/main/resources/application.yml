@@ -39,14 +39,11 @@ common:
   # request matcher for secure API routes
   secured: /secured/**
   # required permissions to access secure API routes
-  secured-permissions: >
-    org.morriswa.messageboard:test
-    org.morriswa.messageboard:develop
+  secured-permissions: org.morriswa.messageboard:test
   # request matcher for secure developer API routes
   develop: /developer
   # required permissions to access secure developer API routes
-  develop-permissions: >
-    org.morriswa.messageboard:develop
+  develop-permissions: org.morriswa.messageboard:develop
   cache: ./localfilecache/
   stores:
     prefix: developer-content
